@@ -1,0 +1,18 @@
+[
+  {
+    "learn_email": "student@training.local",
+    "learn_password": "learn123",
+    "demo_email": "demo@training.local",
+    "demo_password": "demo123",
+    "display_name": "Ученик 1",
+    "role": "student"
+  },
+  {
+    "learn_email": "author@training.local",
+    "learn_password": "author123",
+    "demo_email": "demo@training.local",
+    "demo_password": "demo123",
+    "display_name": "Методист",
+    "role": "author"
+  }
+]

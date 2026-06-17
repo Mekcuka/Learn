@@ -1,0 +1,102 @@
+---
+description: Стек, тесты, env и git для разработки Learn Portal
+alwaysApply: true
+---
+
+# Learn — разработка
+
+## Стек (по plan.md)
+
+| Слой | Технология |
+|------|------------|
+| Backend | **FastAPI** + **PostgreSQL** + SQLAlchemy/Alembic |
+| Frontend | **React** + **TypeScript** + **Vite** |
+| Auth Learn | JWT (учебные аккаунты, pre-seeded) |
+| Demo integration | httpx/aiohttp, Bearer JWT, read-only |
+| Tests backend | **pytest** + pytest-asyncio (при async) |
+| Tests frontend | **Vitest** (+ React Testing Library по мере надобности) |
+
+Hosting MVP: **localhost**. Production — после MVP.
+
+## Структура кода
+
+```
+backend/
+  app/
+    main.py           # FastAPI app, /health
+    api/v1/learn/     # Роуты по contract.md
+    models/           # SQLAlchemy models
+    services/         # verify engine, demo client
+  tests/
+  alembic/
+  requirements.txt
+
+frontend/
+  src/
+    api/              # learnApi client
+    pages/            # Login, Modules, StepView
+    components/       # StepPanel, Quiz
+  package.json
+  vite.config.ts
+```
+
+## Env и секреты
+
+- Секреты **только** в `.env` (gitignored).
+- Шаблоны: `backend/.env.example`, `deploy/.env.example`.
+- **Не коммить:** пароли demo, `SECRET_KEY`, JWT keys, encrypted demo credentials.
+- Demo API URL по умолчанию: `https://97.60.spark.modeltech.ru/api/v1` (override через env).
+
+Типичные переменные backend:
+
+```
+DATABASE_URL=postgresql://learn:learn@localhost:5432/learn
+SECRET_KEY=change-me
+DEMO_API_BASE_URL=https://97.60.spark.modeltech.ru/api/v1
+```
+
+## Git
+
+- **Коммиты — только по явной просьбе пользователя.**
+- Не используй `--no-verify`, force push, amend без запроса.
+- Не обновляй git config.
+
+## Команды (целевые)
+
+```powershell
+# Backend
+cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+pytest -q
+
+# Frontend
+cd frontend
+npm install
+npm run dev          # Vite dev server
+npm run test
+npm run lint
+
+# PostgreSQL (optional)
+docker compose -f deploy/docker-compose.yml up -d postgres
+```
+
+## API conventions
+
+- Learn Portal prefix: **`/api/v1/learn`**
+- Health: **`GET /health`** (backend root, без auth)
+- Ошибки: `{ "detail": "code", "message": "RU text", "request_id": "..." }`
+- User-facing `message` — **русский**
+
+## Перед PR / handoff Reviewer
+
+- Контракт из `contract.md` покрыт stub или реализацией
+- Phase 2 verify-типы не добавлены в UI/API MVP
+- Новые зависимости зафиксированы в requirements.txt / package.json
+- Lint и tests зелёные для затронутых пакетов
+
+## Docker (опционально)
+
+Локальный PostgreSQL через `deploy/docker-compose.yml` — без Cursore vendor staging. Backend/frontend на хосте в dev; контейнеризация — на усмотрение Integrator после MVP.

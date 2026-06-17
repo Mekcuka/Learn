@@ -1,0 +1,62 @@
+---
+description: Контекст платформы Learn — репозиторий Student, документация, демо-приложение
+alwaysApply: true
+---
+
+# Learn — контекст проекта
+
+## Назначение
+
+**Learn Portal** — образовательная платформа для прохождения учебных модулей с интеграцией в **демо-приложение СППР**. MVP: модуль «Ориентация» (5 шагов: login → project → navigation → journal → quiz).
+
+Репозиторий: `C:\project\Student`
+
+## Демо-приложение
+
+| Ресурс | URL |
+|--------|-----|
+| UI (проекты) | https://97.60.spark.modeltech.ru/projects |
+| Demo API base | https://97.60.spark.modeltech.ru/api/v1 |
+| Swagger UI | https://97.60.spark.modeltech.ru/api/v1/docs |
+| OpenAPI JSON | https://97.60.spark.modeltech.ru/api/v1/openapi.json |
+
+Learn **не** дублирует функциональность демо — направляет ученика deep link'ами и проверяет прогресс через read-only Demo API (см. `demo-api.mdc`).
+
+## Документация
+
+| Путь | Содержание |
+|------|------------|
+| `docs/features/learn/README.md` | Индекс модуля ориентации |
+| `docs/features/learn/plan.md` | Фазы Builder, scope, чеклист приёмки |
+| `docs/features/learn/contract.md` | Learn Portal API (`/api/v1/learn/*`) + verify types |
+| `docs/features/learn/data-model.md` | Сущности БД |
+| `docs/features/learn/integration-map.md` | Learn ↔ Demo: auth, deep links |
+| `docs/features/learn/demo-api-reference.md` | Справочник Demo API |
+| `docs/features/learn/open-questions.md` | Решения PO и открытые вопросы |
+
+Новые фичи Learn документируются в `docs/features/<feature>/` по тому же шаблону (см. `orchestration.mdc`).
+
+## Структура репозитория (целевая)
+
+```
+Student/
+├── backend/          # FastAPI — Learn Portal API, verify engine
+├── frontend/         # React + Vite — портал ученика
+├── docs/features/    # Планы, контракты, integration-map
+├── deploy/           # docker-compose (опц.), env examples
+└── .cursor/rules/    # Правила Cursor для агента
+```
+
+Hosting MVP: **localhost**. Production — после MVP (O3).
+
+## Соглашения по языку документов
+
+- **Пользовательские тексты** (UI, ошибки, инструкции шагов) — **русский** (см. `russian-language.mdc`).
+- **Техническая документация** — смешанный RU/EN: описания и решения на русском; имена API, полей JSON, типов verify, путей — на английском как в `contract.md`.
+- **Код** — английские идентификаторы; комментарии — по соглашению модуля.
+
+## Перед изменениями
+
+1. Прочитай `plan.md` и `contract.md` для активной фичи.
+2. Не реализуй Phase 2 verify-типы (`job_completed`, `calculation_result`, …) в MVP ориентации.
+3. Не коммить секреты (demo passwords, JWT keys) — только `.env.example`.

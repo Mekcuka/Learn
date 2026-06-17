@@ -1,0 +1,121 @@
+---
+description: Конвейер 4 ролей (Planner → Builder → Reviewer → Integrator) для фич Learn
+alwaysApply: true
+---
+
+# Оркестрация разработки: 4 роли
+
+Любая задача, затрагивающая **больше 3 файлов** или **новую фичу**, проходит обязательный конвейер из 4 ролей. Мелкие правки (1–2 файла, фиксы) — без конвейера.
+
+**Репозиторий:** `C:\project\Student`
+
+## Роли и мандат
+
+| Роль | Что делает | Что НЕ делает |
+|------|------------|---------------|
+| **1. Planner** | Изучает контекст, пишет plan + contract + data-model | Не пишет прод-код |
+| **2. Builder** | Реализует по плану: backend → frontend (последовательно) | Не меняет архитектуру без согласования |
+| **3. Reviewer** | Проверяет контракт, границы модулей, тесты | Не добавляет фичи |
+| **4. Integrator** | Миграции БД, docker-compose, seed, E2E smoke, CI | Не пишет прод-код |
+
+## Обязательный порядок
+
+```mermaid
+flowchart LR
+  U[Пользователь] --> P[1. Planner]
+  P -->|plan.md + contract.md + approval| B[2. Builder]
+  B -->|diff + impl-log.md + approval| R[3. Reviewer]
+  R -->|review-report.md зелёный| I[4. Integrator]
+  R -->|красный| B
+  I -->|ready| U
+```
+
+**Последовательность строгая.** Builder не стартует без артефактов Planner. Reviewer — после «контракт реализован» от Builder. Integrator — после зелёного Reviewer.
+
+## Approval на каждой фазе
+
+Каждый handoff требует **явного подтверждения пользователя**:
+
+1. Роль завершает работу артефактом.
+2. Агент **останавливается**: «Фаза X завершена. Артефакт: `<path>`. Переходим к фазе Y?»
+3. Следующая роль — **только после подтверждения**.
+
+**Не запускать следующую роль автоматически.**
+
+## Артефакты
+
+```
+docs/features/<feature>/
+├── plan.md              ← Planner (обязательный)
+├── contract.md          ← Planner (обязательный)
+├── data-model.md        ← Planner (обязательный)
+├── integration-map.md   ← Planner (опц.)
+├── impl-log.md          ← Builder
+└── review-report.md     ← Reviewer
+```
+
+Без `plan.md` + `contract.md` Builder не имеет мандата. Без `impl-log.md` Reviewer не проверяет соответствие.
+
+Пример активной фичи: `docs/features/learn/`.
+
+## Когда конвейер НЕ нужен
+
+- Фикс бага в 1–2 файлах
+- Обновление версии зависимости
+- Правки текстов/стилей
+- Рефакторинг без изменения поведения
+- Правки `.cursor/rules/` без кода
+
+При сомнении — спроси: «Это задача на конвейер из 4 ролей или обычная правка?»
+
+## Префикс роли в ответах
+
+Каждое сообщение в активном конвейере **начинается с тега**:
+
+```
+[<РОЛЬ>[:<фаза>]] <сообщение>
+```
+
+### Примеры
+
+```
+[Planner] Создаю артефакты: plan.md, contract.md, data-model.md.
+
+[Builder:1] Backend: модели User, TrainingAccount, /api/v1/learn/auth/login.
+[Builder:2] Frontend: StepPanel, deep link CTA.
+
+[Reviewer] Вердикт: ЗЕЛЁНЫЙ. review-report.md создан.
+
+[Integrator] alembic upgrade head; seed orientation-v1.
+```
+
+### Правила
+
+1. **Тег первый** — перед любым другим текстом
+2. **Один тег** на сообщение
+3. **Handoff** — текущая роль спрашивает approval, не пишет тег следующей роли
+4. Тег **не нужен** вне конвейера и для вопросов без разработки фичи
+
+## Builder — порядок для Learn
+
+1. **Backend** (FastAPI, модели, `/api/v1/learn/*`, verify engine)
+2. **Frontend** (React/Vite, auth, modules, StepPanel, quiz)
+
+Не параллелить backend и frontend при первой интеграции контракта — последовательно, чтобы API стабилизировался.
+
+## Integrator — чеклист Learn
+
+- Alembic migrations применены
+- Seed: pre-seeded training accounts, module `orientation-v1`
+- `.env.example` актуален
+- `pytest` (backend) и `npm run test` (frontend) зелёные
+- Smoke: login → module list → step start на localhost
+
+## Антипаттерны
+
+- Planner пишет код
+- Builder сам делает миграции/production deploy без Integrator
+- Reviewer до завершения Builder
+- Авто-handoff без approval
+- Реализация Phase 2 verify в MVP ориентации
+- Puppeteer/Playwright для runtime verify (только Demo API HTTP)

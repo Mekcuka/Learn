@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: learn
+      POSTGRES_PASSWORD: learn
+      POSTGRES_DB: learn
+    ports:
+      - "5432:5432"
+    volumes:
+      - learn_pg_data:/var/lib/postgresql/data
+
+volumes:
+  learn_pg_data:

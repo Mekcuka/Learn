@@ -1,0 +1,58 @@
+---
+description: Активация Context7 при вопросах о библиотеках и фреймворках
+alwaysApply: true
+---
+
+# Skills — активация Context7
+
+When the user asks about libraries, frameworks, or needs code examples, use **Context7** MCP to fetch current documentation instead of relying on training data.
+
+## When to Use
+
+Activate when the user:
+
+- Asks setup or configuration questions («Как настроить Alembic с FastAPI?», «How do I configure Vite proxy?»)
+- Requests code involving libraries («Напиши pytest fixture для async SQLAlchemy»)
+- Needs API references («Какие методы у httpx AsyncClient?»)
+- Mentions specific frameworks (FastAPI, React, Vite, Vitest, SQLAlchemy, etc.)
+
+## How to Fetch Documentation
+
+### Step 1: Resolve the Library ID
+
+Call `resolve-library-id` with:
+
+- `libraryName`: официальное имя библиотеки (`FastAPI`, `React`, `Vite`)
+- `query`: полный вопрос пользователя
+
+### Step 2: Select the Best Match
+
+- Exact or closest name match
+- Higher benchmark scores
+- Version-specific ID if user mentioned version
+
+### Step 3: Fetch the Documentation
+
+Call `query-docs` with:
+
+- `libraryId`: выбранный Context7 ID (e.g. `/tiangolo/fastapi`)
+- `query`: конкретный вопрос
+
+### Step 4: Use the Documentation
+
+- Answer using current, accurate information
+- Include relevant code examples from docs
+- Cite library version when relevant
+
+## Learn-specific: do NOT use Context7 for
+
+- Demo API endpoints and verify logic — read `docs/features/learn/demo-api-reference.md` and `contract.md`
+- Learn Portal API shapes — read `contract.md`
+- Product/architecture decisions — read `plan.md`, `open-questions.md`
+
+## Guidelines
+
+- **Be specific** in queries
+- **Version awareness** when user mentions versions
+- **Prefer official sources** over community forks
+- **Limit:** max 3 calls per tool per question (see `context7.mdc`)

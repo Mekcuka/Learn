@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <rect width="960" height="540" fill="#1e293b"/>
+  <rect x="24" y="24" width="912" height="48" rx="6" fill="#334155"/>
+  <text x="48" y="56" fill="#94a3b8" font-family="Manrope, Segoe UI, sans-serif" font-size="18">Atlas Grid — учебный placeholder</text>
+  <text x="480" y="280" text-anchor="middle" fill="#e2e8f0" font-family="Manrope, Segoe UI, sans-serif" font-size="22">Экран входа</text>
+  <text x="480" y="320" text-anchor="middle" fill="#64748b" font-family="Manrope, Segoe UI, sans-serif" font-size="14">Замените на реальный скриншот через редактор автора</text>
+</svg>
