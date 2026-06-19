@@ -714,12 +714,6 @@ button.hotspot {
   }
 }
 
-  outline: none;
-  box-shadow:
-    0 0 0 2px #fff,
-    0 0 0 4px var(--accent);
-}
-
 .expected-result {
   background: #f0fdf4;
   border: 1px solid #bbf7d0;
