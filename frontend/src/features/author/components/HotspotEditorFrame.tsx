@@ -1,9 +1,9 @@
 import { memo, type MouseEvent as ReactMouseEvent, type RefObject } from "react";
 
-import PinHotspotMarker from "../../../components/PinHotspotMarker";
-import HotspotZoneLabel from "../../../components/HotspotZoneLabel";
-import ScreenshotHotspotOverlay from "../../../components/ScreenshotHotspotOverlay";
-import ZoomHotspotPopup from "../../../components/ZoomHotspotPopup";
+import PinHotspotMarker from "../../lesson/components/PinHotspotMarker";
+import HotspotZoneLabel from "../../lesson/components/HotspotZoneLabel";
+import ScreenshotHotspotOverlay from "../../lesson/components/ScreenshotHotspotOverlay";
+import ZoomHotspotPopup from "../../lesson/components/ZoomHotspotPopup";
 import type { HotspotItem } from "../../../types/lesson";
 import { getHotspotKind, hotspotPinFillProps, hotspotRectVisualStyle } from "../../../utils/hotspots";
 import { hotspotOverlayStyle } from "../../../utils/imageContentRect";

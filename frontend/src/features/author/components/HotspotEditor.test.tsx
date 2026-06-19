@@ -10,7 +10,7 @@ import AppTheme from "../../../components/mui/AppTheme";
 import "../../../styles/author.css";
 import HotspotEditor from "./HotspotEditor";
 
-vi.mock("../../../hooks/useScreenshotViewport", () => ({
+vi.mock("../../lesson/hooks/useScreenshotViewport", () => ({
   useScreenshotViewport: () => ({
     frameRef: { current: null },
     containerRef: { current: null },

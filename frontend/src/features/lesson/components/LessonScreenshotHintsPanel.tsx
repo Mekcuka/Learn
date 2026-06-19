@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 import type { HotspotItem, LessonSlide } from "../../../types/lesson";
 import { scrollIntoOverflowParent } from "../../../utils/scrollContainer";
 import { toggleHotspotSelection } from "../../../utils/screenshotViewport";
-import SafeHtml from "../../../components/SafeHtml";
+import SafeHtml from "../../wiki/components/SafeHtml";
 
 export function slideHotspotHints(slide: LessonSlide | null): HotspotItem[] {
   return slide?.hotspots ?? [];

@@ -1,5 +1,6 @@
+export { default as ExpectedResult } from "./components/ExpectedResult";
+export { default as HotspotZoneLabel } from "./components/HotspotZoneLabel";
 export { default as LessonActions } from "./components/LessonActions";
-export { default as LessonHtml } from "./components/LessonHtml";
 export { default as LessonNextStepCard } from "./components/LessonNextStepCard";
 export { default as LessonPageHeader } from "./components/LessonPageHeader";
 export { default as LessonPreviewBanner } from "./components/LessonPreviewBanner";
@@ -9,6 +10,16 @@ export { default as LessonScreenshotHintsPanel } from "./components/LessonScreen
 export { default as LessonShell } from "./components/LessonShell";
 export { default as LessonSlideView } from "./components/LessonSlideView";
 export type { LessonSlideViewMode } from "./components/LessonSlideView";
+export { default as PinHotspotMarker } from "./components/PinHotspotMarker";
+export { default as QuizPanel } from "./components/QuizPanel";
+export { default as ScreenshotGuide } from "./components/ScreenshotGuide";
+export { default as ScreenshotHotspotOverlay } from "./components/ScreenshotHotspotOverlay";
+export { default as SlideCarousel } from "./components/SlideCarousel";
+export { default as ZoomHotspotPopup } from "./components/ZoomHotspotPopup";
+export { useImageContentRect } from "./hooks/useImageContentRect";
+export { useImageNaturalAspectRatio } from "./hooks/useImageNaturalAspectRatio";
 export { useLessonProgress } from "./hooks/useLessonProgress";
 export type { LessonProgressPhase } from "./hooks/useLessonProgress";
 export { useLessonVerify } from "./hooks/useLessonVerify";
+export { useScreenshotViewport } from "./hooks/useScreenshotViewport";
+export { default as LessonPage } from "./pages/LessonPage";

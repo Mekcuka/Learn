@@ -245,3 +245,50 @@ Phase 3 CSS module blocks (roadmap, next-step, hotspot toolbar) were already mig
 ## Phase 5+ (planned)
 
 See `plan.md`.
+
+---
+
+## Feature grouping completion (2026-06-19)
+
+**Builder:** Final frontend migration to feature-based layout (~85% → ~100%).
+
+### Moved to canonical paths
+
+| Item | New path |
+|------|----------|
+| `AuthorLessonPage` | `features/author/pages/AuthorLessonPage.tsx` |
+| `AuthorModulesPage` | `features/author/pages/AuthorModulesPage.tsx` |
+| `HomePage` | `features/catalog/pages/HomePage.tsx` |
+| `HashtagList` | `shared/content/HashtagList.tsx` |
+| `useVerifyPolling` | `shared/hooks/useVerifyPolling.ts` (cross-domain: lesson + self-study) |
+
+### Backward-compatible re-exports (thin stubs)
+
+- `pages/AuthorLessonPage.tsx`, `pages/AuthorModulesPage.tsx`, `pages/HomePage.tsx`
+- `components/HashtagList.tsx`, `hooks/useVerifyPolling.ts`
+
+### Barrels updated
+
+- `features/author/index.ts` — author pages
+- `features/catalog/index.ts` — HomePage
+- `shared/content/index.ts`, `shared/hooks/index.ts` — new
+
+### Imports updated
+
+Feature consumers import from `shared/content` and `shared/hooks` directly. `App.tsx` unchanged (lazy loads from `pages/`).
+
+### Not removed
+
+- `components/author/`, `components/lesson/`, `components/catalog/` — still contain Phase 2 re-export shims (not empty)
+- `api/`, `utils/` compat shims — kept for safety
+
+### Tests & build
+
+- `npm run lint`: **OK**
+- `npm run test -- --run`: **191 passed** (39 files)
+- `npm run build`: **OK**
+
+### Notes
+
+- No product behavior changes.
+- Migration compliance estimate: **~100%** feature grouping for pages and cross-cutting hooks/components.

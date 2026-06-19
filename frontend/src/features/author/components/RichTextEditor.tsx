@@ -3,9 +3,9 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { nextFootnoteNumber, sanitizeContentHtml } from "../../../utils/contentHtml";
+import { nextFootnoteNumber, sanitizeContentHtml } from "../../wiki/utils/contentHtml";
 import { AlertModal, CalloutTypeModal, PromptModal } from "../../../components/mui/PromptModal";
-import ContentHtml from "../../../components/ContentHtml";
+import ContentHtml from "../../wiki/components/ContentHtml";
 import EditorBubbleMenu from "./EditorBubbleMenu";
 import ImageInsertModal, { type ImageInsertResult } from "./ImageInsertModal";
 import LinkInsertModal, { type LinkInsertResult } from "./LinkInsertModal";

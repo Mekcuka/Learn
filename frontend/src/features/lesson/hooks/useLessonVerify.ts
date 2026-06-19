@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 
 import { verifyLesson } from "../../../api/learnApi";
-import { useVerifyPolling } from "../../../hooks/useVerifyPolling";
+import { useVerifyPolling } from "../../../shared/hooks/useVerifyPolling";
 import type { VerifyResult } from "../../../types/lesson";
 
 type UseLessonVerifyOptions = {

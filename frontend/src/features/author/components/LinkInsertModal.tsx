@@ -9,8 +9,8 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useEffect, useState } from "react";
 
-import { listWikiArticles, type WikiArticleListItem } from "../../../api/wikiApi";
-import { isAllowedWikiLinkHref } from "../../../utils/wikiHtml";
+import { listWikiArticles, type WikiArticleListItem } from "../../wiki/api/wikiApi";
+import { isAllowedWikiLinkHref } from "../../wiki/utils/wikiHtml";
 import { BaseModal } from "../../../components/mui/BaseModal";
 
 export type LinkInsertResult = {

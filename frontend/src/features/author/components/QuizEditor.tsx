@@ -25,7 +25,7 @@ import {
   type AuthorQuiz,
   type AuthorQuizQuestion,
 } from "../../../utils/quizEditor";
-import QuizPanel from "../../../components/QuizPanel";
+import QuizPanel from "../../lesson/components/QuizPanel";
 import RichTextEditor from "./RichTextEditor";
 
 type QuizEditorProps = {

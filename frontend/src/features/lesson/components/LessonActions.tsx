@@ -8,9 +8,8 @@ import { Link } from "react-router-dom";
 
 import type { LessonDetail, LessonSlide, LessonStateItem, VerifyResult } from "../../../types/lesson";
 
-import ExpectedResult from "../../../components/ExpectedResult";
-
-import LessonHtml from "./LessonHtml";
+import ExpectedResult from "./ExpectedResult";
+import ContentHtml from "../../wiki/components/ContentHtml";
 
 
 
@@ -116,7 +115,7 @@ export default function LessonActions({
 
             </Typography>
 
-            <LessonHtml html={lesson.instruction_html} className="lesson-actions-assignment-body" />
+            <ContentHtml html={lesson.instruction_html} className="lesson-actions-assignment-body" />
 
           </div>
 

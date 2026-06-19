@@ -3,8 +3,8 @@ import Typography from "@mui/material/Typography";
 import type { AuthorLessonDetail } from "../../../api/authorApi";
 import type { LessonDetail } from "../../../types/lesson";
 import type { QuizSubmitResult } from "../../../types/lesson";
-import QuizPanel from "../../../components/QuizPanel";
-import SlideCarousel from "../../../components/SlideCarousel";
+import QuizPanel from "./QuizPanel";
+import SlideCarousel from "./SlideCarousel";
 
 export type LessonSlideViewMode = "student" | "author" | "preview";
 

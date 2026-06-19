@@ -10,7 +10,7 @@ import type { LessonDetail } from "../../../types/lesson";
 import AppTheme from "../../../components/mui/AppTheme";
 import LessonSlideView from "./LessonSlideView";
 
-vi.mock("../../../components/ScreenshotGuide", () => ({
+vi.mock("./ScreenshotGuide", () => ({
   default: () => <div data-testid="screenshot-guide" />,
 }));
 

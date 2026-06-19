@@ -10,11 +10,11 @@ import "../../../styles/author.css";
 import "../../../styles/screenshot.css";
 import HotspotEditorFrame from "./HotspotEditorFrame";
 
-vi.mock("../../../hooks/useImageNaturalAspectRatio", () => ({
+vi.mock("../../lesson/hooks/useImageNaturalAspectRatio", () => ({
   useImageNaturalAspectRatio: () => 16 / 9,
 }));
 
-vi.mock("../../../components/ScreenshotHotspotOverlay", () => ({
+vi.mock("../../lesson/components/ScreenshotHotspotOverlay", () => ({
   default: ({ children }: { children: ReactNode }) => (
     <div className="screenshot-overlay">{children}</div>
   ),

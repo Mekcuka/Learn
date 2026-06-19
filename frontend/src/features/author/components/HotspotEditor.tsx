@@ -18,9 +18,9 @@ import {
 
 import type { HotspotItem } from "../../../types/lesson";
 
-import { useScreenshotViewport } from "../../../hooks/useScreenshotViewport";
+import { useScreenshotViewport } from "../../lesson/hooks/useScreenshotViewport";
 
-import ScreenshotToolbar from "../../../components/ScreenshotToolbar";
+import ScreenshotToolbar from "./ScreenshotToolbar";
 
 import HotspotEditorFrame from "./HotspotEditorFrame";
 

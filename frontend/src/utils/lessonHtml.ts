@@ -3,4 +3,4 @@ export {
   splitContentHtml as splitLessonHtml,
   nextFootnoteNumber,
   type ContentHtmlParts as LessonHtmlParts,
-} from "./contentHtml";
+} from "../features/wiki/utils/contentHtml";

@@ -6,7 +6,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { type ReactNode, useState } from "react";
 import type { LessonDetail, LessonSlide, LessonStateItem, VerifyResult } from "../../../types/lesson";
 import LessonActions from "./LessonActions";
-import LessonHtml from "./LessonHtml";
+import ContentHtml from "../../wiki/components/ContentHtml";
 
 type LessonReferencePanelProps = {
   lesson: LessonDetail;
@@ -160,7 +160,7 @@ export default function LessonReferencePanel({
 
       {hasCaption && (
         <ReferenceSection title="Подсказка к слайду" collapsible defaultOpen={false}>
-          <LessonHtml html={slide!.caption_html} className="lesson-ref-body" />
+          <ContentHtml html={slide!.caption_html} className="lesson-ref-body" />
         </ReferenceSection>
       )}
 

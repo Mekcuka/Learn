@@ -7,9 +7,9 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 
-import { uploadWikiImage } from "../../../api/wikiApi";
-import { CONTENT_ASSET_PATHS, contentAssetLabel } from "../../../utils/contentAssets";
-import { isAllowedWikiImageSrc } from "../../../utils/wikiHtml";
+import { uploadWikiImage } from "../../wiki/api/wikiApi";
+import { CONTENT_ASSET_PATHS, contentAssetLabel } from "../../wiki/utils/contentAssets";
+import { isAllowedWikiImageSrc } from "../../wiki/utils/wikiHtml";
 import { BaseModal } from "../../../components/mui/BaseModal";
 
 export type ImageInsertResult = {

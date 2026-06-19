@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import type { LessonDetail, LessonStateItem } from "../../../types/lesson";
 import { lessonLayoutGridClasses } from "../../../constants/lessonLayout";
 import { moduleProgressLabel } from "../../../utils/lessonUi";
-import HashtagList from "../../../components/HashtagList";
+import HashtagList from "../../../shared/content/HashtagList";
 import LessonNextStepCard from "./LessonNextStepCard";
 import LessonRoadmap from "./LessonRoadmap";
 import type { NextLessonNavigation } from "../../../utils/lessonUi";
