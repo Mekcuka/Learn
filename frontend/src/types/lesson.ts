@@ -1,0 +1,22 @@
+/** Domain types for lessons, slides, hotspots and quiz — sourced from learnApi. */
+export type {
+  DashboardResponse,
+  CalloutWidth,
+  CalloutSide,
+  ResolvedCalloutSide,
+  HotspotFillColor,
+  HotspotItem,
+  HotspotKind,
+  LessonDetail,
+  LessonListItem,
+  LessonSlide,
+  LessonStateItem,
+  ModuleDashboardItem,
+  ModuleLessonOutlineItem,
+  QuizModule,
+  QuizOption,
+  QuizQuestion,
+  QuizSubmitResult,
+  User,
+  VerifyResult,
+} from "../api/learnApi";

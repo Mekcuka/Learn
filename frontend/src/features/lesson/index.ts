@@ -1,0 +1,14 @@
+export { default as LessonActions } from "./components/LessonActions";
+export { default as LessonHtml } from "./components/LessonHtml";
+export { default as LessonNextStepCard } from "./components/LessonNextStepCard";
+export { default as LessonPageHeader } from "./components/LessonPageHeader";
+export { default as LessonPreviewBanner } from "./components/LessonPreviewBanner";
+export { default as LessonReferencePanel } from "./components/LessonReferencePanel";
+export { default as LessonRoadmap } from "./components/LessonRoadmap";
+export { default as LessonScreenshotHintsPanel } from "./components/LessonScreenshotHintsPanel";
+export { default as LessonShell } from "./components/LessonShell";
+export { default as LessonSlideView } from "./components/LessonSlideView";
+export type { LessonSlideViewMode } from "./components/LessonSlideView";
+export { useLessonProgress } from "./hooks/useLessonProgress";
+export type { LessonProgressPhase } from "./hooks/useLessonProgress";
+export { useLessonVerify } from "./hooks/useLessonVerify";

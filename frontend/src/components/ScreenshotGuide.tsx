@@ -1,12 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+} from "react";
 
 import { useScreenshotViewport } from "../hooks/useScreenshotViewport";
-import type { HotspotItem } from "../api/learnApi";
+import type { HotspotItem } from "../types/lesson";
+import { getHotspotKind, hotspotPinFillProps, hotspotRectVisualStyle, pinHotspotAriaLabel } from "../utils/hotspots";
 import { toggleHotspotSelection } from "../utils/screenshotViewport";
-import SafeHtml from "./SafeHtml";
-import ScreenshotToolbar from "./ScreenshotToolbar";
-
-const ZOOM_HINT_KEY = "learn:screenshot-zoom-hint";
+import { hotspotOverlayStyle } from "../utils/imageContentRect";
+import PinHotspotMarker from "./PinHotspotMarker";
+import HotspotZoneLabel from "./HotspotZoneLabel";
+import ScreenshotHotspotOverlay from "./ScreenshotHotspotOverlay";
+import ScreenshotToolbar, { type ScreenshotToolbarProps } from "./ScreenshotToolbar";
+import ZoomHotspotPopup from "./ZoomHotspotPopup";
 
 type ScreenshotGuideProps = {
   imagePath: string;
@@ -15,6 +25,8 @@ type ScreenshotGuideProps = {
   viewportResetKey?: string;
   activeHotspotId?: string | null;
   onHotspotSelect?: (hotspotId: string | null) => void;
+  hideToolbar?: boolean;
+  onToolbarPropsChange?: (props: ScreenshotToolbarProps) => void;
 };
 
 export default function ScreenshotGuide({
@@ -24,21 +36,24 @@ export default function ScreenshotGuide({
   viewportResetKey,
   activeHotspotId,
   onHotspotSelect,
+  hideToolbar = false,
+  onToolbarPropsChange,
 }: ScreenshotGuideProps) {
   const [showHotspots, setShowHotspots] = useState(true);
   const [hoveredHotspotId, setHoveredHotspotId] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showZoomHint, setShowZoomHint] = useState(false);
   const shellRef = useRef<HTMLDivElement>(null);
 
   const viewport = useScreenshotViewport({ resetKey: viewportResetKey });
 
   const activeHotspot = hotspots.find((item) => item.id === activeHotspotId) ?? null;
   const displayHotspotId = activeHotspotId ?? hoveredHotspotId;
+  const zoomModalHotspot =
+    activeHotspot && getHotspotKind(activeHotspot) === "zoom" ? activeHotspot : null;
 
-  useEffect(() => {
-    setShowZoomHint(sessionStorage.getItem(ZOOM_HINT_KEY) !== "1");
-  }, []);
+  const closeZoomModal = useCallback(() => {
+    onHotspotSelect?.(null);
+  }, [onHotspotSelect]);
 
   useEffect(() => {
     function onFullscreenChange() {
@@ -47,26 +62,6 @@ export default function ScreenshotGuide({
     document.addEventListener("fullscreenchange", onFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
   }, []);
-
-  const dismissZoomHint = useCallback(() => {
-    sessionStorage.setItem(ZOOM_HINT_KEY, "1");
-    setShowZoomHint(false);
-  }, []);
-
-  const handleZoomIn = useCallback(() => {
-    dismissZoomHint();
-    viewport.zoomIn();
-  }, [dismissZoomHint, viewport]);
-
-  const handleWheel = useCallback(
-    (event: React.WheelEvent) => {
-      if (event.ctrlKey || event.metaKey) {
-        dismissZoomHint();
-      }
-      viewport.handleWheel(event);
-    },
-    [dismissZoomHint, viewport],
-  );
 
   const toggleFullscreen = useCallback(async () => {
     const node = shellRef.current;
@@ -81,21 +76,75 @@ export default function ScreenshotGuide({
   }, []);
 
   const handleHotspotClick = useCallback(
-    (hotspotId: string) => {
-      onHotspotSelect?.(toggleHotspotSelection(activeHotspotId ?? null, hotspotId));
+    (hotspotId: string, _event: ReactMouseEvent<HTMLButtonElement>) => {
+      const hotspot = hotspots.find((item) => item.id === hotspotId);
+      if (!hotspot) {
+        return;
+      }
+      const kind = getHotspotKind(hotspot);
+
+      if (kind === "zoom") {
+        const next = toggleHotspotSelection(activeHotspotId ?? null, hotspotId);
+        onHotspotSelect?.(next);
+        return;
+      }
+
+      const next = toggleHotspotSelection(activeHotspotId ?? null, hotspotId);
+      onHotspotSelect?.(next);
     },
-    [activeHotspotId, onHotspotSelect],
+    [activeHotspotId, hotspots, onHotspotSelect],
   );
+
+  const toggleShowHotspots = useCallback(() => {
+    setShowHotspots((value) => !value);
+  }, []);
+
+  const toolbarProps = useMemo<ScreenshotToolbarProps>(
+    () => ({
+      zoom: viewport.zoom,
+      canZoomIn: viewport.canZoomIn,
+      canZoomOut: viewport.canZoomOut,
+      showHotspots,
+      isFullscreen,
+      onZoomIn: viewport.zoomIn,
+      onZoomOut: viewport.zoomOut,
+      onReset: viewport.reset,
+      onToggleHotspots: toggleShowHotspots,
+      onToggleFullscreen: () => void toggleFullscreen(),
+    }),
+    [
+      isFullscreen,
+      showHotspots,
+      toggleFullscreen,
+      toggleShowHotspots,
+      viewport.canZoomIn,
+      viewport.canZoomOut,
+      viewport.reset,
+      viewport.zoom,
+      viewport.zoomIn,
+      viewport.zoomOut,
+    ],
+  );
+
+  useEffect(() => {
+    if (hideToolbar) {
+      onToolbarPropsChange?.(toolbarProps);
+    }
+  }, [hideToolbar, onToolbarPropsChange, toolbarProps]);
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
       if (event.key === "Escape") {
+        if (zoomModalHotspot) {
+          closeZoomModal();
+          return;
+        }
         onHotspotSelect?.(null);
         return;
       }
       if (event.key === "+" || event.key === "=") {
         event.preventDefault();
-        handleZoomIn();
+        viewport.zoomIn();
         return;
       }
       if (event.key === "-") {
@@ -103,47 +152,90 @@ export default function ScreenshotGuide({
         viewport.zoomOut();
       }
     },
-    [handleZoomIn, onHotspotSelect, viewport],
+    [closeZoomModal, onHotspotSelect, viewport, zoomModalHotspot],
   );
+
+  const renderHotspot = (hotspot: HotspotItem) => {
+    const kind = getHotspotKind(hotspot);
+    const isActive = displayHotspotId === hotspot.id;
+
+    if (kind === "pin") {
+      const pinFill = hotspotPinFillProps(hotspot);
+      return (
+        <button
+          key={hotspot.id}
+          type="button"
+          className={`hotspot-pin${isActive ? " hotspot-pin-active" : ""}${hotspot.pulse !== false ? " hotspot-pin-pulse" : ""}${pinFill.className ? ` ${pinFill.className}` : ""}`}
+          style={{ ...hotspotOverlayStyle(hotspot, "pin"), ...pinFill.style }}
+          aria-label={pinHotspotAriaLabel(hotspot.label)}
+          aria-pressed={activeHotspotId === hotspot.id}
+          onClick={(event) => {
+            event.stopPropagation();
+            handleHotspotClick(hotspot.id, event);
+          }}
+          onMouseEnter={() => setHoveredHotspotId(hotspot.id)}
+          onMouseLeave={() => setHoveredHotspotId(null)}
+          onFocus={() => setHoveredHotspotId(hotspot.id)}
+          onBlur={() => setHoveredHotspotId(null)}
+        >
+          <PinHotspotMarker
+            label={hotspot.label}
+            descriptionHtml={hotspot.description_html}
+            calloutWidth={hotspot.callout_width}
+            calloutSide={hotspot.callout_side}
+            anchorXPct={hotspot.x_pct + hotspot.width_pct / 2}
+            showCallout={isActive}
+            animateCallout
+          />
+        </button>
+      );
+    }
+
+    return (
+      <button
+        key={hotspot.id}
+        type="button"
+        className={`hotspot ${kind === "zoom" ? "hotspot--zoom" : ""} ${hotspot.pulse !== false ? "hotspot-pulse" : ""} ${
+          isActive ? "hotspot-active" : ""
+        }`}
+        style={{
+          ...hotspotOverlayStyle(hotspot, "zone"),
+          ...hotspotRectVisualStyle(hotspot, isActive),
+        }}
+        aria-label={hotspot.label}
+        aria-pressed={activeHotspotId === hotspot.id}
+        onClick={(event) => {
+          event.stopPropagation();
+          handleHotspotClick(hotspot.id, event);
+        }}
+        onMouseEnter={() => setHoveredHotspotId(hotspot.id)}
+        onMouseLeave={() => setHoveredHotspotId(null)}
+        onFocus={() => setHoveredHotspotId(hotspot.id)}
+        onBlur={() => setHoveredHotspotId(null)}
+      >
+        <HotspotZoneLabel
+          label={hotspot.label}
+          xPct={hotspot.x_pct}
+          yPct={hotspot.y_pct}
+          widthPct={hotspot.width_pct}
+          heightPct={hotspot.height_pct}
+        />
+      </button>
+    );
+  };
 
   return (
     <div className="screenshot-guide" ref={shellRef}>
-      <ScreenshotToolbar
-        zoom={viewport.zoom}
-        canZoomIn={viewport.canZoomIn}
-        canZoomOut={viewport.canZoomOut}
-        showHotspots={showHotspots}
-        isFullscreen={isFullscreen}
-        onZoomIn={handleZoomIn}
-        onZoomOut={viewport.zoomOut}
-        onReset={viewport.reset}
-        onToggleHotspots={() => setShowHotspots((value) => !value)}
-        onToggleFullscreen={() => void toggleFullscreen()}
-      />
-
-      {showZoomHint && (
-        <p className="screenshot-zoom-hint" role="note">
-          Удерживайте Ctrl и крутите колёсико для масштаба. На телефоне — жест «щипок».
-          <button type="button" className="screenshot-zoom-hint-dismiss" onClick={dismissZoomHint}>
-            Понятно
-          </button>
-        </p>
-      )}
+      {!hideToolbar && <ScreenshotToolbar {...toolbarProps} />}
 
       <div
         ref={viewport.frameRef}
-        className={`screenshot-frame ${viewport.canPan ? "screenshot-frame-pannable" : ""} ${
-          viewport.isDragging ? "screenshot-frame-dragging" : ""
-        }`}
+        className="screenshot-frame"
         tabIndex={0}
         role="application"
         aria-label={`Скриншот: ${alt}`}
         aria-keyshortcuts="+ - Escape"
-        onWheel={handleWheel}
-        onPointerDown={viewport.handlePointerDown}
-        onPointerMove={viewport.handlePointerMove}
-        onPointerUp={viewport.handlePointerUp}
-        onPointerCancel={viewport.handlePointerUp}
+        onWheel={viewport.handleWheel}
         onTouchStart={viewport.handleTouchStart}
         onTouchMove={viewport.handleTouchMove}
         onTouchEnd={viewport.handleTouchEnd}
@@ -156,52 +248,26 @@ export default function ScreenshotGuide({
               transform: `translate(${viewport.pan.x}px, ${viewport.pan.y}px) scale(${viewport.zoom})`,
             }}
           >
-            <img src={imagePath} alt={alt} loading="lazy" className="screenshot-image" draggable={false} />
-            {showHotspots && (
-              <div className="screenshot-overlay">
-                {hotspots.map((hotspot) => (
-                  <button
-                    key={hotspot.id}
-                    type="button"
-                    className={`hotspot ${hotspot.pulse !== false ? "hotspot-pulse" : ""} ${
-                      displayHotspotId === hotspot.id ? "hotspot-active" : ""
-                    }`}
-                    style={{
-                      left: `${hotspot.x_pct}%`,
-                      top: `${hotspot.y_pct}%`,
-                      width: `${hotspot.width_pct}%`,
-                      height: `${hotspot.height_pct}%`,
-                    }}
-                    aria-label={hotspot.label}
-                    aria-pressed={activeHotspotId === hotspot.id}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleHotspotClick(hotspot.id);
-                    }}
-                    onMouseEnter={() => setHoveredHotspotId(hotspot.id)}
-                    onMouseLeave={() => setHoveredHotspotId(null)}
-                    onFocus={() => setHoveredHotspotId(hotspot.id)}
-                    onBlur={() => setHoveredHotspotId(null)}
-                  >
-                    <span className="hotspot-label">{hotspot.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+            <ScreenshotHotspotOverlay
+              containerRef={viewport.containerRef}
+              imagePath={imagePath}
+              imageAlt={alt}
+              resetKey={viewportResetKey}
+              lazy={false}
+            >
+              {showHotspots ? hotspots.map(renderHotspot) : null}
+            </ScreenshotHotspotOverlay>
           </div>
+          <ZoomHotspotPopup
+            open={Boolean(zoomModalHotspot)}
+            hotspot={zoomModalHotspot}
+            imagePath={imagePath}
+            imageAlt={alt}
+            onClose={closeZoomModal}
+          />
         </div>
       </div>
 
-      {activeHotspot && (
-        <div className="hotspot-callout" role="status">
-          <strong>{activeHotspot.label}</strong>
-          {activeHotspot.description_html?.trim() ? (
-            <SafeHtml html={activeHotspot.description_html} className="hotspot-callout-body" tag="div" />
-          ) : (
-            <p className="hotspot-callout-body">Нажмите ещё раз, чтобы снять выделение.</p>
-          )}
-        </div>
-      )}
     </div>
   );
 }

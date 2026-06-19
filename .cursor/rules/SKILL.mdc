@@ -46,7 +46,6 @@ Call `query-docs` with:
 
 ## Learn-specific: do NOT use Context7 for
 
-- Demo API endpoints and verify logic — read `docs/features/learn/demo-api-reference.md` and `contract.md`
 - Learn Portal API shapes — read `contract.md`
 - Product/architecture decisions — read `plan.md`, `open-questions.md`
 

@@ -3,9 +3,11 @@ import { describe, expect, it } from "vitest";
 import {
   clampPan,
   clampZoom,
+  computeZoomToFitHotspot,
   panForZoomAtPoint,
   panToCenterHotspot,
   toggleHotspotSelection,
+  viewportForHotspotZoom,
 } from "./screenshotViewport";
 
 describe("screenshotViewport", () => {
@@ -45,5 +47,14 @@ describe("screenshotViewport", () => {
     expect(toggleHotspotSelection(null, "a")).toBe("a");
     expect(toggleHotspotSelection("a", "a")).toBeNull();
     expect(toggleHotspotSelection("a", "b")).toBe("b");
+  });
+
+  it("computes stronger zoom to fit hotspot rect", () => {
+    const hotspot = { x_pct: 40, y_pct: 30, width_pct: 20, height_pct: 15 };
+    const zoom = computeZoomToFitHotspot(hotspot, 800, 400);
+    expect(zoom).toBeGreaterThan(1.25);
+    const viewport = viewportForHotspotZoom(hotspot, 800, 400);
+    expect(viewport.zoom).toBe(zoom);
+    expect(Math.abs(viewport.panX)).toBeGreaterThan(0);
   });
 });

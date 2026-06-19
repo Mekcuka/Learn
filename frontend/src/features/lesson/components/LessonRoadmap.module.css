@@ -1,0 +1,459 @@
+/* Chevron roadmap — palette aligned with learn-mui-theme tokens */
+
+.root {
+
+  --roadmap-primary: var(--color-typo-brand, #0078d2);
+
+  --roadmap-primary-dark: #005a9e;
+
+  --roadmap-success: var(--color-typo-success, #22a06b);
+
+  --roadmap-success-dark: #1a7d52;
+
+  --roadmap-neutral-bg: var(--color-bg-soft, #f3f4f6);
+
+  --roadmap-neutral-fg: var(--color-typo-ghost, #9ca3af);
+
+  --roadmap-upcoming-bg: color-mix(
+
+    in srgb,
+
+    var(--roadmap-primary) 11%,
+
+    var(--color-bg-secondary, #f9fafb)
+
+  );
+
+  --roadmap-upcoming-fg: var(--roadmap-primary-dark);
+
+  --roadmap-upcoming-border: color-mix(in srgb, var(--roadmap-primary) 24%, var(--color-bg-border, #e8e8e8));
+
+  --roadmap-chevron-notch: 11px;
+
+
+
+  display: flex;
+
+  justify-content: center;
+
+  width: 100%;
+
+  overflow-x: auto;
+
+  -webkit-overflow-scrolling: touch;
+
+  scrollbar-width: thin;
+
+  scrollbar-color: color-mix(in srgb, var(--roadmap-primary) 28%, transparent) transparent;
+
+  padding: 0.2rem 0;
+
+}
+
+
+
+:global(.lesson-page-header__roadmap) .root {
+
+  min-width: 0;
+
+  margin-top: 0;
+
+  justify-content: stretch;
+
+  width: 100%;
+
+  padding: 0;
+
+  border: 1px solid var(--color-bg-border, #e8e8e8);
+
+  border-radius: inherit;
+
+  box-shadow: 0 1px 2px rgb(15 23 42 / 4%);
+
+}
+
+
+
+:global(.lesson-page-header__roadmap) .track {
+
+  width: 100%;
+
+  max-width: none;
+
+  min-width: 0;
+
+  padding: 0;
+
+}
+
+
+
+:global(.lesson-page-header__roadmap) .segment:last-child .link {
+
+  padding-right: 0.7rem;
+
+  border-right-color: transparent;
+
+  clip-path: polygon(
+
+    0 0,
+
+    100% 0,
+
+    100% 100%,
+
+    0 100%,
+
+    var(--roadmap-chevron-notch) 50%
+
+  );
+
+}
+
+
+
+:global(.lesson-page-header__roadmap) .segment:first-child .link {
+
+  border-left-color: transparent;
+
+}
+
+
+
+.track {
+
+  display: flex;
+
+  list-style: none;
+
+  margin: 0;
+
+  padding: 0.1rem 0.15rem;
+
+  width: min(100%, 52rem);
+
+  min-width: min(100%, 20rem);
+
+}
+
+
+
+.segment {
+
+  flex: 1 1 0;
+
+  min-width: 4.85rem;
+
+  position: relative;
+
+  margin-left: calc(var(--roadmap-chevron-notch) * -1 + 1px);
+
+}
+
+
+
+.segment:first-child {
+
+  margin-left: 0;
+
+}
+
+
+
+.link {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  min-height: 2.5rem;
+
+  padding: 0.4rem 0.9rem 0.4rem calc(0.7rem + var(--roadmap-chevron-notch));
+
+  background: var(--roadmap-upcoming-bg);
+
+  color: var(--roadmap-upcoming-fg);
+
+  border: 1px solid var(--roadmap-upcoming-border);
+
+  text-decoration: none;
+
+  font-weight: 600;
+
+  line-height: 1.25;
+
+  text-align: center;
+
+  clip-path: polygon(
+
+    0 0,
+
+    calc(100% - var(--roadmap-chevron-notch)) 0,
+
+    100% 50%,
+
+    calc(100% - var(--roadmap-chevron-notch)) 100%,
+
+    0 100%,
+
+    var(--roadmap-chevron-notch) 50%
+
+  );
+
+  transition:
+
+    background-color 0.15s ease,
+
+    border-color 0.15s ease,
+
+    box-shadow 0.15s ease,
+
+    color 0.15s ease;
+
+}
+
+
+
+.segment:first-child .link {
+
+  padding-left: 0.7rem;
+
+  clip-path: polygon(
+
+    0 0,
+
+    calc(100% - var(--roadmap-chevron-notch)) 0,
+
+    100% 50%,
+
+    calc(100% - var(--roadmap-chevron-notch)) 100%,
+
+    0 100%
+
+  );
+
+}
+
+
+
+.link:hover {
+
+  background: color-mix(in srgb, var(--roadmap-primary) 18%, var(--color-bg-secondary, #f9fafb));
+
+  border-color: color-mix(in srgb, var(--roadmap-primary) 36%, var(--color-bg-border, #e8e8e8));
+
+}
+
+
+
+.link:focus-visible {
+
+  outline: 2px solid var(--roadmap-primary);
+
+  outline-offset: 2px;
+
+}
+
+
+
+.label {
+
+  color: inherit !important;
+
+  font-weight: inherit;
+
+  font-size: 0.7rem !important;
+
+  letter-spacing: 0.015em;
+
+  max-width: 100%;
+
+}
+
+
+
+/* Current step — primary emphasis */
+
+.segmentCurrent .link {
+
+  background: var(--roadmap-primary);
+
+  color: #fff;
+
+  border-color: transparent;
+
+  font-weight: 700;
+
+  box-shadow:
+
+    0 0 0 2px color-mix(in srgb, var(--roadmap-primary) 22%, #fff),
+
+    0 4px 12px color-mix(in srgb, var(--roadmap-primary) 34%, transparent);
+
+}
+
+
+
+.segmentCurrent .link:hover {
+
+  background: var(--roadmap-primary-dark);
+
+  border-color: transparent;
+
+}
+
+
+
+/* Completed — success green */
+
+.segmentCompleted .link {
+
+  background: var(--roadmap-success);
+
+  color: #fff;
+
+  border-color: transparent;
+
+}
+
+
+
+.segmentCompleted .link:hover {
+
+  background: var(--roadmap-success-dark);
+
+  border-color: transparent;
+
+}
+
+
+
+.segmentCompleted .label::after {
+
+  content: " ✓";
+
+  font-size: 0.65rem;
+
+  opacity: 0.95;
+
+}
+
+
+
+/* Upcoming unlocked — soft primary tint (base .link styles) */
+
+.segmentUpcoming .link {
+
+  background: var(--roadmap-upcoming-bg);
+
+  color: var(--roadmap-upcoming-fg);
+
+  border-color: var(--roadmap-upcoming-border);
+
+}
+
+
+
+/* Locked — neutral, non-interactive */
+
+.segmentLocked .link {
+
+  background: var(--roadmap-neutral-bg);
+
+  color: var(--roadmap-neutral-fg);
+
+  border-color: var(--color-bg-border, #e8e8e8);
+
+  cursor: not-allowed;
+
+}
+
+
+
+.segmentLocked .link:hover {
+
+  background: var(--roadmap-neutral-bg);
+
+  border-color: var(--color-bg-border, #e8e8e8);
+
+}
+
+
+
+@media (max-width: 640px) {
+
+  :global(.lesson-page-header__roadmap) .root {
+
+    justify-content: stretch;
+
+  }
+
+
+
+  :global(.lesson-page-header__roadmap) .track {
+
+    min-width: 100%;
+
+  }
+
+
+
+  .track {
+
+    min-width: 100%;
+
+    padding-inline: 0.05rem;
+
+  }
+
+
+
+  .segment {
+
+    min-width: 4.35rem;
+
+    --roadmap-chevron-notch: 9px;
+
+  }
+
+
+
+  .link {
+
+    min-height: 2.35rem;
+
+    padding-inline: 0.75rem;
+
+    padding-left: calc(0.55rem + var(--roadmap-chevron-notch));
+
+  }
+
+
+
+  .segment:first-child .link {
+
+    padding-left: 0.55rem;
+
+  }
+
+
+
+  :global(.lesson-page-header__roadmap) .segment:last-child .link {
+
+    padding-right: 0.55rem;
+
+  }
+
+
+
+  .label {
+
+    font-size: 0.64rem !important;
+
+  }
+
+}
+
+

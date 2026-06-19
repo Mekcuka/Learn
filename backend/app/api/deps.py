@@ -1,3 +1,5 @@
+import time
+from threading import Lock
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
@@ -11,17 +13,35 @@ from app.services.auth import decode_access_token
 
 security = HTTPBearer(auto_error=False)
 
-DEFAULT_DEMO_EMAIL = "student@training.local"
+_USER_CACHE_TTL_SECONDS = 60.0
+_user_cache: dict[int, tuple[User, float]] = {}
+_user_cache_lock = Lock()
+
+
+def _get_user_cached(db: Session, user_id: int) -> User | None:
+    now = time.monotonic()
+    with _user_cache_lock:
+        entry = _user_cache.get(user_id)
+        if entry and now - entry[1] < _USER_CACHE_TTL_SECONDS:
+            return db.merge(entry[0])
+
+    user = db.get(User, user_id)
+    if user and user.is_active:
+        with _user_cache_lock:
+            _user_cache[user_id] = (user, now)
+    return user
+
+DEFAULT_STUDENT_EMAIL = "student@training.local"
 DEFAULT_AUTHOR_EMAIL = "author@training.local"
 
 
 def get_default_user(db: Session) -> User:
-    user = db.query(User).filter(User.email == DEFAULT_DEMO_EMAIL).first()
+    user = db.query(User).filter(User.email == DEFAULT_STUDENT_EMAIL).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail={
-                "detail": "demo_user_missing",
+                "detail": "student_user_missing",
                 "message": "Учебный аккаунт не найден. Запустите seed.",
             },
         )
@@ -47,7 +67,7 @@ def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"detail": "unauthorized", "message": "Сессия истекла. Войдите снова."},
         )
-    user = db.get(User, user_id)
+    user = _get_user_cached(db, user_id)
     if not user or not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -1,15 +1,22 @@
-import { type MouseEvent } from "react";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Card from "@mui/material/Card";
+import CardActionArea from "@mui/material/CardActionArea";
+import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { type MouseEvent, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 
-import type { LessonListItem } from "../../api/learnApi";
+import type { LessonListItem } from "../../types/lesson";
+import { lessonStatusLabel, slideCountLabel } from "../../utils/lessonUi";
 import HashtagList from "../HashtagList";
 
 const CARD_THEMES = [
-  { bg: "#f3e8d8", accent: "#c4a574", icon: "login" },
-  { bg: "#d8f3e8", accent: "#5cb88a", icon: "project" },
-  { bg: "#fde8f0", accent: "#e879a9", icon: "map" },
-  { bg: "#e8eefd", accent: "#6b8cff", icon: "journal" },
-  { bg: "#fef6dc", accent: "#d4a017", icon: "quiz" },
+  { bg: "var(--color-bg-soft)", accent: "var(--color-typo-caution)", icon: "login" },
+  { bg: "var(--color-bg-success)", accent: "var(--color-typo-success)", icon: "project" },
+  { bg: "var(--color-bg-alert)", accent: "var(--color-typo-alert)", icon: "map" },
+  { bg: "var(--color-bg-link)", accent: "var(--color-typo-link)", icon: "journal" },
+  { bg: "var(--color-bg-warning)", accent: "var(--color-typo-warning)", icon: "quiz" },
 ] as const;
 
 function CardIllustration({ type }: { type: (typeof CARD_THEMES)[number]["icon"] }) {
@@ -57,12 +64,126 @@ function CardIllustration({ type }: { type: (typeof CARD_THEMES)[number]["icon"]
   }
 }
 
+function statusChipProps(status: LessonListItem["status"]) {
+  switch (status) {
+    case "active":
+      return { color: "primary" as const, variant: "filled" as const };
+    case "completed":
+      return { color: "success" as const, variant: "filled" as const };
+    case "locked":
+      return { color: "default" as const, variant: "outlined" as const };
+    case "not_started":
+      return { color: "default" as const, variant: "outlined" as const };
+  }
+}
+
 type LessonCatalogCardProps = {
   lesson: LessonListItem;
-  moduleTitle: string;
+  moduleTitle?: string;
   activeTag?: string | null;
   onTagClick?: (tag: string, event: MouseEvent) => void;
 };
+
+function LessonCardBody({
+  lesson,
+  moduleTitle,
+  activeTag,
+  onTagClick,
+  theme,
+}: {
+  lesson: LessonListItem;
+  moduleTitle?: string;
+  activeTag?: string | null;
+  onTagClick?: (tag: string, event: MouseEvent) => void;
+  theme: (typeof CARD_THEMES)[number];
+}) {
+  const statusChip = statusChipProps(lesson.status);
+
+  return (
+    <>
+      <div className="catalog-card-content">
+        <Stack spacing={0.75}>
+          {moduleTitle && (
+            <Typography variant="caption" color="text.secondary" className="catalog-card-label">
+              {moduleTitle}
+            </Typography>
+          )}
+          <Typography variant="h6" fontWeight={700} component="h3" className="catalog-card-title">
+            {lesson.title}
+          </Typography>
+          <Stack direction="row" flexWrap="wrap" gap={0.5} useFlexGap alignItems="center">
+            <Chip
+              size="small"
+              label={lessonStatusLabel(lesson.status)}
+              icon={lesson.status === "locked" ? <LockOutlinedIcon /> : undefined}
+              {...statusChip}
+            />
+            <Typography variant="caption" color="text.secondary" className="catalog-card-meta">
+              {slideCountLabel(lesson.slide_count)}
+            </Typography>
+          </Stack>
+          {(lesson.tags?.length ?? 0) > 0 && (
+            <HashtagList
+              tags={lesson.tags ?? []}
+              activeTag={activeTag}
+              onTagClick={onTagClick}
+              className="catalog-card-tags"
+            />
+          )}
+        </Stack>
+      </div>
+      <div className="catalog-card-visual" style={{ color: theme.accent }}>
+        <CardIllustration type={theme.icon} />
+      </div>
+    </>
+  );
+}
+
+function LessonCardInner({ children }: { children: ReactNode }) {
+  return <div className="catalog-card-inner">{children}</div>;
+}
+
+function LessonCardShell({
+  locked,
+  backgroundColor,
+  children,
+  linkTo,
+}: {
+  locked: boolean;
+  backgroundColor: string;
+  children: ReactNode;
+  linkTo?: string;
+}) {
+  const inner = <LessonCardInner>{children}</LessonCardInner>;
+
+  if (locked) {
+    return (
+      <Card
+        component="article"
+        variant="outlined"
+        className="catalog-card catalog-card-locked"
+        style={{ backgroundColor }}
+        title="Сначала завершите предыдущий урок"
+      >
+        {inner}
+      </Card>
+    );
+  }
+
+  return (
+    <Card variant="outlined" className="catalog-card catalog-card-link" style={{ backgroundColor }}>
+      <CardActionArea
+        component={Link}
+        to={linkTo!}
+        className="catalog-card-action"
+        disableRipple
+        sx={{ p: 0, height: "100%", display: "block" }}
+      >
+        {inner}
+      </CardActionArea>
+    </Card>
+  );
+}
 
 export default function LessonCatalogCard({
   lesson,
@@ -72,53 +193,20 @@ export default function LessonCatalogCard({
 }: LessonCatalogCardProps) {
   const theme = CARD_THEMES[(lesson.order - 1) % CARD_THEMES.length];
   const locked = lesson.status === "locked";
-  const completed = lesson.status === "completed";
-
-  const content = (
-    <>
-      <div className="catalog-card-content">
-        <span className="catalog-card-label">{moduleTitle}</span>
-        <h3 className="catalog-card-title">{lesson.title}</h3>
-        {(lesson.tags?.length ?? 0) > 0 && (
-          <HashtagList
-            tags={lesson.tags ?? []}
-            activeTag={activeTag}
-            onTagClick={onTagClick}
-            className="catalog-card-tags"
-          />
-        )}
-        <p className="catalog-card-meta">
-          {lesson.slide_count > 0 ? `${lesson.slide_count} слайда` : "Теория"}
-          {completed && <span className="catalog-card-done"> · Пройден</span>}
-        </p>
-      </div>
-      <div className="catalog-card-visual" style={{ color: theme.accent }}>
-        <CardIllustration type={theme.icon} />
-      </div>
-      {lesson.status === "active" && <span className="catalog-card-badge">Текущий</span>}
-      {locked && <span className="catalog-card-lock" title="Сначала завершите предыдущий урок" />}
-    </>
-  );
-
-  if (locked) {
-    return (
-      <article
-        className="catalog-card catalog-card-locked"
-        style={{ backgroundColor: theme.bg }}
-        title="Сначала завершите предыдущий урок"
-      >
-        {content}
-      </article>
-    );
-  }
 
   return (
-    <Link
-      to={`/lessons/${lesson.id}`}
-      className="catalog-card catalog-card-link"
-      style={{ backgroundColor: theme.bg }}
+    <LessonCardShell
+      locked={locked}
+      backgroundColor={theme.bg}
+      linkTo={locked ? undefined : `/lessons/${lesson.id}`}
     >
-      {content}
-    </Link>
+      <LessonCardBody
+        lesson={lesson}
+        moduleTitle={moduleTitle}
+        activeTag={activeTag}
+        onTagClick={onTagClick}
+        theme={theme}
+      />
+    </LessonCardShell>
   );
 }

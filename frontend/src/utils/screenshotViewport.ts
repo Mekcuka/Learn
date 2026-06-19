@@ -1,4 +1,4 @@
-import type { HotspotItem } from "../api/learnApi";
+import type { HotspotItem } from "../types/lesson";
 
 export const MIN_ZOOM = 1;
 export const MAX_ZOOM = 3;
@@ -63,6 +63,36 @@ export function panToCenterHotspot(
   const rawPanX = containerWidth / 2 - centerX * zoom;
   const rawPanY = containerHeight / 2 - centerY * zoom;
   return clampPan(rawPanX, rawPanY, zoom, containerWidth, containerHeight);
+}
+
+/** Zoom level that fits the hotspot rect in the viewport (with padding). */
+export function computeZoomToFitHotspot(
+  hotspot: Pick<HotspotItem, "x_pct" | "y_pct" | "width_pct" | "height_pct">,
+  containerWidth: number,
+  containerHeight: number,
+  padding = 0.88,
+): number {
+  if (containerWidth <= 0 || containerHeight <= 0) {
+    return MIN_ZOOM;
+  }
+  const rectW = (hotspot.width_pct / 100) * containerWidth;
+  const rectH = (hotspot.height_pct / 100) * containerHeight;
+  if (rectW <= 0 || rectH <= 0) {
+    return MAX_ZOOM;
+  }
+  const zoomW = (containerWidth * padding) / rectW;
+  const zoomH = (containerHeight * padding) / rectH;
+  return clampZoom(Math.min(zoomW, zoomH));
+}
+
+export function viewportForHotspotZoom(
+  hotspot: Pick<HotspotItem, "x_pct" | "y_pct" | "width_pct" | "height_pct">,
+  containerWidth: number,
+  containerHeight: number,
+): { zoom: number; panX: number; panY: number } {
+  const zoom = computeZoomToFitHotspot(hotspot, containerWidth, containerHeight);
+  const pan = panToCenterHotspot(hotspot, zoom, containerWidth, containerHeight);
+  return { zoom, panX: pan.panX, panY: pan.panY };
 }
 
 export function toggleHotspotSelection(currentId: string | null, hotspotId: string): string | null {

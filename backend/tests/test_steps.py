@@ -20,7 +20,7 @@ def test_module_steps_includes_states(client):
     assert data["current_step_id"] == "step-01-login-context"
 
 
-def test_step_flow_manual_and_mock_resource(client):
+def test_step_flow_manual_steps(client):
     headers = _auth_headers(client)
     module_id = "orientation-v1"
 
@@ -53,10 +53,8 @@ def test_step_flow_manual_and_mock_resource(client):
     )
     assert verify2.status_code == 200
     assert verify2.json()["status"] == "passed"
-    assert verify2.json()["data"]["resource_id"] == "mock-project-id"
 
     flow = client.get(f"/api/v1/learn/modules/{module_id}/steps", headers=headers)
-    assert flow.json()["project_id"] == "mock-project-id"
     assert flow.json()["progress_percent"] == 40
 
 
@@ -67,7 +65,7 @@ def test_verify_locked_step_rejected(client):
         headers=headers,
     )
     assert response.status_code == 400
-    assert response.json()["detail"]["detail"] == "invalid_step_transition"
+    assert response.json()["detail"] == "invalid_step_transition"
 
 
 def _complete_step(client, headers, module_id: str, step_id: str) -> None:
@@ -94,7 +92,6 @@ def test_full_flow_through_journal(client):
     data = flow.json()
     assert data["progress_percent"] == 80
     assert data["current_step_id"] == "step-05-mini-quiz"
-    assert data["project_id"] == "mock-project-id"
 
     states = {item["step_id"]: item["status"] for item in data["step_states"]}
     assert states["step-04-job-journal"] == "completed"

@@ -9,7 +9,6 @@ from app.db import get_db
 from app.models.module import Module, Step
 from app.models.lesson import Lesson
 from app.models.progress import StepState
-from app.models.training_account import TrainingAccount
 from app.models.user import User
 from app.schemas.modules import (
     ModuleDetailResponse,
@@ -238,10 +237,7 @@ def verify_step(
             },
         )
 
-    training_account = (
-        db.query(TrainingAccount).filter(TrainingAccount.user_id == current_user.id).first()
-    )
-    return run_verify(db, progress, step, step_state, training_account)
+    return run_verify(db, progress, step, step_state)
 
 
 @router.post("/modules/{module_id}/steps/{step_id}/complete-manual")

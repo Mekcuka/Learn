@@ -1,4 +1,7 @@
-type ScreenshotToolbarProps = {
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+
+export type ScreenshotToolbarProps = {
   zoom: number;
   canZoomIn: boolean;
   canZoomOut: boolean;
@@ -28,57 +31,73 @@ export default function ScreenshotToolbar({
   return (
     <div className="screenshot-toolbar" role="toolbar" aria-label="Инструменты просмотра скрина">
       <div className="screenshot-toolbar-group">
-        <button
-          type="button"
-          className="screenshot-tool-btn secondary"
-          onClick={onZoomOut}
+        <Button
+          size="small"
+          variant="text"
+          color="primary"
+          disableElevation
           disabled={!canZoomOut}
           aria-label="Уменьшить"
           title="Уменьшить"
+          onClick={onZoomOut}
         >
           −
-        </button>
-        <span className="screenshot-zoom-label" aria-live="polite">
+        </Button>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          fontWeight={600}
+          className="screenshot-zoom-label"
+          aria-live="polite"
+        >
           {zoomPercent}%
-        </span>
-        <button
-          type="button"
-          className="screenshot-tool-btn secondary"
-          onClick={onZoomIn}
+        </Typography>
+        <Button
+          size="small"
+          variant="text"
+          color="primary"
+          disableElevation
           disabled={!canZoomIn}
           aria-label="Увеличить"
           title="Увеличить"
+          onClick={onZoomIn}
         >
           +
-        </button>
-        <button
-          type="button"
-          className="screenshot-tool-btn secondary"
-          onClick={onReset}
+        </Button>
+        <Button
+          size="small"
+          variant="outlined"
+          color="primary"
+          disableElevation
           disabled={zoomPercent === 100}
           aria-label="Сбросить масштаб"
+          onClick={onReset}
         >
           Сброс
-        </button>
+        </Button>
       </div>
       <div className="screenshot-toolbar-group">
-        <button
-          type="button"
-          className={`screenshot-tool-btn secondary ${showHotspots ? "active" : ""}`}
-          onClick={onToggleHotspots}
+        <Button
+          size="small"
+          variant={showHotspots ? "contained" : "outlined"}
+          color="primary"
+          disableElevation
           aria-pressed={showHotspots}
           aria-label={showHotspots ? "Скрыть метки" : "Показать метки"}
+          onClick={onToggleHotspots}
         >
           Метки
-        </button>
-        <button
-          type="button"
-          className="screenshot-tool-btn secondary"
-          onClick={onToggleFullscreen}
+        </Button>
+        <Button
+          size="small"
+          variant="outlined"
+          color="primary"
+          disableElevation
           aria-label={isFullscreen ? "Выйти из полного экрана" : "На весь экран"}
+          onClick={onToggleFullscreen}
         >
           {isFullscreen ? "Свернуть" : "На весь экран"}
-        </button>
+        </Button>
       </div>
     </div>
   );

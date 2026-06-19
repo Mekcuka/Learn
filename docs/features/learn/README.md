@@ -1,9 +1,8 @@
 # Learn — ориентационный модуль
 
-Документация платформы обучения **Learn Portal** (репозиторий `C:\project\Student`) для MVP «Ориентация в демо-приложении».
+Документация платформы обучения **Learn Portal** (репозиторий `C:\project\Student`): уроки, wiki, самостоятельная работа.
 
-**Демо-приложение:** [https://97.60.spark.modeltech.ru/projects](https://97.60.spark.modeltech.ru/projects)  
-**Demo API Swagger:** [https://97.60.spark.modeltech.ru/api/v1/docs](https://97.60.spark.modeltech.ru/api/v1/docs)
+> **2026-06-18:** интеграция с внешним демо-приложением СППР снята. Verify: `manual`, `quiz_passed`.
 
 ---
 
@@ -12,17 +11,21 @@
 | Файл | Назначение |
 |------|------------|
 | [plan.md](plan.md) | Фазы Builder, scope, чеклист приёмки |
-| [contract.md](contract.md) | Learn Portal API + verify types + mapping к Demo API |
+| [contract.md](contract.md) | Learn Portal API + verify types + wiki + self-study |
 | [data-model.md](data-model.md) | Сущности БД Learn |
-| [integration-map.md](integration-map.md) | Learn ↔ Demo: auth, deep links, errors |
-| [demo-api-reference.md](demo-api-reference.md) | Справочник Demo API для orientation MVP |
-| [demo-bridge.md](demo-bridge.md) | postMessage `learn:step_done`, tour hooks |
-| [content-authoring.md](content-authoring.md) | Скрины, hotspots, редактор `/author` |
+| [integration-map.md](integration-map.md) | Границы платформы, auth, verify |
+| [content-authoring.md](content-authoring.md) | Скрины, hotspots, TipTap, quiz editor, `/author` |
 | [open-questions.md](open-questions.md) | Решённые и открытые вопросы |
 | [impl-log.md](impl-log.md) | Журнал реализации по фазам |
 | [review-report.md](review-report.md) | Отчёт Reviewer (Phase 1–2 + дополнения) |
 
-Редактор методиста: [../learn-authoring/](../learn-authoring/)
+### Смежные фичи
+
+| Путь | Назначение |
+|------|------------|
+| [../learn-authoring/](../learn-authoring/) | Author API, роли методиста |
+| [../wiki/](../wiki/) | Wiki-статьи (ученик + методист) |
+| [../self-study/](../self-study/) | Самостоятельная работа |
 
 ---
 
@@ -33,37 +36,36 @@
 | Урок | verify | UI |
 |------|--------|-----|
 | Учебный аккаунт | `manual` | «Я выполнил» |
-| Создание проекта | `resource_exists` | «Открыть в демо» + polling verify |
-| Навигация | `navigation` (fallback manual) | deep link + postMessage / «Я выполнил» |
-| Журнал задач | `manual` | deep link + «Я выполнил» |
+| Создание проекта | `manual` | «Я выполнил» |
+| Навигация | `manual` | «Я выполнил» |
+| Журнал задач | `manual` | «Я выполнил» |
 | Мини-квиз | `quiz_passed` | `QuizPanel` + `POST .../quiz/submit` |
-
-Автоматическая verify (Demo API read):
-
-- **Урок 2:** `GET /api/v1/projects` — проект с `created_at >= started_at`
-- **Урок 5:** квиз в Learn (без Demo API)
-
-Auth для server-side verify: `POST /api/v1/auth/login` → `Authorization: Bearer`.
 
 Учебные аккаунты: **pre-seeded** (O1). Hosting MVP: **localhost** (O3).
 
 ---
 
-## Текущий статус (2026-06-17)
+## Текущий статус (2026-06-18)
 
 | Область | Статус |
 |---------|--------|
-| Dashboard + уроки со слайдами | ✅ |
-| Справочная панель справа | ✅ |
-| Hotspots ↔ подсветка в справке | ✅ |
-| Verify polling в UI | ✅ |
+| Dashboard: модули → вложенные уроки, фильтры по тегам/статусу | ✅ |
+| Урок: 3-колоночный layout, viewport-fit, без scroll страницы | ✅ |
+| `LessonReferencePanel` (слева), collapsible sections | ✅ |
+| `LessonScreenshotHintsPanel` (справа), hotspots | ✅ |
+| `LessonNextStepCard` после завершения урока | ✅ |
+| `LessonActions` над скриншотом | ✅ |
+| Главная `/`: Уроки + Самостоятельная работа + Wiki | ✅ |
+| `PortalTopbar` — единый MUI AppBar | ✅ |
+| UI: **MUI v6** (Consta удалён) | ✅ |
+| Wiki API + author CRUD (`006_wiki_articles`) | ✅ |
+| Self-study API + seed из PPTX (`007_self_study`) | ✅ |
+| Author quiz GET/PUT, `QuizEditor` | ✅ |
+| TipTap: toolbar, slash, bubble, tables, wiki images/links | ✅ |
 | Мини-квиз (5 вопросов, порог 80%) | ✅ |
-| Редактор `/author` + TipTap + HotspotEditor | ✅ |
-| postMessage bridge (Learn side) | ✅ документировано; demo UI — TBD |
-| `job_completed` verify (Phase 2) | ✅ в коде; не используется в orientation seed |
-| Реальные скрины с демо | ⏳ placeholder SVG + скрипт `capture:screens` |
+| Редактор `/author` + drag-drop слайдов | ✅ |
+| Реальные скрины уроков | ⏳ placeholder SVG + `capture:screens` |
 | Auth guards, logout, production deploy | ⏳ |
-| Tour hooks в demo UI | ⏳ O3-tour |
 
 ---
 
@@ -75,5 +77,7 @@ Auth для server-side verify: `POST /api/v1/auth/login` → `Authorization: Be
 | 2026-06-17 | **O2:** Journal — `manual` only for MVP |
 | 2026-06-17 | **O3:** Hosting — localhost first |
 | 2026-06-17 | **O4:** 5 steps: login → project → navigation → journal → quiz |
+| 2026-06-18 | **O14:** UI stack — MUI вместо Consta |
+| 2026-06-18 | **O15:** Wiki и self-study — отдельные API-группы в `/api/v1/learn` |
 
 Полный лог: [open-questions.md](open-questions.md).

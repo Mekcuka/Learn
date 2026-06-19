@@ -1,104 +1,50 @@
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+
+import Box from "@mui/material/Box";
+
+import Button from "@mui/material/Button";
+
+import Chip from "@mui/material/Chip";
+
+import IconButton from "@mui/material/IconButton";
+
+import LinearProgress from "@mui/material/LinearProgress";
+
+import Paper from "@mui/material/Paper";
+
+import Stack from "@mui/material/Stack";
+
+import Tooltip from "@mui/material/Tooltip";
+
+import Typography from "@mui/material/Typography";
+
 import { useEffect, useMemo, useState } from "react";
 
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 
 
-import { getDashboard, LearnApiError, type LessonListItem, type ModuleDashboardItem } from "../api/learnApi";
+import { getDashboard, LearnApiError, type ModuleDashboardItem } from "../api/learnApi";
 
 import CatalogSidebar, { type StatusFilter } from "../components/catalog/CatalogSidebar";
 
-import LessonCatalogCard from "../components/catalog/LessonCatalogCard";
+import ModuleCatalogGroup from "../components/catalog/ModuleCatalogGroup";
 
-import { Button } from "@consta/uikit/Button";
-import { Text } from "@consta/uikit/Text";
+import { PageError, PageLoading } from "../components/mui/PageStatus";
 
-import { PageError, PageLoading } from "../components/consta/PageStatus";
 import PortalTopbar from "../components/PortalTopbar";
 
-import { aggregateTagCounts, formatHashtag, lessonHasTag, normalizeTag } from "../utils/hashtags";
+import {
 
+  countVisibleLessons,
 
+  getFilteredModuleGroups,
 
-type LessonWithModule = LessonListItem & { moduleId: string; moduleTitle: string };
+} from "../utils/catalogGrouping";
 
+import { aggregateTagCounts, formatHashtag, normalizeTag } from "../utils/hashtags";
 
-
-function filterLessons(
-
-  modules: ModuleDashboardItem[],
-
-  moduleId: string,
-
-  statusFilter: StatusFilter,
-
-  activeTag: string | null,
-
-): LessonWithModule[] {
-
-  const source =
-
-    moduleId === "all"
-
-      ? modules.flatMap((module) =>
-
-          module.lessons.map((lesson) => ({
-
-            ...lesson,
-
-            moduleId: module.id,
-
-            moduleTitle: module.title,
-
-          })),
-
-        )
-
-      : modules
-
-          .filter((m) => m.id === moduleId)
-
-          .flatMap((module) =>
-
-            module.lessons.map((lesson) => ({
-
-              ...lesson,
-
-              moduleId: module.id,
-
-              moduleTitle: module.title,
-
-            })),
-
-          );
-
-
-
-  return source.filter((lesson) => {
-
-    if (activeTag && !lessonHasTag(lesson.tags, activeTag)) {
-
-      return false;
-
-    }
-
-    if (statusFilter === "completed") {
-
-      return lesson.status === "completed";
-
-    }
-
-    if (statusFilter === "available") {
-
-      return lesson.status !== "locked";
-
-    }
-
-    return true;
-
-  });
-
-}
+import { moduleProgressLabel } from "../utils/lessonUi";
 
 
 
@@ -152,21 +98,7 @@ export default function DashboardPage() {
 
   const allLessons = useMemo(
 
-    () =>
-
-      modules.flatMap((module) =>
-
-        module.lessons.map((lesson) => ({
-
-          ...lesson,
-
-          moduleId: module.id,
-
-          moduleTitle: module.title,
-
-        })),
-
-      ),
+    () => modules.flatMap((module) => module.lessons),
 
     [modules],
 
@@ -178,9 +110,9 @@ export default function DashboardPage() {
 
 
 
-  const lessons = useMemo(
+  const moduleGroups = useMemo(
 
-    () => filterLessons(modules, selectedModuleId, statusFilter, activeTag),
+    () => getFilteredModuleGroups(modules, selectedModuleId, statusFilter, activeTag),
 
     [modules, selectedModuleId, statusFilter, activeTag],
 
@@ -188,27 +120,71 @@ export default function DashboardPage() {
 
 
 
-  const totalCount = useMemo(() => {
-
-    if (selectedModuleId === "all") {
-
-      return modules.reduce((sum, m) => sum + m.lessons.length, 0);
-
-    }
-
-    return modules.find((m) => m.id === selectedModuleId)?.lessons.length ?? 0;
-
-  }, [modules, selectedModuleId]);
+  const visibleLessonCount = useMemo(() => countVisibleLessons(moduleGroups), [moduleGroups]);
 
 
 
-  const pageTitle =
+  const totals = useMemo(
+
+    () =>
+
+      modules.reduce(
+
+        (acc, module) => ({
+
+          completed: acc.completed + module.completed_lessons,
+
+          total: acc.total + module.total_lessons,
+
+        }),
+
+        { completed: 0, total: 0 },
+
+      ),
+
+    [modules],
+
+  );
+
+
+
+  const overallProgress = totals.total ? Math.round((totals.completed / totals.total) * 100) : 0;
+
+
+
+  const selectedModule =
 
     selectedModuleId === "all"
 
-      ? "Уроки"
+      ? null
 
-      : (modules.find((m) => m.id === selectedModuleId)?.title ?? "Уроки");
+      : (modules.find((module) => module.id === selectedModuleId) ?? null);
+
+
+
+  const headerProgress = selectedModule
+
+    ? {
+
+        percent: selectedModule.progress_percent,
+
+        label: moduleProgressLabel(selectedModule.completed_lessons, selectedModule.total_lessons),
+
+      }
+
+    : {
+
+        percent: overallProgress,
+
+        label: moduleProgressLabel(totals.completed, totals.total),
+
+      };
+
+
+
+  const hasActiveFilters = statusFilter !== "all" || Boolean(activeTag);
+
+  const showModuleAccordions = selectedModuleId === "all" && moduleGroups.length > 1;
 
 
 
@@ -235,6 +211,16 @@ export default function DashboardPage() {
   function handleTagClick(tag: string) {
 
     setActiveTag(activeTag && normalizeTag(activeTag) === normalizeTag(tag) ? null : tag);
+
+  }
+
+
+
+  function resetFilters() {
+
+    setStatusFilter("all");
+
+    setActiveTag(null);
 
   }
 
@@ -274,89 +260,271 @@ export default function DashboardPage() {
 
         <main className="catalog-main">
 
-          <header className="catalog-main-header">
+          <Box className="catalog-main-inner">
 
-            <h1 className="catalog-main-title">
+            <Stack component="header" spacing={1.5} className="catalog-page-header">
 
-              {pageTitle}
+              <Stack
 
-              <span className="catalog-info" title="Каталог учебных уроков">
+                direction={{ xs: "column", sm: "row" }}
 
-                i
+                justifyContent="space-between"
 
-              </span>
+                alignItems={{ xs: "flex-start", sm: "center" }}
 
-            </h1>
+                spacing={1}
 
-            {!loading && !error && (
+              >
 
-              <span className="catalog-count">
+                <Box>
 
-                {lessons.length} {lessons.length === 1 ? "урок" : "уроков"}
+                  <Typography variant="h4" component="h1" fontWeight={800}>
 
-                {(statusFilter !== "all" || activeTag) && ` · из ${totalCount}`}
+                    Обучение
 
-              </span>
+                  </Typography>
+
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+
+                    {selectedModule
+
+                      ? selectedModule.title
+
+                      : "Каталог модулей и уроков платформы"}
+
+                  </Typography>
+
+                </Box>
+
+                <Tooltip title="Выберите модуль слева, отфильтруйте уроки по статусу или хештегу">
+
+                  <IconButton size="small" aria-label="Подсказка по каталогу">
+
+                    <InfoOutlinedIcon fontSize="small" />
+
+                  </IconButton>
+
+                </Tooltip>
+
+              </Stack>
+
+
+
+              {!loading && !error && totals.total > 0 && (
+
+                <Box>
+
+                  <Stack
+
+                    direction="row"
+
+                    justifyContent="space-between"
+
+                    alignItems="center"
+
+                    spacing={1}
+
+                    sx={{ mb: 0.75 }}
+
+                  >
+
+                    <Typography variant="body2" color="text.secondary">
+
+                      {headerProgress.label}
+
+                    </Typography>
+
+                    <Typography variant="body2" fontWeight={600} color="primary.main">
+
+                      {headerProgress.percent}%
+
+                    </Typography>
+
+                  </Stack>
+
+                  <LinearProgress
+
+                    variant="determinate"
+
+                    value={headerProgress.percent}
+
+                    aria-label="Общий прогресс обучения"
+
+                  />
+
+                </Box>
+
+              )}
+
+
+
+              {!loading && !error && (
+
+                <Stack direction="row" flexWrap="wrap" gap={0.75} useFlexGap>
+
+                  <Chip
+
+                    size="small"
+
+                    variant="outlined"
+
+                    label={`${visibleLessonCount} ${
+
+                      visibleLessonCount === 1
+
+                        ? "урок"
+
+                        : visibleLessonCount >= 2 && visibleLessonCount <= 4
+
+                          ? "урока"
+
+                          : "уроков"
+
+                    }`}
+
+                  />
+
+                  {selectedModuleId === "all" && moduleGroups.length > 0 && (
+
+                    <Chip
+
+                      size="small"
+
+                      variant="outlined"
+
+                      label={`${moduleGroups.length} ${
+
+                        moduleGroups.length === 1 ? "модуль" : "модулей"
+
+                      }`}
+
+                    />
+
+                  )}
+
+                  {hasActiveFilters && (
+
+                    <Chip size="small" color="primary" label="Фильтры активны" />
+
+                  )}
+
+                </Stack>
+
+              )}
+
+            </Stack>
+
+
+
+            {activeTag && (
+
+              <Paper variant="outlined" className="hashtag-filter-banner">
+
+                <Typography variant="body2">
+
+                  Активный фильтр:{" "}
+
+                  <Typography component="span" fontWeight={600}>
+
+                    {formatHashtag(activeTag)}
+
+                  </Typography>
+
+                </Typography>
+
+                <Button size="small" variant="text" onClick={() => setActiveTag(null)}>
+
+                  Сбросить
+
+                </Button>
+
+              </Paper>
 
             )}
 
-          </header>
+
+
+            {loading && <PageLoading label="Загружаем каталог…" />}
+
+            {error && <PageError message={error} />}
 
 
 
-          {activeTag && (
-            <div className="hashtag-filter-banner">
-              <Text size="s">
-                Активный фильтр: <Text as="span" weight="semibold">{formatHashtag(activeTag)}</Text>
-              </Text>
-              <Button size="xs" view="clear" label="Сбросить ✕" onClick={() => setActiveTag(null)} />
-            </div>
-          )}
+            {!loading && !error && moduleGroups.length === 0 && (
 
-          {loading && <PageLoading />}
-          {error && <PageError message={error} />}
+              <Paper variant="outlined" className="catalog-empty-state">
 
-          {!loading && !error && lessons.length === 0 && (
-            <Text size="m" view="secondary" className="catalog-message">
-              Нет уроков по выбранным фильтрам.
-            </Text>
-          )}
+                <Typography variant="h6" component="h2" gutterBottom>
+
+                  {hasActiveFilters ? "Ничего не найдено" : "Уроки пока недоступны"}
+
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+
+                  {hasActiveFilters
+
+                    ? "По выбранным фильтрам уроков нет. Попробуйте сбросить фильтры или выбрать другой модуль."
+
+                    : "Когда появятся учебные модули, они отобразятся здесь."}
+
+                </Typography>
+
+                {hasActiveFilters && (
+
+                  <Button variant="outlined" size="small" onClick={resetFilters}>
+
+                    Сбросить фильтры
+
+                  </Button>
+
+                )}
+
+              </Paper>
+
+            )}
 
 
 
-          {!loading && !error && lessons.length > 0 && (
+            {!loading && !error && moduleGroups.length > 0 && (
 
-            <div className="catalog-grid">
+              <Stack spacing={3} useFlexGap className="catalog-module-groups">
 
-              {lessons.map((lesson) => (
+                {moduleGroups.map((group, index) => (
 
-                <LessonCatalogCard
+                  <ModuleCatalogGroup
 
-                  key={lesson.id}
+                    key={group.module.id}
 
-                  lesson={lesson}
+                    module={group.module}
 
-                  moduleTitle={lesson.moduleTitle}
+                    lessons={group.lessons}
 
-                  activeTag={activeTag}
+                    collapsible={showModuleAccordions}
 
-                  onTagClick={(tag, event) => {
+                    defaultExpanded={index === 0 || !showModuleAccordions}
 
-                    event.preventDefault();
+                    activeTag={activeTag}
 
-                    event.stopPropagation();
+                    onTagClick={(tag, event) => {
 
-                    navigate(`/dashboard?tag=${encodeURIComponent(normalizeTag(tag))}`);
+                      event.preventDefault();
 
-                  }}
+                      event.stopPropagation();
 
-                />
+                      navigate(`/dashboard?tag=${encodeURIComponent(normalizeTag(tag))}`);
 
-              ))}
+                    }}
 
-            </div>
+                  />
 
-          )}
+                ))}
+
+              </Stack>
+
+            )}
+
+          </Box>
 
         </main>
 

@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import type { HotspotItem } from "../types/lesson";
 import {
   clampPan,
   clampZoom,
   MAX_ZOOM,
   MIN_ZOOM,
   panForZoomAtPoint,
+  panToCenterHotspot,
+  viewportForHotspotZoom,
   ZOOM_STEP,
 } from "../utils/screenshotViewport";
 
@@ -34,8 +37,6 @@ export function useScreenshotViewport({ resetKey }: UseScreenshotViewportOptions
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const [viewport, setViewport] = useState<ViewportState>(INITIAL_VIEWPORT);
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStart = useRef<{ pointerX: number; pointerY: number; pan: Pan } | null>(null);
   const pinchStart = useRef<PinchState | null>(null);
 
   const { zoom, pan } = viewport;
@@ -92,6 +93,59 @@ export function useScreenshotViewport({ resetKey }: UseScreenshotViewportOptions
     setViewport(INITIAL_VIEWPORT);
   }, []);
 
+  const panBy = useCallback(
+    (deltaX: number, deltaY: number) => {
+      setViewport((current) => {
+        const { width, height } = getSize();
+        const nextPan = clampPan(
+          current.pan.x + deltaX,
+          current.pan.y + deltaY,
+          current.zoom,
+          width,
+          height,
+        );
+        return {
+          zoom: current.zoom,
+          pan: { x: nextPan.panX, y: nextPan.panY },
+        };
+      });
+    },
+    [getSize],
+  );
+
+  const focusHotspot = useCallback(
+    (hotspot: Pick<HotspotItem, "x_pct" | "y_pct" | "width_pct" | "height_pct">) => {
+      const { width, height } = getSize();
+      if (width <= 0 || height <= 0) {
+        return;
+      }
+      setViewport((current) => {
+        const nextZoom = current.zoom <= MIN_ZOOM ? Math.min(MAX_ZOOM, MIN_ZOOM + ZOOM_STEP) : current.zoom;
+        const nextPan = panToCenterHotspot(hotspot, nextZoom, width, height);
+        return {
+          zoom: nextZoom,
+          pan: { x: nextPan.panX, y: nextPan.panY },
+        };
+      });
+    },
+    [getSize],
+  );
+
+  const focusHotspotZoom = useCallback(
+    (hotspot: Pick<HotspotItem, "x_pct" | "y_pct" | "width_pct" | "height_pct">) => {
+      const { width, height } = getSize();
+      if (width <= 0 || height <= 0) {
+        return;
+      }
+      const next = viewportForHotspotZoom(hotspot, width, height);
+      setViewport({
+        zoom: next.zoom,
+        pan: { x: next.panX, y: next.panY },
+      });
+    },
+    [getSize],
+  );
+
   useEffect(() => {
     reset();
   }, [reset, resetKey]);
@@ -118,56 +172,6 @@ export function useScreenshotViewport({ resetKey }: UseScreenshotViewportOptions
     },
     [applyZoomDelta, getFocalFromClient],
   );
-
-  const handlePointerDown = useCallback(
-    (event: React.PointerEvent) => {
-      if (zoom <= MIN_ZOOM) {
-        return;
-      }
-      if ((event.target as HTMLElement).closest(".hotspot")) {
-        return;
-      }
-      dragStart.current = {
-        pointerX: event.clientX,
-        pointerY: event.clientY,
-        pan: { ...pan },
-      };
-      setIsDragging(true);
-      frameRef.current?.setPointerCapture(event.pointerId);
-    },
-    [pan, zoom],
-  );
-
-  const handlePointerMove = useCallback(
-    (event: React.PointerEvent) => {
-      if (!dragStart.current) {
-        return;
-      }
-      const dx = event.clientX - dragStart.current.pointerX;
-      const dy = event.clientY - dragStart.current.pointerY;
-      const { width, height } = getSize();
-      const clamped = clampPan(
-        dragStart.current.pan.x + dx,
-        dragStart.current.pan.y + dy,
-        zoom,
-        width,
-        height,
-      );
-      setViewport((current) => ({
-        ...current,
-        pan: { x: clamped.panX, y: clamped.panY },
-      }));
-    },
-    [getSize, zoom],
-  );
-
-  const handlePointerUp = useCallback((event: React.PointerEvent) => {
-    dragStart.current = null;
-    setIsDragging(false);
-    if (frameRef.current?.hasPointerCapture(event.pointerId)) {
-      frameRef.current.releasePointerCapture(event.pointerId);
-    }
-  }, []);
 
   const handleTouchStart = useCallback(
     (event: React.TouchEvent) => {
@@ -215,24 +219,20 @@ export function useScreenshotViewport({ resetKey }: UseScreenshotViewportOptions
     pinchStart.current = null;
   }, []);
 
-  const canPan = zoom > MIN_ZOOM;
-
   return {
     containerRef,
     frameRef,
     zoom,
     pan,
-    isDragging,
-    canPan,
     canZoomIn: zoom < MAX_ZOOM,
     canZoomOut: zoom > MIN_ZOOM,
     zoomIn,
     zoomOut,
     reset,
+    panBy,
+    focusHotspot,
+    focusHotspotZoom,
     handleWheel,
-    handlePointerDown,
-    handlePointerMove,
-    handlePointerUp,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,

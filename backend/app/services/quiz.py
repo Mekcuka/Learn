@@ -1,16 +1,79 @@
 from __future__ import annotations
 
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.lesson import Lesson, LessonState
 from app.models.module import Module, QuizQuestion
 from app.models.progress import UserProgress
+from app.schemas.author import AuthorQuizQuestion, AuthorQuizResponse
 from app.schemas.quiz import QuizAnswerItem, QuizQuestionPublic, QuizSubmitResponse
+from app.services.authoring import validate_quiz_questions
 from app.services.progress import complete_lesson_and_advance, get_or_create_progress
 
 
 def _question_allows_multiple(question: QuizQuestion) -> bool:
     return len(question.correct_option_ids or []) > 1
+
+
+def get_author_module_quiz(db: Session, module: Module) -> AuthorQuizResponse:
+    questions = (
+        db.query(QuizQuestion)
+        .filter(QuizQuestion.module_id == module.id)
+        .order_by(QuizQuestion.sort_order)
+        .all()
+    )
+    return AuthorQuizResponse(
+        module_id=module.id,
+        pass_threshold_percent=module.pass_threshold_percent,
+        questions=[
+            AuthorQuizQuestion(
+                id=question.id,
+                order=question.sort_order,
+                prompt_html=question.prompt_html,
+                options=[{"id": opt["id"], "text": opt["text"]} for opt in (question.options or [])],
+                correct_option_ids=list(question.correct_option_ids or []),
+            )
+            for question in questions
+        ],
+    )
+
+
+def replace_module_quiz(
+    db: Session,
+    module: Module,
+    *,
+    questions: list[AuthorQuizQuestion],
+    pass_threshold_percent: int | None = None,
+) -> AuthorQuizResponse:
+    validate_quiz_questions(questions)
+
+    if pass_threshold_percent is not None:
+        if pass_threshold_percent < 0 or pass_threshold_percent > 100:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={
+                    "detail": "validation_error",
+                    "message": "Порог прохождения должен быть от 0 до 100",
+                },
+            )
+        module.pass_threshold_percent = pass_threshold_percent
+
+    db.query(QuizQuestion).filter(QuizQuestion.module_id == module.id).delete()
+    for question in sorted(questions, key=lambda item: item.order):
+        db.add(
+            QuizQuestion(
+                id=question.id,
+                module_id=module.id,
+                sort_order=question.order,
+                prompt_html=question.prompt_html,
+                options=[{"id": opt.id, "text": opt.text} for opt in question.options],
+                correct_option_ids=list(question.correct_option_ids),
+            )
+        )
+    db.commit()
+    db.refresh(module)
+    return get_author_module_quiz(db, module)
 
 
 def get_module_quiz(db: Session, module: Module) -> list[QuizQuestionPublic]:

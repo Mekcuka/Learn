@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 
-import { PageLoading } from "../components/consta/PageStatus";
+import { PageLoading } from "../components/mui/PageStatus";
 
 import { useAuth, useIsAuthor } from "../auth/AuthContext";
 

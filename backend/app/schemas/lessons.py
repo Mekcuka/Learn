@@ -1,6 +1,13 @@
+from typing import Literal
+
 from pydantic import BaseModel
 
 from app.schemas.quiz import QuizModuleResponse
+
+HotspotKind = Literal["region", "zoom", "pin"]
+HotspotFillColor = Literal["yellow", "blue", "green", "red", "orange"]
+CalloutWidth = Literal["compact", "normal", "wide"]
+CalloutSide = Literal["auto", "left", "right", "top", "bottom"]
 
 
 class HotspotItem(BaseModel):
@@ -10,8 +17,13 @@ class HotspotItem(BaseModel):
     y_pct: float
     width_pct: float
     height_pct: float
+    kind: HotspotKind = "region"
     pulse: bool = True
+    fill_enabled: bool = True
+    fill_color: HotspotFillColor | None = None
     description_html: str | None = None
+    callout_width: CalloutWidth | None = None
+    callout_side: CalloutSide | None = None
 
 
 class LessonSlideResponse(BaseModel):

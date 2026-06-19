@@ -2,10 +2,8 @@
 
 Инструкции для AI-агентов (Cursor, Cloud Agents) в репозитории **Learn Portal**.
 
-**Проект:** образовательная платформа с интеграцией в демо-приложение СППР.  
-**Репозиторий:** `C:\project\Student`  
-**Демо UI:** https://97.60.spark.modeltech.ru/projects  
-**Demo API:** https://97.60.spark.modeltech.ru/api/v1/docs
+**Проект:** образовательная платформа — уроки, wiki, самостоятельная работа.  
+**Репозиторий:** `C:\project\Student`
 
 ---
 
@@ -16,8 +14,7 @@
 | Файл | Назначение |
 |------|------------|
 | [project-context.mdc](.cursor/rules/project-context.mdc) | Контекст Learn, документация, структура repo |
-| [learn-architecture.mdc](.cursor/rules/learn-architecture.mdc) | Portal + Backend + Verifier, учебные аккаунты |
-| [demo-api.mdc](.cursor/rules/demo-api.mdc) | Demo API base, auth, endpoints для verify |
+| [learn-architecture.mdc](.cursor/rules/learn-architecture.mdc) | Portal + Backend + Verifier |
 | [orchestration.mdc](.cursor/rules/orchestration.mdc) | Конвейер Planner → Builder → Reviewer → Integrator |
 | [development.mdc](.cursor/rules/development.mdc) | FastAPI, React/Vite, pytest, env, git |
 | [russian-language.mdc](.cursor/rules/russian-language.mdc) | Русский для UI и чата |
@@ -28,31 +25,53 @@
 
 ---
 
-## Документация фичи Learn (orientation MVP)
+## Документация фич
+
+### Learn (orientation MVP)
 
 Стартовая точка: [`docs/features/learn/README.md`](docs/features/learn/README.md)
 
 - **plan.md** — фазы, scope, чеклист приёмки
-- **contract.md** — Learn API `/api/v1/learn/*`, verify types
+- **contract.md** — Learn API `/api/v1/learn/*`, verify types, wiki, self-study
 - **data-model.md** — сущности БД
-- **integration-map.md** — Learn ↔ Demo
-- **demo-api-reference.md** — справочник Demo API
-- **demo-bridge.md** — postMessage `learn:step_done`
-- **content-authoring.md** — скрины, hotspots, `/author`
+- **integration-map.md** — границы платформы, auth, verify
+- **content-authoring.md** — скрины, hotspots, TipTap, `/author`
 - **impl-log.md** — журнал реализации
 
-Редактор методиста: **docs/features/learn-authoring/**
+### Редактор методиста
+
+**docs/features/learn-authoring/** — Author API, роли, CRUD уроков
+
+### Wiki
+
+**docs/features/wiki/** — публичный `/wiki` + author CRUD `/author/wiki`
+
+### Самостоятельная работа
+
+**docs/features/self-study/** — `/self-study`, задания с verify (manual)
+
+---
+
+## Стек (актуально)
+
+| Слой | Технология |
+|------|------------|
+| Backend | FastAPI + PostgreSQL + SQLAlchemy/Alembic |
+| Frontend | React + TypeScript + Vite + **MUI v6** |
+| Rich text | TipTap (toolbar, slash commands, bubble menu, tables, images) |
+| HTML render | `ContentHtml` / `LessonHtml` + DOMPurify |
+| Auth Learn | JWT (учебные аккаунты, pre-seeded) |
+
+> UI ранее использовал Consta Design System — **заменён на MUI** (2026-06-18). Старые `consta/` пути удалены; тема в `frontend/src/components/mui/`.
 
 ---
 
 ## Быстрые ограничения
 
-1. Verify через **Demo API HTTP** на сервере — **не** Puppeteer/Playwright в runtime verify (Playwright только для E2E и capture скринов).
-2. Learn **не** вызывает write-endpoints Demo API (`POST /projects`, jobs).
-3. MVP orientation: `calculation_result`, `job_failed_expected` **не реализовать**. `job_completed` — реализован для Phase 2 уроков, в orientation seed не используется.
-4. Hosting MVP: **localhost**; production отложен.
-5. Коммиты — **только по запросу** пользователя.
-6. Ответы в чате и UI-тексты — **русский** (см. `russian-language.mdc`).
+1. Verify — только `manual` и `quiz_passed` на сервере Learn; внешние API **не** используются.
+2. Hosting MVP: **localhost**; production отложен.
+3. Коммиты — **только по запросу** пользователя.
+4. Ответы в чате и UI-тексты — **русский** (см. `russian-language.mdc`).
 
 ---
 

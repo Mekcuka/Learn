@@ -10,6 +10,16 @@ describe("learnApi", () => {
     expect(error.code).toBe("unauthorized");
   });
 
+  it("parses unified flat error format from backend", () => {
+    const parsed = parseApiError({
+      detail: "unauthorized",
+      message: "Требуется авторизация",
+      request_id: "abc-123",
+    });
+    expect(parsed.message).toBe("Требуется авторизация");
+    expect(parsed.code).toBe("unauthorized");
+  });
+
   it("parses nested detail.message from backend errors", () => {
     const parsed = parseApiError({
       detail: {

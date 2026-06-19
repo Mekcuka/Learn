@@ -1,11 +1,11 @@
-import { Button } from "@consta/uikit/Button";
-import { Text } from "@consta/uikit/Text";
-import { TextField } from "@consta/uikit/TextField";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import { FormEvent, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 
 import { login, LearnApiError } from "../api/learnApi";
-import { PageError } from "../components/consta/PageStatus";
+import { PageError } from "../components/mui/PageStatus";
 import { useAuth } from "../auth/AuthContext";
 
 export default function LoginPage() {
@@ -43,37 +43,35 @@ export default function LoginPage() {
 
   return (
     <main className="login-shell">
-      <Text size="2xl" weight="bold" as="h1">
+      <Typography variant="h4" fontWeight="bold" component="h1">
         Вход в Learn
-      </Text>
-      <Text size="m" view="secondary" className="subtitle">
+      </Typography>
+      <Typography color="text.secondary" className="subtitle">
         Учебный портал ориентации в демо-приложении
-      </Text>
+      </Typography>
       <form className="login-form" onSubmit={handleSubmit}>
         <TextField
           label="Email"
           type="email"
           value={email}
-          onChange={(value) => setEmail(value ?? "")}
+          onChange={(event) => setEmail(event.target.value)}
           autoComplete="username"
           required
+          fullWidth
         />
         <TextField
           label="Пароль"
           type="password"
           value={password}
-          onChange={(value) => setPassword(value ?? "")}
+          onChange={(event) => setPassword(event.target.value)}
           autoComplete="current-password"
           required
+          fullWidth
         />
         {error && <PageError message={error} />}
-        <Button
-          type="submit"
-          label={submitting ? "Вход…" : "Войти"}
-          loading={submitting}
-          disabled={submitting}
-          width="full"
-        />
+        <Button type="submit" variant="contained" fullWidth disabled={submitting}>
+          {submitting ? "Вход…" : "Войти"}
+        </Button>
       </form>
     </main>
   );

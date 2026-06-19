@@ -78,6 +78,24 @@ def get_or_create_progress(db: Session, user_id: UUID, module_id: str) -> UserPr
     return progress
 
 
+def get_or_create_progress_map(
+    db: Session, user_id: UUID, module_ids: list[str]
+) -> dict[str, UserProgress]:
+    if not module_ids:
+        return {}
+
+    progress_map = {
+        progress.module_id: progress
+        for progress in db.query(UserProgress)
+        .filter(UserProgress.user_id == user_id, UserProgress.module_id.in_(module_ids))
+        .all()
+    }
+    for module_id in module_ids:
+        if module_id not in progress_map:
+            progress_map[module_id] = get_or_create_progress(db, user_id, module_id)
+    return progress_map
+
+
 def _ensure_lesson_states(db: Session, progress: UserProgress, module_id: str) -> None:
     existing = (
         db.query(LessonState)

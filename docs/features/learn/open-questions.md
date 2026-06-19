@@ -1,6 +1,6 @@
 # Open questions — Learn orientation MVP
 
-Статус на **2026-06-17** после сверки с Demo API OpenAPI и **PO decisions O1–O4**.
+Статус на **2026-06-18** после сверки с Demo API OpenAPI, **PO decisions O1–O4** и дополнений O14–O15.
 
 ---
 
@@ -31,6 +31,8 @@
 | O3 | **Hosting Learn Portal** | **localhost first** для MVP; production-хостинг отложен. Builder разворачивает локально; деплой на стенд — Phase 2 / после приёмки. |
 | O4 | **Final step list** | **5 шагов:** login → project → navigation → journal → quiz. Шаги 6–7 (retry-hint) — вне обязательного MVP. |
 | O7 | **Learn registration model** | *(закрыт через O1)* — self-register **не** используется; только admin-issued pre-seed. |
+| O14 | **UI component library** | **MUI v6** вместо Consta Design System. Тема: `frontend/src/components/mui/theme.ts`. |
+| O15 | **Wiki + self-study** | Отдельные API-группы; контракты в `docs/features/wiki/`, `docs/features/self-study/`. |
 
 ---
 
@@ -71,3 +73,6 @@
 | 2026-06-17 | **O3:** Learn Portal hosting — localhost first; production deferred |
 | 2026-06-17 | **O4:** 5 steps final: login → project → navigation → journal → quiz |
 | 2026-06-17 | Quiz UI + submit API реализованы; 5 placeholder-вопросов в seed |
+| 2026-06-18 | **O14:** MUI заменил Consta; единый `PortalTopbar`, `BaseModal` |
+| 2026-06-18 | **O15:** Wiki (`006`) и self-study (`007`) API + frontend routes |
+| 2026-06-18 | Author quiz GET/PUT; `QuizEditor`; lesson 3-column layout |

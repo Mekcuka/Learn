@@ -23,6 +23,7 @@ def test_login_invalid_credentials(client):
     )
     assert response.status_code == 401
     assert response.json()["detail"] == "invalid_credentials"
+    assert response.json()["message"] == "Неверный email или пароль"
 
 
 def test_modules_list_requires_auth(client):

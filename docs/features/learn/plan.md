@@ -1,12 +1,11 @@
 # План: Learn — ориентационный модуль (MVP)
 
 **Дата:** 2026-06-17  
-**Статус:** **ready for Builder (content TBD)** — O1–O4 закрыты; контент шагов (O5), квиз (O6) и tour hooks (O3-tour) можно заполнять параллельно с разработкой  
+**Статус:** **ready for Builder (content TBD)** — O1–O4 закрыты; контент шагов (O5), квиз (O6) можно заполнять параллельно с разработкой  
 **Проект:** `C:\project\Student`  
-**Платформа:** Learn  
-**Демо-приложение:** https://97.60.spark.modeltech.ru/projects  
-**Demo API:** `https://97.60.spark.modeltech.ru/api/v1`  
-**Swagger:** https://97.60.spark.modeltech.ru/api/v1/docs
+**Платформа:** Learn
+
+> **2026-06-18:** интеграция с внешним демо-приложением и Demo API **снята**. Verify: `manual`, `quiz_passed`. Ниже — исторический план MVP; актуальные границы — [integration-map.md](integration-map.md), [contract.md](contract.md).
 
 ## Цель и границы
 

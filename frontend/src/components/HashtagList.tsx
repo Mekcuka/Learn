@@ -1,4 +1,4 @@
-import { Tag } from "@consta/uikit/Tag";
+import Chip from "@mui/material/Chip";
 import { type MouseEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -26,7 +26,7 @@ export default function HashtagList({
     return null;
   }
 
-  const rootClass = ["hashtag-list-consta", className].filter(Boolean).join(" ");
+  const rootClass = ["hashtag-list-mui", className].filter(Boolean).join(" ");
 
   return (
     <div className={rootClass}>
@@ -37,10 +37,9 @@ export default function HashtagList({
 
         if (onTagClick) {
           return (
-            <Tag
+            <Chip
               key={tag}
-              size="s"
-              mode="button"
+              size="small"
               label={formatHashtag(tag)}
               onClick={(event) => onTagClick(tag, event)}
             />
@@ -49,10 +48,9 @@ export default function HashtagList({
 
         if (linkBase) {
           return (
-            <Tag
+            <Chip
               key={tag}
-              size="s"
-              mode="button"
+              size="small"
               label={formatHashtag(tag)}
               onClick={(event) => {
                 event.stopPropagation();
@@ -63,13 +61,12 @@ export default function HashtagList({
         }
 
         return (
-          <Tag
+          <Chip
             key={tag}
-            size="s"
-            mode="check"
+            size="small"
             label={formatHashtag(tag)}
-            checked={isActive}
-            onChange={() => undefined}
+            color={isActive ? "primary" : "default"}
+            variant={isActive ? "filled" : "outlined"}
           />
         );
       })}

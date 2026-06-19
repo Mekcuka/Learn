@@ -24,6 +24,9 @@ class Lesson(Base):
     verify_config: Mapped[dict] = mapped_column(JsonType, default=dict, nullable=False)
     is_optional: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     tags: Mapped[list] = mapped_column(JsonType, default=list, nullable=False)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    draft_payload: Mapped[dict | None] = mapped_column(JsonType, nullable=True)
+    has_unpublished_changes: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     module = relationship("Module", back_populates="lessons")

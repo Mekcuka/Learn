@@ -12,7 +12,6 @@ alwaysApply: true
 | Backend | **FastAPI** + **PostgreSQL** + SQLAlchemy/Alembic |
 | Frontend | **React** + **TypeScript** + **Vite** |
 | Auth Learn | JWT (учебные аккаунты, pre-seeded) |
-| Demo integration | httpx/aiohttp, Bearer JWT, read-only |
 | Tests backend | **pytest** + pytest-asyncio (при async) |
 | Tests frontend | **Vitest** (+ React Testing Library по мере надобности) |
 
@@ -26,7 +25,7 @@ backend/
     main.py           # FastAPI app, /health
     api/v1/learn/     # Роуты по contract.md
     models/           # SQLAlchemy models
-    services/         # verify engine, demo client
+    services/         # verify engine
   tests/
   alembic/
   requirements.txt
@@ -44,15 +43,13 @@ frontend/
 
 - Секреты **только** в `.env` (gitignored).
 - Шаблоны: `backend/.env.example`, `deploy/.env.example`.
-- **Не коммить:** пароли demo, `SECRET_KEY`, JWT keys, encrypted demo credentials.
-- Demo API URL по умолчанию: `https://97.60.spark.modeltech.ru/api/v1` (override через env).
+- **Не коммить:** `SECRET_KEY`, JWT keys.
 
 Типичные переменные backend:
 
 ```
 DATABASE_URL=postgresql://learn:learn@localhost:5432/learn
 SECRET_KEY=change-me
-DEMO_API_BASE_URL=https://97.60.spark.modeltech.ru/api/v1
 ```
 
 ## Git

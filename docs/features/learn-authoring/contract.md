@@ -21,6 +21,10 @@
 | POST | `/slides/{slide_id}/upload` | multipart file upload |
 | GET | `/lessons/{lesson_id}/export` | JSON export |
 | POST | `/modules/{module_id}/lessons/import` | JSON import |
+| GET | `/modules/{module_id}/quiz` | Квиз модуля для редактирования |
+| PUT | `/modules/{module_id}/quiz` | Обновить вопросы и порог |
+
+Wiki CRUD — отдельный router `/api/v1/learn/author/wiki` (см. [../wiki/contract.md](../wiki/contract.md)).
 
 ## Auth
 

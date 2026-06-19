@@ -1,3 +1,5 @@
+import { getCached, invalidateApiCache, setCached } from "./apiCache";
+
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
 const REQUEST_TIMEOUT_MS = 20_000;
 
@@ -33,6 +35,16 @@ export type DashboardResponse = {
   modules: ModuleDashboardItem[];
 };
 
+export type HotspotKind = "region" | "zoom" | "pin";
+
+export type HotspotFillColor = "yellow" | "blue" | "green" | "red" | "orange";
+
+export type CalloutWidth = "compact" | "normal" | "wide";
+
+export type CalloutSide = "auto" | "left" | "right" | "top" | "bottom";
+
+export type ResolvedCalloutSide = "left" | "right" | "top" | "bottom";
+
 export type HotspotItem = {
   id: string;
   label: string;
@@ -40,8 +52,13 @@ export type HotspotItem = {
   y_pct: number;
   width_pct: number;
   height_pct: number;
+  kind?: HotspotKind;
   pulse?: boolean;
+  fill_enabled?: boolean;
+  fill_color?: HotspotFillColor;
   description_html?: string;
+  callout_width?: CalloutWidth;
+  callout_side?: CalloutSide;
 };
 export type LessonSlide = {
   id: string;
@@ -125,9 +142,13 @@ export type VerifyResult = {
 type ApiError = {
   detail?: string | { detail?: string; message?: string };
   message?: string;
+  request_id?: string;
 };
 
 function parseApiError(payload: ApiError): { message: string; code?: string } {
+  if (payload.message && typeof payload.detail === "string") {
+    return { message: payload.message, code: payload.detail };
+  }
   if (payload.message) {
     const code =
       typeof payload.detail === "string"
@@ -229,7 +250,19 @@ export async function getMe() {
 }
 
 export async function getDashboard() {
+  const cacheKey = "learn:dashboard";
+  const cached = getCached<DashboardResponse>(cacheKey);
+  if (cached) {
+    return {
+      modules: cached.modules.map((module) => ({
+        ...module,
+        lessons: module.lessons.map((lesson) => normalizeLessonTags(lesson)),
+      })),
+    };
+  }
+
   const data = await request<DashboardResponse>("/api/v1/learn/dashboard");
+  setCached(cacheKey, data);
   return {
     modules: data.modules.map((module) => ({
       ...module,
@@ -238,12 +271,27 @@ export async function getDashboard() {
   };
 }
 
-export async function getLesson(lessonId: string) {
-  const data = await request<LessonDetail>(`/api/v1/learn/lessons/${lessonId}`);
+export async function getLesson(
+  lessonId: string,
+  options?: { draft?: boolean; fields?: "meta"; include?: string },
+) {
+  const params = new URLSearchParams();
+  if (options?.draft) {
+    params.set("draft", "1");
+  }
+  if (options?.fields) {
+    params.set("fields", options.fields);
+  }
+  if (options?.include) {
+    params.set("include", options.include);
+  }
+  const query = params.toString() ? `?${params.toString()}` : "";
+  const data = await request<LessonDetail>(`/api/v1/learn/lessons/${lessonId}${query}`);
   return normalizeLessonTags(data);
 }
 
 export async function startLesson(lessonId: string) {
+  invalidateApiCache("learn:dashboard");
   return request<{ lesson_id: string; started_at: string }>(
     `/api/v1/learn/lessons/${lessonId}/start`,
     { method: "POST", body: "{}" },
@@ -251,6 +299,7 @@ export async function startLesson(lessonId: string) {
 }
 
 export async function verifyLesson(lessonId: string) {
+  invalidateApiCache("learn:dashboard");
   return request<VerifyResult>(`/api/v1/learn/lessons/${lessonId}/verify`, {
     method: "POST",
     body: "{}",
@@ -262,10 +311,11 @@ export async function submitQuiz(
   answers: { question_id: string; selected_option_ids: string[] }[],
   lessonId?: string,
 ) {
+  invalidateApiCache("learn:dashboard");
   return request<QuizSubmitResult>(`/api/v1/learn/modules/${moduleId}/quiz/submit`, {
     method: "POST",
     body: JSON.stringify({ answers, lesson_id: lessonId }),
   });
 }
 
-export { LearnApiError, parseApiError as parseApiErrorForTest };
+export { LearnApiError, invalidateApiCache, parseApiError as parseApiErrorForTest };

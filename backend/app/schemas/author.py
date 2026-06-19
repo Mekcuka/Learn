@@ -19,6 +19,7 @@ class AuthorLessonListItem(BaseModel):
     summary: str | None
     slide_count: int
     verify_type: str
+    has_unpublished_changes: bool = False
 
 
 class AuthorLessonDetail(BaseModel):
@@ -34,6 +35,28 @@ class AuthorLessonDetail(BaseModel):
     verify: VerifyConfigResponse
     is_optional: bool
     slides: list[LessonSlideResponse]
+    has_unpublished_changes: bool = False
+    published_at: str | None = None
+
+
+class DuplicateLessonRequest(BaseModel):
+    new_id: str | None = None
+    title_suffix: str = " (копия)"
+
+
+class CreateRevisionRequest(BaseModel):
+    label: str | None = None
+
+
+class LessonRevisionItem(BaseModel):
+    id: str
+    created_at: str
+    author_user_id: str | None
+    summary: str | None
+
+
+class LessonRevisionListResponse(BaseModel):
+    items: list[LessonRevisionItem]
 
 
 class CreateLessonRequest(BaseModel):
@@ -77,8 +100,17 @@ class UpdateSlideRequest(BaseModel):
     sort_order: int | None = None
 
 
+class UpdateSlideResponse(BaseModel):
+    slide: LessonSlideResponse
+    has_unpublished_changes: bool
+
+
 class ReorderSlidesRequest(BaseModel):
     slide_ids: list[str]
+
+
+class ReorderLessonsRequest(BaseModel):
+    lesson_ids: list[str]
 
 
 class LessonExportPayload(BaseModel):
@@ -98,3 +130,27 @@ class LessonExportPayload(BaseModel):
 
 class LessonImportRequest(BaseModel):
     lesson: LessonExportPayload
+
+
+class AuthorQuizOption(BaseModel):
+    id: str
+    text: str
+
+
+class AuthorQuizQuestion(BaseModel):
+    id: str
+    order: int
+    prompt_html: str
+    options: list[AuthorQuizOption]
+    correct_option_ids: list[str]
+
+
+class AuthorQuizResponse(BaseModel):
+    module_id: str
+    pass_threshold_percent: int
+    questions: list[AuthorQuizQuestion]
+
+
+class UpdateModuleQuizRequest(BaseModel):
+    pass_threshold_percent: int | None = None
+    questions: list[AuthorQuizQuestion]

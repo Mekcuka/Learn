@@ -1,0 +1,138 @@
+/**
+ * @vitest-environment jsdom
+ */
+import { act } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { MemoryRouter } from "react-router-dom";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
+import type { LessonDetail } from "../../../types/lesson";
+import AppTheme from "../../../components/mui/AppTheme";
+import LessonReferencePanel from "./LessonReferencePanel";
+
+const baseLesson: LessonDetail = {
+  id: "lesson-01",
+  module_id: "orientation-v1",
+  module_title: "Ориентация",
+  order: 1,
+  title: "Вход",
+  summary: null,
+  tags: [],
+  instruction_html: "<p>Создайте проект в демо</p>",
+  deep_link: "https://demo.example/projects",
+  verify: { type: "manual", config: {} },
+  progress_percent: 0,
+  project_id: null,
+  lesson_states: [],
+  module_lessons: [],
+  quiz: null,
+  slides: [
+    {
+      id: "s1",
+      order: 1,
+      title: "Слайд 1",
+      caption_html: "<p>Подсказка</p>",
+      expected_result_html: "<p>Проект появился в списке</p>",
+      image_path: "/content/placeholder-slide.svg",
+      hotspots: [],
+    },
+  ],
+};
+
+describe("LessonReferencePanel", () => {
+  let container: HTMLDivElement;
+  let root: Root;
+
+  beforeEach(() => {
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+  });
+
+  afterEach(() => {
+    act(() => {
+      root.unmount();
+    });
+    container.remove();
+  });
+
+  it("shows assignment block with verify actions for active lesson", () => {
+    act(() => {
+      root.render(
+        <AppTheme>
+          <MemoryRouter>
+            <LessonReferencePanel
+              lesson={baseLesson}
+              slide={baseLesson.slides[0]}
+              slideIndex={0}
+              slideTotal={1}
+              lessonState={{ lesson_id: "lesson-01", status: "active", completed_at: null, verify_result: null }}
+              onVerify={() => undefined}
+            />
+          </MemoryRouter>
+        </AppTheme>,
+      );
+    });
+
+    const panel = container.querySelector(".lesson-reference-panel");
+    expect(panel?.querySelector(".lesson-actions")).not.toBeNull();
+    expect(container.textContent).toContain("Задание");
+    expect(container.textContent).toContain("Создайте проект в демо");
+    expect(container.textContent).toContain("Ожидаемый результат");
+    expect(container.textContent).toContain("Я выполнил");
+  });
+
+  it("hides assignment when lesson completed", () => {
+    act(() => {
+      root.render(
+        <AppTheme>
+          <MemoryRouter>
+            <LessonReferencePanel
+              lesson={baseLesson}
+              slide={baseLesson.slides[0]}
+              slideIndex={0}
+              slideTotal={1}
+              lessonState={{
+                lesson_id: "lesson-01",
+                status: "completed",
+                completed_at: "2026-06-18T10:00:00Z",
+                verify_result: null,
+              }}
+              onVerify={() => undefined}
+            />
+          </MemoryRouter>
+        </AppTheme>,
+      );
+    });
+
+    expect(container.querySelector(".lesson-actions")).toBeNull();
+  });
+
+  it("does not show assignment for quiz lessons", () => {
+    act(() => {
+      root.render(
+        <AppTheme>
+          <MemoryRouter>
+            <LessonReferencePanel
+              lesson={{
+                ...baseLesson,
+                verify: { type: "quiz_passed", config: {} },
+                quiz: { module_id: "orientation-v1", pass_threshold_percent: 80,
+                  questions: [{ id: "q1", order: 1, prompt_html: "?", options: [{ id: "o1", text: "A" }], allow_multiple: false }],
+                },
+              }}
+              slide={baseLesson.slides[0]}
+              slideIndex={0}
+              slideTotal={1}
+              onVerify={() => undefined}
+            />
+          </MemoryRouter>
+        </AppTheme>,
+      );
+    });
+
+    expect(container.querySelector(".lesson-actions")).toBeNull();
+    expect(container.textContent).toContain("Квиз");
+  });
+});
+

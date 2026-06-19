@@ -17,7 +17,7 @@ alwaysApply: true
 ## Когда НЕ использовать
 
 - Код и архитектура **репозитория Student** — файловые инструменты / поиск по кодовой базе
-- Контракт Learn и Demo API — `docs/features/learn/contract.md`, `demo-api-reference.md`
+- Контракт Learn — `docs/features/learn/contract.md`
 - Простые правки в 1–2 файлах, где API уже виден в соседнем коде проекта
 
 ## Порядок вызовов

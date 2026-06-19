@@ -392,3 +392,167 @@ frontend: npm run test:e2e  → smoke (требует backend + frontend)
 | `calculation_result` verify | Phase 2, не в коде |
 | Tour hooks в demo UI | demo team (O3-tour) |
 | Production deploy | O3 |
+
+---
+
+# Impl log — UI polish, MUI, Wiki, Self-study (Builder)
+
+**Дата:** 2026-06-18  
+**Scope:** MUI migration, lesson layout, wiki/self-study API, authoring enhancements  
+**Статус:** завершена (Builder)
+
+## Цель
+
+Отразить накопленные доработки сессий: новый UI stack, 3-колоночный урок, wiki и самостоятельная работа, расширенный редактор методиста.
+
+## Backend
+
+| Компонент | Файлы | Описание |
+|-----------|-------|----------|
+| Wiki | `models/wiki_article.py`, `api/v1/learn/wiki.py`, `author_wiki.py`, `schemas/wiki.py` | Public read + author CRUD, image upload |
+| Migration | `006_wiki_articles.py` | Таблица `wiki_articles` |
+| Self-study | `models/self_study.py`, `api/v1/learn/self_study.py`, `services/self_study_progress.py` | Assignments, steps, progress, verify reuse |
+| Migration | `007_self_study.py` | `self_study_*` tables |
+| Author quiz | `author.py` (GET/PUT quiz), `schemas/author.py` | `AuthorQuizResponse`, `UpdateModuleQuizRequest` |
+| Seed | `seed/data.py` | `WIKI_ARTICLE_SPECS`, `SELF_STUDY_ASSIGNMENT` (из PPTX), `seed_wiki_articles`, `seed_self_study` |
+| PPTX extract | `scripts/extract_pptx.py`, `pptx_extract.txt` | Источник текста self-study |
+| Tests | `tests/test_wiki.py`, `tests/test_self_study.py`, `tests/test_author_quiz.py` | API coverage |
+
+## Frontend — UI/UX
+
+| Компонент | Файлы | Описание |
+|-----------|-------|----------|
+| MUI migration | `components/mui/*`, удалён `consta/` | `AppTheme`, `theme.ts`, `BaseModal`, `ConfirmModal`, `PromptModal`, `PageStatus` |
+| PortalTopbar | `PortalTopbar.tsx` | Единый MUI `AppBar` + `Tabs` на всех страницах |
+| Home | `HomePage.tsx` | Три блока: Уроки, Самостоятельная работа, Wiki |
+| Dashboard | `DashboardPage.tsx`, `catalogGrouping.ts`, `CatalogSidebar.tsx` | Модули → вложенные уроки, фильтры тег/статус |
+| Lesson layout | `LessonPage.tsx`, `index.css` | 3 колонки: reference (left), main (center), hints (right); viewport-fit, no page scroll |
+| Reference | `LessonReferencePanel.tsx` | Слева; collapsible Accordion sections |
+| Hints | `LessonScreenshotHintsPanel.tsx` | Справа; список hotspots текущего слайда |
+| Next lesson | `LessonNextStepCard.tsx` | Кнопка следующего урока после completion |
+| Actions order | `LessonActions.tsx` + `SlideCarousel.tsx` | Действия **над** скриншотом |
+| Slide nav | `SlideCarousel.tsx`, `ScreenshotToolbar.tsx` | Nav dots, уменьшенные кнопки toolbar |
+| HTML render | `LessonHtml.tsx`, `ContentHtml`, `lessonHtml.ts`, `contentHtml.ts` | Единый sanitized render |
+| Wiki pages | `WikiPage.tsx`, `WikiArticlePage.tsx` | Public wiki |
+| Self-study | `SelfStudyPage.tsx`, `SelfStudyAssignmentPage.tsx` | `/self-study` flow |
+
+## Frontend — Authoring
+
+| Компонент | Файлы | Описание |
+|-----------|-------|----------|
+| RichTextEditor | `author/RichTextEditor.tsx`, `RichTextToolbar.tsx`, `EditorBubbleMenu.tsx` | Full TipTap: toolbar, slash, bubble, tables, links |
+| Extensions | `extensions/Callout.ts`, `Footnote.ts`, `Popup.ts`, `SlashCommands` | Callout, footnote, popup blocks |
+| Wiki mode | `ImageInsertModal.tsx`, wiki link picker | Images + wiki links |
+| Lesson editor | `AuthorLessonPage.tsx` | Drag-drop slides, duplicate, hotspot RichText compact |
+| Quiz | `QuizEditor.tsx` | Compact quiz editor, GET/PUT author quiz API |
+| Wiki author | `AuthorWikiPage.tsx`, `AuthorWikiEditPage.tsx` | CRUD `/author/wiki` |
+
+## Tech debt / cleanup
+
+| Тема | Описание |
+|------|----------|
+| Dead CSS | Удалён `consta-overrides.css`; `mui-overrides.css` |
+| Modals | `BaseModal` — общая обёртка для author modals |
+| Catalog utils | `utils/catalogGrouping.ts` + tests — группировка модуль→уроки |
+
+## Маршруты (новые / обновлённые)
+
+| Route | Назначение |
+|-------|------------|
+| `/` | Home с тремя порталами |
+| `/self-study`, `/self-study/:id` | Самостоятельная работа |
+| `/wiki`, `/wiki/:id` | Wiki |
+| `/author/wiki`, `/author/wiki/new`, `/author/wiki/:slug/edit` | Wiki authoring |
+
+## Миграции
+
+```text
+005_lesson_tags → 006_wiki_articles → 007_self_study
+```
+
+## Документация (эта сессия)
+
+- Корневой `README.md`, `AGENTS.md`
+- `docs/features/learn/README.md`, `content-authoring.md`, `contract.md` §7–9, `open-questions.md`
+- `docs/features/wiki/plan.md`, `contract.md` (новые)
+- `docs/features/self-study/plan.md`, `contract.md` (новые)
+- `docs/features/learn-authoring/contract.md` — quiz endpoints
+
+## Ещё не сделано
+
+| Тема | Статус |
+|------|--------|
+| Author UI для self-study CRUD | только seed |
+| Production deploy backend | O3 |
+| Auth guards / logout polish | ⏳ |
+| Реальные WebP вместо placeholder | скрипт + PO |
+| Tour hooks в demo UI | demo team |
+
+---
+
+## Sprint: стабильность и производительность (2026-06-18)
+
+**Статус:** завершён (Builder, refactor sprint)
+
+### CI / стабильность
+
+| Задача | Результат |
+|--------|-----------|
+| Pytest на PostgreSQL в CI | Шаг `Pytest (PostgreSQL, critical)` — author_phase3, wiki, self_study |
+| `DB_CREATE_ALL` | `create_all` только при `DB_CREATE_ALL=true` |
+| Единый формат ошибок | `RequestIdMiddleware`, `app/exceptions.py` |
+
+### Backend / Frontend performance
+
+- Self-study list: batch GROUP BY step/completed counts
+- Author modules: batch slide_count / lesson_count
+- `GET /lessons/{id}?fields=meta&include=slides,quiz`
+- Route-level CSS, TTL cache 45s, bundle budget CI script
+
+### Тесты
+
+- `tests/test_api_errors.py` — request_id, fields=meta
+
+---
+
+## Фаза: E2E CI, review reports, perf (2026-06-18)
+
+**Статус:** завершён (Builder)
+
+### CI / E2E
+
+| Задача | Результат |
+|--------|-----------|
+| Job `e2e` в `.github/workflows/ci.yml` | PG service, alembic, Playwright chromium |
+| `playwright.config.ts` | `webServer[]`: uvicorn :8000 + vite :5173; `SEED_ON_STARTUP`, `AUTH_ENABLED=false` |
+| Smoke spec | `frontend/e2e/lesson-smoke.spec.ts` (dashboard, lesson verify, hotspots) |
+| Локальный запуск | `npm run test:e2e`; `PLAYWRIGHT_SKIP_SERVER=1` если серверы уже up |
+
+### Review reports
+
+| Фича | Артефакт |
+|------|----------|
+| Wiki | `docs/features/wiki/review-report.md` — GREEN |
+| Self-study | `docs/features/self-study/review-report.md` — GREEN |
+
+### Legacy cleanup
+
+| Файл | Действие |
+|------|----------|
+| `demo_client.py`, monolithic `verify.py` | Удалены; пакет `app/services/verify/` |
+| `test_verify_demo.py`, `test_verify_job.py` | `pytest.mark.skip` — deprecated Demo verify |
+| `DemoBridgeTesterPanel` | Не в кодовой базе (не используется) |
+
+### Perf / middleware
+
+| Задача | Результат |
+|--------|-----------|
+| Prefetch next slide image | `SlideCarousel.tsx` — `link rel=prefetch` |
+| JWT user cache 60s | `deps.py` — `_get_user_cached` + `db.merge` |
+| Static `Cache-Control` | `StaticCacheControlMiddleware` для `/content/*` (при serve static с backend) |
+
+### Тесты (ожидаемо)
+
+- Backend: pytest (включая 2 skipped deprecated)
+- Frontend: vitest + lint
+- E2E: 3 smoke tests через Playwright

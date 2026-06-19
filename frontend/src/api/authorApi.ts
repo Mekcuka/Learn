@@ -1,4 +1,4 @@
-import type { HotspotItem, LessonSlide } from "./learnApi";
+import type { HotspotItem, LessonSlide } from "../types/lesson";
 import { LearnApiError, parseApiErrorForTest as parseApiError } from "./learnApi";
 
 export type AuthorModule = {
@@ -17,6 +17,7 @@ export type AuthorLessonListItem = {
   summary: string | null;
   slide_count: number;
   verify_type: string;
+  has_unpublished_changes?: boolean;
 };
 
 export type AuthorLessonDetail = {
@@ -32,6 +33,39 @@ export type AuthorLessonDetail = {
   verify: { type: string; config: Record<string, unknown> };
   is_optional: boolean;
   slides: LessonSlide[];
+  has_unpublished_changes?: boolean;
+  published_at?: string | null;
+};
+
+export type AuthorQuizOption = {
+  id: string;
+  text: string;
+};
+
+export type AuthorQuizQuestion = {
+  id: string;
+  order: number;
+  prompt_html: string;
+  options: AuthorQuizOption[];
+  correct_option_ids: string[];
+};
+
+export type AuthorQuiz = {
+  module_id: string;
+  pass_threshold_percent: number;
+  questions: AuthorQuizQuestion[];
+};
+
+export type AuthorSlideUpdateResponse = {
+  slide: LessonSlide;
+  has_unpublished_changes: boolean;
+};
+
+export type LessonRevisionItem = {
+  id: string;
+  created_at: string;
+  author_user_id: string | null;
+  summary: string | null;
 };
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
@@ -147,7 +181,7 @@ export async function updateAuthorSlide(
     sort_order: number;
   }>,
 ) {
-  return authorRequest<AuthorLessonDetail>(`/api/v1/learn/author/slides/${slideId}`, {
+  return authorRequest<AuthorSlideUpdateResponse>(`/api/v1/learn/author/slides/${slideId}`, {
     method: "PUT",
     body: JSON.stringify(body),
   });
@@ -164,6 +198,16 @@ export async function reorderAuthorSlides(lessonId: string, slideIds: string[]) 
     method: "PATCH",
     body: JSON.stringify({ slide_ids: slideIds }),
   });
+}
+
+export async function reorderAuthorLessons(moduleId: string, lessonIds: string[]) {
+  return authorRequest<AuthorLessonListItem[]>(
+    `/api/v1/learn/author/modules/${moduleId}/lessons/reorder`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ lesson_ids: lessonIds }),
+    },
+  );
 }
 
 export async function uploadSlideImage(slideId: string, file: File) {
@@ -183,5 +227,58 @@ export async function importAuthorLesson(moduleId: string, lesson: Record<string
   return authorRequest<AuthorLessonDetail>(`/api/v1/learn/author/modules/${moduleId}/lessons/import`, {
     method: "POST",
     body: JSON.stringify({ lesson }),
+  });
+}
+
+export async function duplicateAuthorLesson(
+  lessonId: string,
+  body?: { new_id?: string; title_suffix?: string },
+) {
+  return authorRequest<AuthorLessonDetail>(`/api/v1/learn/author/lessons/${lessonId}/duplicate`, {
+    method: "POST",
+    body: JSON.stringify(body ?? {}),
+  });
+}
+
+export async function getAuthorLessonRevisions(lessonId: string) {
+  return authorRequest<{ items: LessonRevisionItem[] }>(
+    `/api/v1/learn/author/lessons/${lessonId}/revisions`,
+  );
+}
+
+export async function createAuthorLessonRevision(lessonId: string, label?: string) {
+  return authorRequest<LessonRevisionItem>(`/api/v1/learn/author/lessons/${lessonId}/revisions`, {
+    method: "POST",
+    body: JSON.stringify({ label: label ?? null }),
+  });
+}
+
+export async function rollbackAuthorLessonRevision(lessonId: string, revisionId: string) {
+  return authorRequest<AuthorLessonDetail>(
+    `/api/v1/learn/author/lessons/${lessonId}/revisions/${revisionId}/rollback`,
+    { method: "POST" },
+  );
+}
+
+export async function publishAuthorLesson(lessonId: string) {
+  return authorRequest<AuthorLessonDetail>(`/api/v1/learn/author/lessons/${lessonId}/publish`, {
+    method: "POST",
+  });
+}
+
+export async function getAuthorQuiz(moduleId: string) {
+  return authorRequest<AuthorQuiz>(`/api/v1/learn/author/modules/${moduleId}/quiz`);
+}
+
+export async function updateAuthorQuiz(
+  moduleId: string,
+  body: {
+    pass_threshold_percent?: number;
+    questions: AuthorQuizQuestion[];
+  },
+) {
+  return authorRequest<AuthorQuiz>(`/api/v1/learn/author/modules/${moduleId}/quiz`, {
+    method: "PUT",
+    body: JSON.stringify(body),
   });
 }

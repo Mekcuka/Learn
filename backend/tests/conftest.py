@@ -8,9 +8,9 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 os.environ["TESTING"] = "1"
-os.environ["DATABASE_URL"] = "sqlite://"
+os.environ.setdefault("DATABASE_URL", "sqlite://")
 os.environ["SECRET_KEY"] = "test-secret-key"
-os.environ["DEMO_API_MOCK"] = "true"
+os.environ.setdefault("AUTH_ENABLED", "false")
 os.environ["AUTH_ENABLED"] = "true"
 
 from app.config import get_settings
@@ -21,11 +21,18 @@ from app.seed.data import run_seed
 
 get_settings.cache_clear()
 
-engine = create_engine(
-    "sqlite://",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
+_database_url = os.environ["DATABASE_URL"]
+_use_sqlite = _database_url.startswith("sqlite")
+
+if _use_sqlite:
+    engine = create_engine(
+        _database_url,
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+else:
+    engine = create_engine(_database_url)
+
 TestingSession = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 db_module.engine = engine
 db_module.SessionLocal = TestingSession

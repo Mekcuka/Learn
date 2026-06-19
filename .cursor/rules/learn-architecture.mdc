@@ -1,5 +1,5 @@
 ---
-description: Архитектура Learn Portal — Portal, Backend, Verifier, интеграция с Demo
+description: Архитектура Learn Portal — Portal, Backend, Verifier
 alwaysApply: true
 ---
 
@@ -8,66 +8,51 @@ alwaysApply: true
 ## Компоненты
 
 ```
-┌─────────────────┐     deep link      ┌──────────────────┐
-│  Learn Portal   │ ─────────────────► │    Demo App      │
-│  (frontend)     │                    │ 97.60.spark...   │
-└────────┬────────┘                    └────────┬─────────┘
-         │ REST /api/v1/learn/*                   │
-         ▼                                      │ UI writes
-┌─────────────────┐                             │
-│ Learn Backend   │──── verify (read-only) ────►│ Demo API
-│ FastAPI + PG    │     Bearer JWT              │ /api/v1/*
+┌─────────────────┐
+│  Learn Portal   │  React + Vite
+│  (frontend)     │  уроки, wiki, self-study, /author
+└────────┬────────┘
+         │ REST /api/v1/learn/*
+         ▼
+┌─────────────────┐
+│ Learn Backend   │  FastAPI + PostgreSQL
+│                 │  verify: manual, quiz_passed
 └─────────────────┘
 ```
 
 | Компонент | Роль |
 |-----------|------|
-| **Portal (frontend)** | Вход ученика, список модулей, `StepPanel`, квиз, кнопка «Открыть в демо» |
+| **Portal (frontend)** | Каталог уроков, слайды, квиз, wiki, редактор методиста |
 | **Backend** | Auth учебных аккаунтов, сценарии, прогресс, REST API по `contract.md` |
-| **Verifier** | Серверный модуль: polling Demo API для `resource_exists`; **не Puppeteer/Playwright в runtime** |
+| **Verifier** | Серверный модуль: `manual` и `quiz_passed` без внешних API |
 
-Verify выполняется **только на сервере Learn** через HTTP-клиент к Demo API. Браузерная автоматизация для проверки шагов **не используется**.
-
-## Учебные аккаунты (O1)
+## Учебные аккаунты
 
 - **Pre-seeded** — без self-register.
-- Админ (СППР) передаёт `{ learn_email, learn_password, demo_email, demo_password }`.
-- Learn хранит привязку `TrainingAccount` → demo credentials (encrypted) для server-side verify.
-- Ученик логинится в Learn отдельно; в демо UI — теми же demo credentials (см. `integration-map.md` §3.3).
+- Админ передаёт `{ learn_email, learn_password, display_name }`.
+- Seed: `backend/seed/training_accounts.json` или встроенный дефолт.
 
-## Verify engine (MVP)
+## Verify engine
 
-| Тип | Где выполняется | Demo API |
-|-----|-----------------|----------|
-| `manual` | Кнопка «Я выполнил» | — |
-| `resource_exists` | Backend polling | `GET /projects` (step 2) |
-| `navigation` | MVP: fallback `manual` | deep link only |
-| `quiz_passed` | Backend | — (Learn only) |
+| Тип | Поведение |
+|-----|-----------|
+| `manual` | Кнопка «Я выполнил» |
+| `quiz_passed` | Квиз на стороне Learn |
 
-**Не в MVP:** `job_completed`, `calculation_result`, `GET .../jobs` для pass шага 4 (O2 — journal = manual).
-
-Алгоритм `resource_exists`: `POST /auth/login` → Bearer → `GET /projects` → ищет `created_at >= step.started_at`.
-
-## Deep links
-
-Формат: `https://97.60.spark.modeltech.ru/projects?learn_step=<id>` (+ опц. `?tour=`).
-
-Пока tour hooks в демо не готовы — fallback на `/projects` и manual confirm (O3-tour).
+Устаревшие типы (`resource_exists`, `navigation`, `job_completed`) в старом контенте → fallback `manual`.
 
 ## API Learn
 
 Префикс: **`/api/v1/learn`**. Полная спецификация — `docs/features/learn/contract.md`.
 
-Ключевые группы: auth, modules/progress, steps (start/verify/complete-manual), quiz/submit.
+Ключевые группы: auth, modules/lessons/progress, quiz/submit, wiki, self-study, author.
 
 ## Локальная разработка (MVP)
 
-- Backend и frontend на **localhost** (отдельные порты; см. `development.mdc`).
+- Backend и frontend на **localhost** (см. `development.mdc`).
 - PostgreSQL — локально или через `docker-compose` (опционально).
-- Demo API — удалённый стенд `97.60.spark.modeltech.ru` (не поднимается в Student repo).
 
 ## Границы
 
-- Learn **не** создаёт проекты и **не** запускает jobs через Demo API — только read verify.
-- Write-операции ученик выполняет в UI демо.
-- Phase 2 verify-типы **не** экспонировать в UI MVP.
+- Verify **не** вызывает внешние API.
+- Hosting MVP: **localhost**; production — после MVP.
