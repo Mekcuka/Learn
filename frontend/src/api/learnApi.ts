@@ -1,7 +1,10 @@
 import { getCached, invalidateApiCache, setCached } from "./apiCache";
+import { httpRequest, LearnApiError } from "./httpClient";
+import type { VerifyResult } from "../types/api";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "";
-const REQUEST_TIMEOUT_MS = 20_000;
+export type { VerifyResult };
+export { LearnApiError, invalidateApiCache };
+export { parseApiError as parseApiErrorForTest } from "./httpClient";
 
 export type User = {
   id: string;
@@ -130,123 +133,24 @@ export type QuizSubmitResult = {
   lesson_completed: boolean;
 };
 
-export type VerifyResult = {
-  status: "pending" | "passed" | "failed";
-  message: string;
-  retry_after_seconds?: number | null;
-  hint_lesson_id?: string;
-  hint_step_id?: string;
-  data?: Record<string, unknown>;
-};
-
-type ApiError = {
-  detail?: string | { detail?: string; message?: string };
-  message?: string;
-  request_id?: string;
-};
-
-function parseApiError(payload: ApiError): { message: string; code?: string } {
-  if (payload.message && typeof payload.detail === "string") {
-    return { message: payload.message, code: payload.detail };
-  }
-  if (payload.message) {
-    const code =
-      typeof payload.detail === "string"
-        ? payload.detail
-        : typeof payload.detail === "object" && payload.detail?.detail
-          ? payload.detail.detail
-          : undefined;
-    return { message: payload.message, code };
-  }
-  if (payload.detail && typeof payload.detail === "object") {
-    return {
-      message: payload.detail.message ?? "Не удалось выполнить запрос",
-      code: payload.detail.detail,
-    };
-  }
-  if (typeof payload.detail === "string") {
-    if (payload.detail === "invalid_credentials") {
-      return { message: "Неверный email или пароль", code: payload.detail };
-    }
-    return { message: payload.detail, code: payload.detail };
-  }
-  return { message: "Не удалось выполнить запрос" };
-}
-
-class LearnApiError extends Error {
-  status: number;
-  code?: string;
-
-  constructor(status: number, message: string, code?: string) {
-    super(message);
-    this.status = status;
-    this.code = code;
-  }
-}
-
 function normalizeLessonTags<T extends { tags?: string[] }>(lesson: T): T & { tags: string[] } {
   return { ...lesson, tags: lesson.tags ?? [] };
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const headers = new Headers(options.headers);
-  if (options.body && !headers.has("Content-Type")) {
-    headers.set("Content-Type", "application/json");
-  }
-
-  const token = localStorage.getItem("learn_token");
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-
-  let response: Response;
-  try {
-    response = await fetch(`${API_BASE}${path}`, {
-      ...options,
-      headers,
-      signal: options.signal ?? AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
-  } catch (err) {
-    if (err instanceof DOMException && err.name === "TimeoutError") {
-      throw new LearnApiError(
-        0,
-        "Сервер не отвечает. Запустите backend и выполните alembic upgrade head.",
-      );
-    }
-    throw new LearnApiError(0, "Не удалось подключиться к серверу");
-  }
-
-  if (!response.ok) {
-    let payload: ApiError = {};
-    try {
-      payload = await response.json();
-    } catch {
-      payload = {};
-    }
-    const { message, code } = parseApiError(payload);
-    throw new LearnApiError(response.status, message, code);
-  }
-
-  if (response.status === 204) {
-    return undefined as T;
-  }
-
-  return response.json() as Promise<T>;
-}
-
 export async function login(email: string, password: string) {
-  return request<{
+  return httpRequest<{
     access_token: string;
     token_type: string;
     user: User;
   }>("/api/v1/learn/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
+    auth: false,
   });
 }
 
 export async function getMe() {
-  return request<User>("/api/v1/learn/auth/me");
+  return httpRequest<User>("/api/v1/learn/auth/me");
 }
 
 export async function getDashboard() {
@@ -261,7 +165,7 @@ export async function getDashboard() {
     };
   }
 
-  const data = await request<DashboardResponse>("/api/v1/learn/dashboard");
+  const data = await httpRequest<DashboardResponse>("/api/v1/learn/dashboard");
   setCached(cacheKey, data);
   return {
     modules: data.modules.map((module) => ({
@@ -286,13 +190,13 @@ export async function getLesson(
     params.set("include", options.include);
   }
   const query = params.toString() ? `?${params.toString()}` : "";
-  const data = await request<LessonDetail>(`/api/v1/learn/lessons/${lessonId}${query}`);
+  const data = await httpRequest<LessonDetail>(`/api/v1/learn/lessons/${lessonId}${query}`);
   return normalizeLessonTags(data);
 }
 
 export async function startLesson(lessonId: string) {
   invalidateApiCache("learn:dashboard");
-  return request<{ lesson_id: string; started_at: string }>(
+  return httpRequest<{ lesson_id: string; started_at: string }>(
     `/api/v1/learn/lessons/${lessonId}/start`,
     { method: "POST", body: "{}" },
   );
@@ -300,7 +204,7 @@ export async function startLesson(lessonId: string) {
 
 export async function verifyLesson(lessonId: string) {
   invalidateApiCache("learn:dashboard");
-  return request<VerifyResult>(`/api/v1/learn/lessons/${lessonId}/verify`, {
+  return httpRequest<VerifyResult>(`/api/v1/learn/lessons/${lessonId}/verify`, {
     method: "POST",
     body: "{}",
   });
@@ -312,10 +216,8 @@ export async function submitQuiz(
   lessonId?: string,
 ) {
   invalidateApiCache("learn:dashboard");
-  return request<QuizSubmitResult>(`/api/v1/learn/modules/${moduleId}/quiz/submit`, {
+  return httpRequest<QuizSubmitResult>(`/api/v1/learn/modules/${moduleId}/quiz/submit`, {
     method: "POST",
     body: JSON.stringify({ answers, lesson_id: lessonId }),
   });
 }
-
-export { LearnApiError, invalidateApiCache, parseApiError as parseApiErrorForTest };

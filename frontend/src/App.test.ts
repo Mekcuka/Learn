@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { LearnApiError, parseApiErrorForTest as parseApiError } from "./api/learnApi";
+import { LearnApiError, parseApiError } from "./api/httpClient";
 
 describe("learnApi", () => {
   it("creates LearnApiError with message", () => {

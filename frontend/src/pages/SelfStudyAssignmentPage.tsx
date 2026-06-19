@@ -19,7 +19,7 @@ import {
   type SelfStudyStepState,
   type VerifyResult,
 } from "../api/selfStudyApi";
-import LessonHtml from "../components/LessonHtml";
+import LessonHtml from "../features/lesson/components/LessonHtml";
 import { PageError, PageLoading } from "../components/mui/PageStatus";
 import PortalTopbar from "../components/PortalTopbar";
 import { useVerifyPolling } from "../hooks/useVerifyPolling";

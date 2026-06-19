@@ -2,7 +2,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 
-import LessonHtml from "./LessonHtml";
+import LessonHtml from "../features/lesson/components/LessonHtml";
 
 type ExpectedResultProps = {
   html: string;

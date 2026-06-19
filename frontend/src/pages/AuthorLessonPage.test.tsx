@@ -24,17 +24,17 @@ vi.mock("../api/authorApi", async () => {
   };
 });
 
-vi.mock("../components/author/AuthorConstructorLayout", () => ({
+vi.mock("../features/author/components/AuthorConstructorLayout", () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
-vi.mock("../components/author/AuthorLessonToolbar", () => ({ default: () => null }));
-vi.mock("../components/author/AuthorLessonMetaPanel", () => ({ default: () => null }));
-vi.mock("../components/author/AuthorRevisionHistoryPanel", () => ({ default: () => null }));
-vi.mock("../components/author/AuthorStoryboardView", () => ({ default: () => null }));
-vi.mock("../components/author/HotspotEditor", () => ({ default: () => null }));
-vi.mock("../components/LessonScreenshotHintsPanel", () => ({ default: () => null }));
-vi.mock("../components/LessonSlideView", () => ({ default: () => null }));
-vi.mock("../components/author/RichTextEditor", () => ({ default: () => null }));
+vi.mock("../features/author/components/AuthorLessonToolbar", () => ({ default: () => null }));
+vi.mock("../features/author/components/AuthorLessonMetaPanel", () => ({ default: () => null }));
+vi.mock("../features/author/components/AuthorRevisionHistoryPanel", () => ({ default: () => null }));
+vi.mock("../features/author/components/AuthorStoryboardView", () => ({ default: () => null }));
+vi.mock("../features/author/components/HotspotEditor", () => ({ default: () => null }));
+vi.mock("../features/lesson/components/LessonScreenshotHintsPanel", () => ({ default: () => null }));
+vi.mock("../features/lesson/components/LessonSlideView", () => ({ default: () => null }));
+vi.mock("../features/author/components/RichTextEditor", () => ({ default: () => null }));
 
 import AuthorLessonPage from "./AuthorLessonPage";
 

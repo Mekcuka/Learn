@@ -1,44 +1,23 @@
-def _auth_headers(client, email: str, password: str):
-    login = client.post(
-        "/api/v1/learn/auth/login",
-        json={"email": email, "password": password},
-    )
-    assert login.status_code == 200
-    token = login.json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
-
-
-def _author_headers(client):
-    return _auth_headers(client, "author@training.local", "author123")
-
-
-def _student_headers(client):
-    return _auth_headers(client, "student@training.local", "learn123")
-
-
-def test_student_forbidden_on_author_api(client):
-    headers = _student_headers(client)
-    response = client.get("/api/v1/learn/author/modules", headers=headers)
+def test_student_forbidden_on_author_api(client, student_headers):
+    response = client.get("/api/v1/learn/author/modules", headers=student_headers)
     assert response.status_code == 403
     assert response.json()["detail"] == "forbidden"
 
 
-def test_author_lists_modules(client):
-    headers = _author_headers(client)
-    response = client.get("/api/v1/learn/author/modules", headers=headers)
+def test_author_lists_modules(client, author_headers):
+    response = client.get("/api/v1/learn/author/modules", headers=author_headers)
     assert response.status_code == 200
     modules = response.json()
     assert len(modules) >= 4
     assert modules[0]["title"] == "Основной интерфейс"
 
 
-def test_author_lesson_crud_and_slides(client):
-    headers = _author_headers(client)
+def test_author_lesson_crud_and_slides(client, author_headers):
     module_id = "map-v1"
 
     create = client.post(
         f"/api/v1/learn/author/modules/{module_id}/lessons",
-        headers=headers,
+        headers=author_headers,
         json={
             "id": "lesson-test-author",
             "title": "Тестовый урок",
@@ -53,7 +32,7 @@ def test_author_lesson_crud_and_slides(client):
 
     update_tags = client.put(
         f"/api/v1/learn/author/lessons/{lesson_id}",
-        headers=headers,
+        headers=author_headers,
         json={"tags": ["#Карта", "Демо", "карта"]},
     )
     assert update_tags.status_code == 200
@@ -61,7 +40,7 @@ def test_author_lesson_crud_and_slides(client):
 
     add_slide = client.post(
         f"/api/v1/learn/author/lessons/{lesson_id}/slides",
-        headers=headers,
+        headers=author_headers,
         json={
             "id": "lesson-test-author-slide-01",
             "title": "Слайд 1",
@@ -82,7 +61,7 @@ def test_author_lesson_crud_and_slides(client):
 
     with_description = client.put(
         "/api/v1/learn/author/slides/lesson-test-author-slide-01",
-        headers=headers,
+        headers=author_headers,
         json={
             "hotspots": [
                 {
@@ -104,7 +83,7 @@ def test_author_lesson_crud_and_slides(client):
 
     invalid_hotspot = client.put(
         "/api/v1/learn/author/slides/lesson-test-author-slide-01",
-        headers=headers,
+        headers=author_headers,
         json={
             "hotspots": [
                 {
@@ -122,7 +101,7 @@ def test_author_lesson_crud_and_slides(client):
 
     pin_hotspot = client.put(
         "/api/v1/learn/author/slides/lesson-test-author-slide-01",
-        headers=headers,
+        headers=author_headers,
         json={
             "hotspots": [
                 {
@@ -145,7 +124,7 @@ def test_author_lesson_crud_and_slides(client):
 
     pin_callout_width = client.put(
         "/api/v1/learn/author/slides/lesson-test-author-slide-01",
-        headers=headers,
+        headers=author_headers,
         json={
             "hotspots": [
                 {
@@ -167,7 +146,7 @@ def test_author_lesson_crud_and_slides(client):
 
     pin_callout_side = client.put(
         "/api/v1/learn/author/slides/lesson-test-author-slide-01",
-        headers=headers,
+        headers=author_headers,
         json={
             "hotspots": [
                 {
@@ -189,7 +168,7 @@ def test_author_lesson_crud_and_slides(client):
 
     fill_hotspot = client.put(
         "/api/v1/learn/author/slides/lesson-test-author-slide-01",
-        headers=headers,
+        headers=author_headers,
         json={
             "hotspots": [
                 {
@@ -212,7 +191,7 @@ def test_author_lesson_crud_and_slides(client):
 
     pin_fill = client.put(
         "/api/v1/learn/author/slides/lesson-test-author-slide-01",
-        headers=headers,
+        headers=author_headers,
         json={
             "hotspots": [
                 {
@@ -235,7 +214,7 @@ def test_author_lesson_crud_and_slides(client):
 
     invalid_fill_color = client.put(
         "/api/v1/learn/author/slides/lesson-test-author-slide-01",
-        headers=headers,
+        headers=author_headers,
         json={
             "hotspots": [
                 {
@@ -254,7 +233,7 @@ def test_author_lesson_crud_and_slides(client):
 
     invalid_kind = client.put(
         "/api/v1/learn/author/slides/lesson-test-author-slide-01",
-        headers=headers,
+        headers=author_headers,
         json={
             "hotspots": [
                 {
@@ -271,27 +250,26 @@ def test_author_lesson_crud_and_slides(client):
     )
     assert invalid_kind.status_code == 422
 
-    export = client.get(f"/api/v1/learn/author/lessons/{lesson_id}/export", headers=headers)
+    export = client.get(f"/api/v1/learn/author/lessons/{lesson_id}/export", headers=author_headers)
     assert export.status_code == 200
     assert export.json()["id"] == lesson_id
     assert export.json()["tags"] == ["Карта", "Демо"]
 
     delete_slide = client.delete(
         "/api/v1/learn/author/slides/lesson-test-author-slide-01",
-        headers=headers,
+        headers=author_headers,
     )
     assert delete_slide.status_code == 200
     assert delete_slide.json()["slides"] == []
 
-    delete_lesson = client.delete(f"/api/v1/learn/author/lessons/{lesson_id}", headers=headers)
+    delete_lesson = client.delete(f"/api/v1/learn/author/lessons/{lesson_id}", headers=author_headers)
     assert delete_lesson.status_code == 204
 
 
-def test_author_reorder_lessons(client):
-    headers = _author_headers(client)
+def test_author_reorder_lessons(client, author_headers):
     module_id = "map-v1"
 
-    list_before = client.get(f"/api/v1/learn/author/modules/{module_id}/lessons", headers=headers)
+    list_before = client.get(f"/api/v1/learn/author/modules/{module_id}/lessons", headers=author_headers)
     assert list_before.status_code == 200
     lessons = list_before.json()
     assert len(lessons) >= 2
@@ -299,7 +277,7 @@ def test_author_reorder_lessons(client):
     reversed_ids = [lesson["id"] for lesson in reversed(lessons)]
     reorder = client.patch(
         f"/api/v1/learn/author/modules/{module_id}/lessons/reorder",
-        headers=headers,
+        headers=author_headers,
         json={"lesson_ids": reversed_ids},
     )
     assert reorder.status_code == 200
@@ -309,29 +287,27 @@ def test_author_reorder_lessons(client):
 
     restore = client.patch(
         f"/api/v1/learn/author/modules/{module_id}/lessons/reorder",
-        headers=headers,
+        headers=author_headers,
         json={"lesson_ids": [lesson["id"] for lesson in lessons]},
     )
     assert restore.status_code == 200
 
 
-def test_author_reorder_lessons_validation(client):
-    headers = _author_headers(client)
+def test_author_reorder_lessons_validation(client, author_headers):
     module_id = "map-v1"
 
-    list_resp = client.get(f"/api/v1/learn/author/modules/{module_id}/lessons", headers=headers)
+    list_resp = client.get(f"/api/v1/learn/author/modules/{module_id}/lessons", headers=author_headers)
     lessons = list_resp.json()
     invalid = client.patch(
         f"/api/v1/learn/author/modules/{module_id}/lessons/reorder",
-        headers=headers,
+        headers=author_headers,
         json={"lesson_ids": [lesson["id"] for lesson in lessons[:1]]},
     )
     assert invalid.status_code == 422
     assert invalid.json()["detail"] == "validation_error"
 
 
-def test_auth_me_includes_role(client):
-    headers = _author_headers(client)
-    response = client.get("/api/v1/learn/auth/me", headers=headers)
+def test_auth_me_includes_role(client, author_headers):
+    response = client.get("/api/v1/learn/auth/me", headers=author_headers)
     assert response.status_code == 200
     assert response.json()["role"] == "author"

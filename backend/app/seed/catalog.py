@@ -3,7 +3,7 @@
 from sqlalchemy.orm import Session
 
 from app.seed.constants import PLACEHOLDER_SLIDE, RETIRED_LESSON_IDS
-from app.seed.orientation import ORIENTATION_LESSONS, ORIENTATION_STEPS, QUIZ_PLACEHOLDERS
+from app.seed.orientation import ORIENTATION_LESSONS, QUIZ_PLACEHOLDERS
 
 def _remove_retired_lessons(db: Session) -> None:
     from app.models.lesson import Lesson, LessonSlide, LessonState
@@ -130,7 +130,7 @@ MODULE_SPECS = [
         "sort_order": 1,
         "title": "Основной интерфейс",
         "description": "Вход, проекты, навигация, журнал задач",
-        "steps": ORIENTATION_STEPS,
+        "is_published": True,
         "lessons": ORIENTATION_LESSONS,
         "quiz_questions": QUIZ_PLACEHOLDERS,
     },
@@ -139,7 +139,7 @@ MODULE_SPECS = [
         "sort_order": 2,
         "title": "Импорт данных",
         "description": "Загрузка POI, слоёв и табличных данных в проект",
-        "steps": [],
+        "is_published": False,
         "lessons": DATA_IMPORT_LESSONS,
         "quiz_questions": [],
     },
@@ -148,7 +148,7 @@ MODULE_SPECS = [
         "sort_order": 3,
         "title": "Кустование",
         "description": "Создание кустов и привязка скважин",
-        "steps": [],
+        "is_published": False,
         "lessons": CLUSTERING_LESSONS,
         "quiz_questions": [],
     },
@@ -157,7 +157,7 @@ MODULE_SPECS = [
         "sort_order": 4,
         "title": "Карта",
         "description": "Работа с картой, слоями и объектами проекта",
-        "steps": [],
+        "is_published": False,
         "lessons": MAP_LESSONS,
         "quiz_questions": [],
     },

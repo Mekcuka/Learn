@@ -16,7 +16,7 @@ import {
 } from "../api/wikiApi";
 import { PageError, PageLoading } from "../components/mui/PageStatus";
 import PortalTopbar from "../components/PortalTopbar";
-import RichTextEditor from "../components/author/RichTextEditor";
+import RichTextEditor from "../features/author/components/RichTextEditor";
 import { formatTagsInput, parseTagsInput, slugFromTitle } from "../utils/wikiSlug";
 
 const EMPTY_ARTICLE: WikiArticleDetail = {

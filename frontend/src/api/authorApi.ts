@@ -1,5 +1,5 @@
 import type { HotspotItem, LessonSlide } from "../types/lesson";
-import { LearnApiError, parseApiErrorForTest as parseApiError } from "./learnApi";
+import { httpRequest } from "./httpClient";
 
 export type AuthorModule = {
   id: string;
@@ -68,48 +68,21 @@ export type LessonRevisionItem = {
   summary: string | null;
 };
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "";
-
-async function authorRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const headers = new Headers(options.headers);
-  if (options.body && !(options.body instanceof FormData) && !headers.has("Content-Type")) {
-    headers.set("Content-Type", "application/json");
-  }
-
-  const token = localStorage.getItem("learn_token");
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-
-  const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
-  if (!response.ok) {
-    let payload: { detail?: string | { detail?: string; message?: string }; message?: string } = {};
-    try {
-      payload = await response.json();
-    } catch {
-      payload = {};
-    }
-    const { message, code } = parseApiError(payload);
-    throw new LearnApiError(response.status, message, code);
-  }
-
-  if (response.status === 204) {
-    return undefined as T;
-  }
-
-  return response.json() as Promise<T>;
-}
-
 export async function getAuthorModules() {
-  return authorRequest<AuthorModule[]>("/api/v1/learn/author/modules");
+  return httpRequest<AuthorModule[]>("/api/v1/learn/author/modules", { timeout: false });
 }
 
 export async function getAuthorModuleLessons(moduleId: string) {
-  return authorRequest<AuthorLessonListItem[]>(`/api/v1/learn/author/modules/${moduleId}/lessons`);
+  return httpRequest<AuthorLessonListItem[]>(
+    `/api/v1/learn/author/modules/${moduleId}/lessons`,
+    { timeout: false },
+  );
 }
 
 export async function getAuthorLesson(lessonId: string) {
-  return authorRequest<AuthorLessonDetail>(`/api/v1/learn/author/lessons/${lessonId}`);
+  return httpRequest<AuthorLessonDetail>(`/api/v1/learn/author/lessons/${lessonId}`, {
+    timeout: false,
+  });
 }
 
 export async function createAuthorLesson(
@@ -125,9 +98,10 @@ export async function createAuthorLesson(
     verify_config?: Record<string, unknown>;
   },
 ) {
-  return authorRequest<AuthorLessonDetail>(`/api/v1/learn/author/modules/${moduleId}/lessons`, {
+  return httpRequest<AuthorLessonDetail>(`/api/v1/learn/author/modules/${moduleId}/lessons`, {
     method: "POST",
     body: JSON.stringify(body),
+    timeout: false,
   });
 }
 
@@ -144,14 +118,18 @@ export async function updateAuthorLesson(
     sort_order: number;
   }>,
 ) {
-  return authorRequest<AuthorLessonDetail>(`/api/v1/learn/author/lessons/${lessonId}`, {
+  return httpRequest<AuthorLessonDetail>(`/api/v1/learn/author/lessons/${lessonId}`, {
     method: "PUT",
     body: JSON.stringify(body),
+    timeout: false,
   });
 }
 
 export async function deleteAuthorLesson(lessonId: string) {
-  return authorRequest<void>(`/api/v1/learn/author/lessons/${lessonId}`, { method: "DELETE" });
+  return httpRequest<void>(`/api/v1/learn/author/lessons/${lessonId}`, {
+    method: "DELETE",
+    timeout: false,
+  });
 }
 
 export async function createAuthorSlide(
@@ -164,9 +142,10 @@ export async function createAuthorSlide(
     hotspots?: HotspotItem[];
   },
 ) {
-  return authorRequest<AuthorLessonDetail>(`/api/v1/learn/author/lessons/${lessonId}/slides`, {
+  return httpRequest<AuthorLessonDetail>(`/api/v1/learn/author/lessons/${lessonId}/slides`, {
     method: "POST",
     body: JSON.stringify(body),
+    timeout: false,
   });
 }
 
@@ -181,31 +160,38 @@ export async function updateAuthorSlide(
     sort_order: number;
   }>,
 ) {
-  return authorRequest<AuthorSlideUpdateResponse>(`/api/v1/learn/author/slides/${slideId}`, {
+  return httpRequest<AuthorSlideUpdateResponse>(`/api/v1/learn/author/slides/${slideId}`, {
     method: "PUT",
     body: JSON.stringify(body),
+    timeout: false,
   });
 }
 
 export async function deleteAuthorSlide(slideId: string) {
-  return authorRequest<AuthorLessonDetail>(`/api/v1/learn/author/slides/${slideId}`, {
+  return httpRequest<AuthorLessonDetail>(`/api/v1/learn/author/slides/${slideId}`, {
     method: "DELETE",
+    timeout: false,
   });
 }
 
 export async function reorderAuthorSlides(lessonId: string, slideIds: string[]) {
-  return authorRequest<AuthorLessonDetail>(`/api/v1/learn/author/lessons/${lessonId}/slides/reorder`, {
-    method: "PATCH",
-    body: JSON.stringify({ slide_ids: slideIds }),
-  });
+  return httpRequest<AuthorLessonDetail>(
+    `/api/v1/learn/author/lessons/${lessonId}/slides/reorder`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ slide_ids: slideIds }),
+      timeout: false,
+    },
+  );
 }
 
 export async function reorderAuthorLessons(moduleId: string, lessonIds: string[]) {
-  return authorRequest<AuthorLessonListItem[]>(
+  return httpRequest<AuthorLessonListItem[]>(
     `/api/v1/learn/author/modules/${moduleId}/lessons/reorder`,
     {
       method: "PATCH",
       body: JSON.stringify({ lesson_ids: lessonIds }),
+      timeout: false,
     },
   );
 }
@@ -213,61 +199,74 @@ export async function reorderAuthorLessons(moduleId: string, lessonIds: string[]
 export async function uploadSlideImage(slideId: string, file: File) {
   const form = new FormData();
   form.append("file", file);
-  return authorRequest<{ image_path: string }>(`/api/v1/learn/author/slides/${slideId}/upload`, {
+  return httpRequest<{ image_path: string }>(`/api/v1/learn/author/slides/${slideId}/upload`, {
     method: "POST",
     body: form,
+    timeout: false,
   });
 }
 
 export async function exportAuthorLesson(lessonId: string) {
-  return authorRequest<Record<string, unknown>>(`/api/v1/learn/author/lessons/${lessonId}/export`);
+  return httpRequest<Record<string, unknown>>(`/api/v1/learn/author/lessons/${lessonId}/export`, {
+    timeout: false,
+  });
 }
 
 export async function importAuthorLesson(moduleId: string, lesson: Record<string, unknown>) {
-  return authorRequest<AuthorLessonDetail>(`/api/v1/learn/author/modules/${moduleId}/lessons/import`, {
-    method: "POST",
-    body: JSON.stringify({ lesson }),
-  });
+  return httpRequest<AuthorLessonDetail>(
+    `/api/v1/learn/author/modules/${moduleId}/lessons/import`,
+    {
+      method: "POST",
+      body: JSON.stringify({ lesson }),
+      timeout: false,
+    },
+  );
 }
 
 export async function duplicateAuthorLesson(
   lessonId: string,
   body?: { new_id?: string; title_suffix?: string },
 ) {
-  return authorRequest<AuthorLessonDetail>(`/api/v1/learn/author/lessons/${lessonId}/duplicate`, {
+  return httpRequest<AuthorLessonDetail>(`/api/v1/learn/author/lessons/${lessonId}/duplicate`, {
     method: "POST",
     body: JSON.stringify(body ?? {}),
+    timeout: false,
   });
 }
 
 export async function getAuthorLessonRevisions(lessonId: string) {
-  return authorRequest<{ items: LessonRevisionItem[] }>(
+  return httpRequest<{ items: LessonRevisionItem[] }>(
     `/api/v1/learn/author/lessons/${lessonId}/revisions`,
+    { timeout: false },
   );
 }
 
 export async function createAuthorLessonRevision(lessonId: string, label?: string) {
-  return authorRequest<LessonRevisionItem>(`/api/v1/learn/author/lessons/${lessonId}/revisions`, {
+  return httpRequest<LessonRevisionItem>(`/api/v1/learn/author/lessons/${lessonId}/revisions`, {
     method: "POST",
     body: JSON.stringify({ label: label ?? null }),
+    timeout: false,
   });
 }
 
 export async function rollbackAuthorLessonRevision(lessonId: string, revisionId: string) {
-  return authorRequest<AuthorLessonDetail>(
+  return httpRequest<AuthorLessonDetail>(
     `/api/v1/learn/author/lessons/${lessonId}/revisions/${revisionId}/rollback`,
-    { method: "POST" },
+    { method: "POST", timeout: false },
   );
 }
 
 export async function publishAuthorLesson(lessonId: string) {
-  return authorRequest<AuthorLessonDetail>(`/api/v1/learn/author/lessons/${lessonId}/publish`, {
+  return httpRequest<AuthorLessonDetail>(`/api/v1/learn/author/lessons/${lessonId}/publish`, {
     method: "POST",
+    timeout: false,
   });
 }
 
 export async function getAuthorQuiz(moduleId: string) {
-  return authorRequest<AuthorQuiz>(`/api/v1/learn/author/modules/${moduleId}/quiz`);
+  return httpRequest<AuthorQuiz>(`/api/v1/learn/author/modules/${moduleId}/quiz`, {
+    timeout: false,
+  });
 }
 
 export async function updateAuthorQuiz(
@@ -277,8 +276,9 @@ export async function updateAuthorQuiz(
     questions: AuthorQuizQuestion[];
   },
 ) {
-  return authorRequest<AuthorQuiz>(`/api/v1/learn/author/modules/${moduleId}/quiz`, {
+  return httpRequest<AuthorQuiz>(`/api/v1/learn/author/modules/${moduleId}/quiz`, {
     method: "PUT",
     body: JSON.stringify(body),
+    timeout: false,
   });
 }

@@ -16,10 +16,8 @@ from app.services.quiz import get_module_quiz
 from app.models.user import User
 from app.schemas.lessons import (
     DashboardResponse,
-    HotspotItem,
     LessonDetailResponse,
     LessonListItem,
-    LessonSlideResponse,
     LessonStateResponse,
     ModuleDashboardItem,
     ModuleLessonOutlineItem,
@@ -30,19 +28,11 @@ from app.services.progress import (
     get_or_create_progress_map,
     get_project_id_from_progress,
 )
-from app.services.authoring import get_working_snapshot, hotspots_from_json, slide_to_response
+from app.services.authoring import get_working_snapshot, slide_snapshot_to_response, slide_to_response
 
 from app.services.verify import run_lesson_verify
 
 router = APIRouter(tags=["lessons"])
-
-
-def _hotspots_from_json(data: dict) -> list[HotspotItem]:
-    return hotspots_from_json(data)
-
-
-def _slide_to_response(slide: LessonSlide) -> LessonSlideResponse:
-    return slide_to_response(slide)
 
 
 def _lesson_status(lesson_state: LessonState | None) -> str:
@@ -233,18 +223,7 @@ def get_lesson(
 
     snapshot = get_working_snapshot(db, lesson) if draft else None
     if snapshot and load_slides:
-        slide_items = [
-            LessonSlideResponse(
-                id=slide["id"],
-                order=slide["sort_order"],
-                title=slide["title"],
-                caption_html=slide.get("caption_html", ""),
-                expected_result_html=slide.get("expected_result_html", ""),
-                image_path=slide.get("image_path", "/content/placeholder-slide.svg"),
-                hotspots=_hotspots_from_json({"hotspots": slide.get("hotspots", [])}),
-            )
-            for slide in snapshot.get("slides", [])
-        ]
+        slide_items = [slide_snapshot_to_response(slide) for slide in snapshot.get("slides", [])]
         lesson_title = snapshot.get("title", lesson.title)
         lesson_summary = snapshot.get("summary", lesson.summary)
         lesson_tags = list(snapshot.get("tags") or [])
@@ -265,7 +244,7 @@ def get_lesson(
         slides = (
             db.query(LessonSlide).filter(LessonSlide.lesson_id == lesson.id).order_by(LessonSlide.sort_order).all()
         )
-        slide_items = [_slide_to_response(slide) for slide in slides]
+        slide_items = [slide_to_response(slide) for slide in slides]
         lesson_title = lesson.title
         lesson_summary = lesson.summary
         lesson_tags = list(lesson.tags or [])

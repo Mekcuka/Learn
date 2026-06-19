@@ -24,7 +24,7 @@ from app.services.self_study_progress import (
     get_project_id_from_self_study_progress,
     complete_self_study_step_and_advance,
 )
-from app.services.verify import run_self_study_verify
+from app.services.verify import is_manual_verify_type, run_self_study_verify
 
 router = APIRouter(prefix="/self-study", tags=["self-study"])
 
@@ -291,7 +291,7 @@ def complete_manual(
         )
 
     step = db.get(SelfStudyStep, step_id)
-    if not step or step.verify_type not in {"manual", "navigation"}:
+    if not step or not is_manual_verify_type(step.verify_type):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={

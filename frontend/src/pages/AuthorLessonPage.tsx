@@ -28,18 +28,18 @@ import {
   uploadSlideImage,
   type AuthorLessonDetail,
 } from "../api/authorApi";
-import AuthorConstructorLayout from "../components/author/AuthorConstructorLayout";
-import AuthorLessonToolbar from "../components/author/AuthorLessonToolbar";
-import AuthorRevisionHistoryPanel from "../components/author/AuthorRevisionHistoryPanel";
-import AuthorStoryboardView from "../components/author/AuthorStoryboardView";
+import { LearnApiError } from "../api/httpClient";
+import AuthorConstructorLayout from "../features/author/components/AuthorConstructorLayout";
+import AuthorLessonMetaPanel from "../features/author/components/AuthorLessonMetaPanel";
+import AuthorLessonToolbar from "../features/author/components/AuthorLessonToolbar";
+import AuthorRevisionHistoryPanel from "../features/author/components/AuthorRevisionHistoryPanel";
+import AuthorStoryboardView from "../features/author/components/AuthorStoryboardView";
+import HotspotEditor from "../features/author/components/HotspotEditor";
+import RichTextEditor from "../features/author/components/RichTextEditor";
+import LessonScreenshotHintsPanel from "../features/lesson/components/LessonScreenshotHintsPanel";
+import LessonSlideView from "../features/lesson/components/LessonSlideView";
 import type { HotspotItem, LessonSlide } from "../types/lesson";
-import { LearnApiError } from "../api/learnApi";
-import AuthorLessonMetaPanel from "../components/author/AuthorLessonMetaPanel";
-import HotspotEditor from "../components/author/HotspotEditor";
-import LessonScreenshotHintsPanel from "../components/LessonScreenshotHintsPanel";
-import LessonSlideView from "../components/LessonSlideView";
 import { PageError, PageLoading } from "../components/mui/PageStatus";
-import RichTextEditor from "../components/author/RichTextEditor";
 import { ConfirmModal } from "../components/mui/ConfirmModal";
 import { useAuthorSlideAutosave } from "../hooks/useAuthorSlideAutosave";
 import { draftSaveMessage } from "../utils/authorPreview";

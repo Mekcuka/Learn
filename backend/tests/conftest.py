@@ -62,3 +62,23 @@ def client(db_session: Session) -> Generator[TestClient, None, None]:
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+
+
+def _login_headers(client: TestClient, email: str, password: str) -> dict[str, str]:
+    login = client.post(
+        "/api/v1/learn/auth/login",
+        json={"email": email, "password": password},
+    )
+    assert login.status_code == 200
+    token = login.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def student_headers(client: TestClient) -> dict[str, str]:
+    return _login_headers(client, "student@training.local", "learn123")
+
+
+@pytest.fixture
+def author_headers(client: TestClient) -> dict[str, str]:
+    return _login_headers(client, "author@training.local", "author123")

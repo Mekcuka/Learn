@@ -1,12 +1,3 @@
-def _auth_headers(client):
-    login = client.post(
-        "/api/v1/learn/auth/login",
-        json={"email": "student@training.local", "password": "learn123"},
-    )
-    token = login.json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
-
-
 def test_api_error_format_includes_request_id(client):
     response = client.post(
         "/api/v1/learn/auth/login",
@@ -20,12 +11,11 @@ def test_api_error_format_includes_request_id(client):
     assert response.headers.get("X-Request-ID") == body["request_id"]
 
 
-def test_get_lesson_fields_meta_omits_slides(client):
-    headers = _auth_headers(client)
-    full = client.get("/api/v1/learn/lessons/lesson-02-create-project", headers=headers)
+def test_get_lesson_fields_meta_omits_slides(client, student_headers):
+    full = client.get("/api/v1/learn/lessons/lesson-02-create-project", headers=student_headers)
     meta = client.get(
         "/api/v1/learn/lessons/lesson-02-create-project?fields=meta",
-        headers=headers,
+        headers=student_headers,
     )
     assert meta.status_code == 200
     meta_data = meta.json()

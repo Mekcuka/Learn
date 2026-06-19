@@ -3,9 +3,10 @@
 from sqlalchemy.orm import Session
 
 from app.models.lesson import Lesson, LessonSlide
-from app.models.module import Module, QuizQuestion, Step
+from app.models.module import Module, QuizQuestion
 
 from app.seed.catalog import MODULE_SPECS, _remove_retired_lessons
+
 
 def _sync_lesson_metadata(db: Session, module_id: str, lessons: list[dict]) -> None:
     for lesson_data in lessons:
@@ -29,13 +30,6 @@ def _add_lessons_to_module(db: Session, module_id: str, lessons: list[dict]) -> 
             db.add(LessonSlide(lesson_id=lesson_id, **slide_data))
 
 
-def _add_steps_to_module(db: Session, module_id: str, steps: list[dict]) -> None:
-    for step_data in steps:
-        if db.get(Step, step_data["id"]):
-            continue
-        db.add(Step(module_id=module_id, **step_data))
-
-
 def _add_quiz_to_module(db: Session, module_id: str, questions: list[dict]) -> None:
     for question in questions:
         if db.get(QuizQuestion, question["id"]):
@@ -44,13 +38,13 @@ def _add_quiz_to_module(db: Session, module_id: str, questions: list[dict]) -> N
 
 
 def seed_module(db: Session, spec: dict) -> None:
+    is_published = spec.get("is_published", True)
     module = db.get(Module, spec["id"])
     if module:
         module.title = spec["title"]
         module.description = spec["description"]
         module.sort_order = spec["sort_order"]
-        module.is_published = True
-        _add_steps_to_module(db, module.id, spec.get("steps", []))
+        module.is_published = is_published
         _add_lessons_to_module(db, module.id, spec.get("lessons", []))
         _add_quiz_to_module(db, module.id, spec.get("quiz_questions", []))
         db.commit()
@@ -62,13 +56,12 @@ def seed_module(db: Session, spec: dict) -> None:
         description=spec["description"],
         scenario_version=1,
         sort_order=spec["sort_order"],
-        is_published=True,
+        is_published=is_published,
         pass_threshold_percent=80,
     )
     db.add(module)
     db.flush()
 
-    _add_steps_to_module(db, module.id, spec.get("steps", []))
     _add_lessons_to_module(db, module.id, spec.get("lessons", []))
     _add_quiz_to_module(db, module.id, spec.get("quiz_questions", []))
     db.commit()

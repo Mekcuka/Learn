@@ -2,54 +2,6 @@
 
 from app.seed.constants import CONTENT_BASE
 
-ORIENTATION_STEPS = [
-    {
-        "id": "step-01-login-context",
-        "sort_order": 1,
-        "title": "Учебный аккаунт",
-        "instruction_html": "<p>Ознакомьтесь с материалом и подтвердите выполнение.</p>",
-        "deep_link_template": None,
-        "verify_type": "manual",
-        "verify_config": {},
-    },
-    {
-        "id": "step-02-create-project",
-        "sort_order": 2,
-        "title": "Создание проекта",
-        "instruction_html": "<p>Изучите шаги создания учебного проекта по слайдам.</p>",
-        "deep_link_template": None,
-        "verify_type": "manual",
-        "verify_config": {},
-    },
-    {
-        "id": "step-03-navigation",
-        "sort_order": 3,
-        "title": "Навигация по интерфейсу",
-        "instruction_html": "<p>Ознакомьтесь с основными разделами интерфейса.</p>",
-        "deep_link_template": None,
-        "verify_type": "manual",
-        "verify_config": {},
-    },
-    {
-        "id": "step-04-job-journal",
-        "sort_order": 4,
-        "title": "Журнал задач",
-        "instruction_html": "<p>Изучите, где находится журнал задач и как читать статусы.</p>",
-        "deep_link_template": None,
-        "verify_type": "manual",
-        "verify_config": {},
-    },
-    {
-        "id": "step-05-mini-quiz",
-        "sort_order": 5,
-        "title": "Мини-квиз",
-        "instruction_html": "<p>Ответьте на вопросы по пройденному материалу.</p>",
-        "deep_link_template": None,
-        "verify_type": "quiz_passed",
-        "verify_config": {"pass_threshold_percent": 80},
-    },
-]
-
 ORIENTATION_LESSONS = [
     {
         "id": "lesson-01-login-context",

@@ -1,14 +1,11 @@
-from datetime import UTC, datetime
-
 from sqlalchemy.orm import Session
 
 from app.models.lesson import Lesson, LessonState
 from app.models.progress import UserProgress
 
+from ._common import ensure_active_or_locked_response, is_manual_verify_type
 from .manual import verify_manual_lesson
 from .quiz_passed import verify_quiz_passed_lesson
-
-_LEGACY_MANUAL_TYPES = frozenset({"resource_exists", "navigation", "job_completed"})
 
 
 def run_lesson_verify(
@@ -17,19 +14,17 @@ def run_lesson_verify(
     lesson: Lesson,
     lesson_state: LessonState,
 ) -> dict:
-    if lesson_state.status == "locked":
-        db.commit()
-        return {
-            "status": "failed",
-            "message": "Сначала завершите предыдущие уроки",
-            "hint_lesson_id": progress.current_lesson_id,
-        }
+    early = ensure_active_or_locked_response(
+        db,
+        lesson_state,
+        locked_message="Сначала завершите предыдущие уроки",
+        hint_key="hint_lesson_id",
+        hint_id=progress.current_lesson_id,
+    )
+    if early:
+        return early
 
-    if not lesson_state.started_at:
-        lesson_state.started_at = datetime.now(UTC)
-        lesson_state.status = "active"
-
-    if lesson.verify_type in ("manual", *_LEGACY_MANUAL_TYPES):
+    if is_manual_verify_type(lesson.verify_type):
         return verify_manual_lesson(db, progress, lesson_state)
     if lesson.verify_type == "quiz_passed":
         return verify_quiz_passed_lesson(db, lesson, lesson_state)

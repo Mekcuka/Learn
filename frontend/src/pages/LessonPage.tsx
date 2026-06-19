@@ -6,15 +6,15 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../styles/lesson-page.css";
 import "../styles/screenshot.css";
 
-import LessonPreviewBanner from "../components/lesson/LessonPreviewBanner";
-import LessonPageHeader from "../components/lesson/LessonPageHeader";
-import LessonShell from "../components/lesson/LessonShell";
+import LessonPageHeader from "../features/lesson/components/LessonPageHeader";
+import LessonPreviewBanner from "../features/lesson/components/LessonPreviewBanner";
+import LessonReferencePanel from "../features/lesson/components/LessonReferencePanel";
+import LessonScreenshotHintsPanel from "../features/lesson/components/LessonScreenshotHintsPanel";
+import LessonShell from "../features/lesson/components/LessonShell";
+import LessonSlideView from "../features/lesson/components/LessonSlideView";
 import { useLessonProgress } from "../features/lesson/hooks/useLessonProgress";
 import { resolveNextLessonNavigation } from "../utils/lessonUi";
 import { lessonLayoutGridClasses } from "../constants/lessonLayout";
-import LessonSlideView from "../components/LessonSlideView";
-import LessonReferencePanel from "../components/LessonReferencePanel";
-import LessonScreenshotHintsPanel from "../components/LessonScreenshotHintsPanel";
 import { PageError, PageLoading } from "../components/mui/PageStatus";
 
 export default function LessonPage() {

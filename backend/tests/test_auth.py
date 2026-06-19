@@ -43,7 +43,7 @@ def test_modules_list_with_auth(client):
     )
     assert response.status_code == 200
     items = response.json()["items"]
-    assert len(items) == 4
+    assert len(items) == 1
     assert items[0]["id"] == "orientation-v1"
     assert items[0]["title"] == "Основной интерфейс"
     assert items[0]["progress_percent"] == 0

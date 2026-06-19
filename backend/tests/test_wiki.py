@@ -1,21 +1,3 @@
-def _auth_headers(client, email: str, password: str):
-    login = client.post(
-        "/api/v1/learn/auth/login",
-        json={"email": email, "password": password},
-    )
-    assert login.status_code == 200
-    token = login.json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
-
-
-def _author_headers(client):
-    return _auth_headers(client, "author@training.local", "author123")
-
-
-def _student_headers(client):
-    return _auth_headers(client, "student@training.local", "learn123")
-
-
 def test_list_wiki_articles_public(client):
     response = client.get("/api/v1/learn/wiki/articles")
     assert response.status_code == 200
@@ -41,22 +23,20 @@ def test_get_wiki_article_not_found(client):
     assert response.status_code == 404
 
 
-def test_student_forbidden_on_author_wiki_api(client):
-    headers = _student_headers(client)
+def test_student_forbidden_on_author_wiki_api(client, student_headers):
     response = client.post(
         "/api/v1/learn/author/wiki/articles",
-        headers=headers,
+        headers=student_headers,
         json={"title": "Тест", "summary": "Описание"},
     )
     assert response.status_code == 403
 
 
-def test_author_wiki_crud(client):
-    headers = _author_headers(client)
+def test_author_wiki_crud(client, author_headers):
 
     create = client.post(
         "/api/v1/learn/author/wiki/articles",
-        headers=headers,
+        headers=author_headers,
         json={
             "id": "wiki-test-article",
             "title": "Тестовая статья",
@@ -76,7 +56,7 @@ def test_author_wiki_crud(client):
 
     update = client.put(
         f"/api/v1/learn/author/wiki/articles/{article_id}",
-        headers=headers,
+        headers=author_headers,
         json={
             "title": "Обновлённая статья",
             "summary": "Новое описание",
@@ -90,7 +70,7 @@ def test_author_wiki_crud(client):
 
     delete = client.delete(
         f"/api/v1/learn/author/wiki/articles/{article_id}",
-        headers=headers,
+        headers=author_headers,
     )
     assert delete.status_code == 204
 
@@ -98,8 +78,7 @@ def test_author_wiki_crud(client):
     assert gone.status_code == 404
 
 
-def test_author_wiki_image_upload(client):
-    headers = _author_headers(client)
+def test_author_wiki_image_upload(client, author_headers, student_headers):
 
     png_bytes = (
         b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01"
@@ -109,7 +88,7 @@ def test_author_wiki_image_upload(client):
 
     response = client.post(
         "/api/v1/learn/author/wiki/upload",
-        headers=headers,
+        headers=author_headers,
         files={"file": ("test.png", png_bytes, "image/png")},
     )
     assert response.status_code == 200
@@ -119,7 +98,7 @@ def test_author_wiki_image_upload(client):
 
     forbidden = client.post(
         "/api/v1/learn/author/wiki/upload",
-        headers=_student_headers(client),
+        headers=student_headers,
         files={"file": ("test.png", png_bytes, "image/png")},
     )
     assert forbidden.status_code == 403

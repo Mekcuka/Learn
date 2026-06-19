@@ -24,28 +24,9 @@ class Module(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
 
-    steps = relationship("Step", back_populates="module", order_by="Step.sort_order")
     lessons = relationship("Lesson", back_populates="module", order_by="Lesson.sort_order")
     quiz_questions = relationship("QuizQuestion", back_populates="module", order_by="QuizQuestion.sort_order")
     progress_records = relationship("UserProgress", back_populates="module")
-
-
-class Step(Base):
-    __tablename__ = "steps"
-
-    id: Mapped[str] = mapped_column(String(64), primary_key=True)
-    module_id: Mapped[str] = mapped_column(String(64), ForeignKey("modules.id"), nullable=False)
-    sort_order: Mapped[int] = mapped_column(Integer, nullable=False)
-    title: Mapped[str] = mapped_column(String(255), nullable=False)
-    instruction_html: Mapped[str] = mapped_column(Text, nullable=False)
-    deep_link_template: Mapped[str | None] = mapped_column(Text, nullable=True)
-    verify_type: Mapped[str] = mapped_column(String(32), nullable=False)
-    verify_config: Mapped[dict] = mapped_column(JsonType, default=dict, nullable=False)
-    is_optional: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-
-    module = relationship("Module", back_populates="steps")
-    step_states = relationship("StepState", back_populates="step")
 
 
 class QuizQuestion(Base):
