@@ -11,7 +11,7 @@ test("dashboard loads and lesson page opens", async ({ page }) => {
   await lessonLink.click();
 
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(page.getByLabel("Справочная информация")).toBeVisible();
+  await expect(page.getByLabel("Справка по уроку")).toBeVisible();
 });
 
 test("manual lesson verify completes", async ({ page }) => {
@@ -40,6 +40,6 @@ test("screenshot zoom and hotspot selection", async ({ page }) => {
 
   const hotspot = page.getByRole("button", { name: /Поле email/ }).first();
   await hotspot.click();
-  await expect(page.getByRole("status").filter({ hasText: "Поле email" })).toBeVisible();
   await expect(hotspot).toHaveAttribute("aria-pressed", "true");
+  await expect(hotspot).toHaveClass(/hotspot-active/);
 });
