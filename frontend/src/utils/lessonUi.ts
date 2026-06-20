@@ -68,7 +68,7 @@ export function isQuizOnlyLesson(lesson: {
 
 const LEGACY_MANUAL_VERIFY_TYPES = new Set(["resource_exists", "navigation", "job_completed"]);
 
-export function isManualVerifyLesson(verifyType: string): boolean {
+function isManualVerifyLesson(verifyType: string): boolean {
   return verifyType === "manual" || LEGACY_MANUAL_VERIFY_TYPES.has(verifyType);
 }
 
@@ -257,7 +257,7 @@ export function readStoredSlideIndex(lessonId: string): number | null {
   return Number.isNaN(index) ? null : index;
 }
 
-export function writeStoredSlideIndex(lessonId: string, index: number): void {
+function writeStoredSlideIndex(lessonId: string, index: number): void {
   sessionStorage.setItem(slideStorageKey(lessonId), String(index));
 }
 

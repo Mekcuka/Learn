@@ -29,7 +29,6 @@
   min-width: 0;
 }
 
-.lesson-page-progress,
 .lesson-page-status,
 .lesson-page-header-row .badge-preview {
   margin-left: auto;
@@ -402,7 +401,6 @@
     gap: 0.35rem 0.65rem;
   }
 
-  .catalog-layout--lesson .lesson-page-progress,
   .catalog-layout--lesson .lesson-page-status,
   .catalog-layout--lesson .lesson-page-header-row .badge-preview {
     margin-left: 0;

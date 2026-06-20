@@ -1,9 +1,4 @@
 /** Shared CSS custom properties and class names for the 3-column lesson grid. */
-export const LESSON_LAYOUT_VARS = {
-  refWidth: "--lesson-ref-width",
-  hintsWidth: "--lesson-hints-width",
-} as const;
-
 export const LESSON_HEADER_GRID = {
   base: "lesson-page-header-grid",
   noHints: "lesson-page-header-grid--no-hints",
