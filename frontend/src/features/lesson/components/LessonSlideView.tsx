@@ -9,6 +9,12 @@ import SlideCarousel from "./SlideCarousel";
 
 export type LessonSlideViewMode = "student" | "author" | "preview";
 
+export type ManualVerifyAction = {
+  onVerify: () => void;
+  busy?: boolean;
+  disabled?: boolean;
+};
+
 type LessonSlideViewProps = {
   mode: LessonSlideViewMode;
   lesson: LessonDetail | AuthorLessonDetail;
@@ -22,6 +28,7 @@ type LessonSlideViewProps = {
   isPreview?: boolean;
   submitError?: string | null;
   onQuizSubmit?: (answers: Record<string, string[]>) => void;
+  manualVerify?: ManualVerifyAction | null;
 };
 
 export default function LessonSlideView({
@@ -37,8 +44,10 @@ export default function LessonSlideView({
   isPreview = false,
   submitError = null,
   onQuizSubmit,
+  manualVerify = null,
 }: LessonSlideViewProps) {
   const showStudentActions = mode === "student" || mode === "preview";
+  const slideNavManualVerify = mode === "student" ? manualVerify : null;
   const studentLesson = lesson as LessonDetail;
   const quiz = "quiz" in lesson ? studentLesson.quiz : null;
   const hasSlides = lesson.slides.length > 0;
@@ -89,6 +98,7 @@ export default function LessonSlideView({
           onChange={onSlideIndexChange}
           hasTrailingQuiz={trailingQuiz}
           hideSlideLabels={mode === "author"}
+          manualVerify={slideNavManualVerify}
         >
           {quizContent}
         </SlideCarousel>
@@ -116,6 +126,7 @@ export default function LessonSlideView({
           onHotspotSelect={onHotspotSelect}
           hasTrailingQuiz={isMixedLesson && hasLoadedQuiz(studentLesson)}
           hideSlideLabels={mode === "author"}
+          manualVerify={slideNavManualVerify}
         />
       ) : (
         <div className="slide-empty">

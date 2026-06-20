@@ -7,6 +7,12 @@ import type { LessonSlide } from "../../../types/lesson";
 import ScreenshotGuide from "./ScreenshotGuide";
 import ScreenshotToolbar, { type ScreenshotToolbarProps } from "../../author/components/ScreenshotToolbar";
 
+type ManualVerifyAction = {
+  onVerify: () => void;
+  busy?: boolean;
+  disabled?: boolean;
+};
+
 type SlideCarouselProps = {
   slides: LessonSlide[];
   currentIndex: number;
@@ -19,6 +25,8 @@ type SlideCarouselProps = {
   children?: ReactNode;
   /** Hides duplicate progress/title headers (author constructor). */
   hideSlideLabels?: boolean;
+  /** Manual verify action — shown on the last slide only (student mode). */
+  manualVerify?: ManualVerifyAction | null;
 };
 
 export default function SlideCarousel({
@@ -30,6 +38,7 @@ export default function SlideCarousel({
   hasTrailingQuiz = false,
   children,
   hideSlideLabels = false,
+  manualVerify = null,
 }: SlideCarouselProps) {
   const total = slides.length;
   const maxIndex = hasTrailingQuiz ? total : total - 1;
@@ -113,6 +122,8 @@ export default function SlideCarousel({
 
   const progressLabel = isOnQuizStep ? "Квиз" : `Слайд ${currentIndex + 1} из ${total}`;
   const titleLabel = isOnQuizStep ? "Квиз" : slide!.title;
+  const isOnLastSlide = !isOnQuizStep && currentIndex === total - 1;
+  const showManualVerify = Boolean(manualVerify && isOnLastSlide);
 
   return (
     <section className="slide-carousel" aria-label="Слайды урока">
@@ -243,7 +254,21 @@ export default function SlideCarousel({
           <div className="slide-nav-controls slide-nav-controls--solo" aria-hidden="true" />
         )}
 
-        <div className="slide-nav-end" aria-hidden="true" />
+        <div className="slide-nav-end" aria-hidden={showManualVerify ? undefined : true}>
+          {showManualVerify && manualVerify ? (
+            <Button
+              type="button"
+              className="slide-nav-btn slide-nav-verify-btn"
+              variant="contained"
+              size="small"
+              disabled={manualVerify.busy || manualVerify.disabled}
+              aria-label="Я выполнил"
+              onClick={manualVerify.onVerify}
+            >
+              {manualVerify.busy ? "Проверка…" : "Я выполнил"}
+            </Button>
+          ) : null}
+        </div>
       </nav>
     </section>
   );

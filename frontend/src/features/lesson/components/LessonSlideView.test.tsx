@@ -236,5 +236,85 @@ describe("LessonSlideView", () => {
 
     expect(onSlideIndexChange).toHaveBeenCalledWith(mixedLesson.slides.length - 1);
   });
+
+  it("shows manual verify in slide-nav on last slide in student mode", () => {
+    const onVerify = vi.fn();
+    const multiSlideLesson: LessonDetail = {
+      ...studentLesson,
+      slides: [
+        studentLesson.slides[0],
+        { ...studentLesson.slides[0], id: "s2", order: 2, title: "Слайд 2" },
+      ],
+    };
+
+    act(() => {
+      root.render(
+        <AppTheme>
+          <LessonSlideView
+            mode="student"
+            lesson={multiSlideLesson}
+            slideIndex={0}
+            onSlideIndexChange={() => undefined}
+            manualVerify={{ onVerify }}
+          />
+        </AppTheme>,
+      );
+    });
+
+    expect(container.querySelector(".slide-nav-verify-btn")).toBeNull();
+
+    act(() => {
+      root.render(
+        <AppTheme>
+          <LessonSlideView
+            mode="student"
+            lesson={multiSlideLesson}
+            slideIndex={1}
+            onSlideIndexChange={() => undefined}
+            manualVerify={{ onVerify }}
+          />
+        </AppTheme>,
+      );
+    });
+
+    expect(container.querySelector(".slide-nav-verify-btn")).not.toBeNull();
+    expect(container.textContent).toContain("Я выполнил");
+  });
+
+  it("does not show manual verify in author or preview mode", () => {
+    const manualVerify = { onVerify: vi.fn() };
+
+    act(() => {
+      root.render(
+        <AppTheme>
+          <LessonSlideView
+            mode="author"
+            lesson={authorLesson}
+            slideIndex={0}
+            onSlideIndexChange={() => undefined}
+            manualVerify={manualVerify}
+          />
+        </AppTheme>,
+      );
+    });
+
+    expect(container.querySelector(".slide-nav-verify-btn")).toBeNull();
+
+    act(() => {
+      root.render(
+        <AppTheme>
+          <LessonSlideView
+            mode="preview"
+            lesson={studentLesson}
+            slideIndex={0}
+            onSlideIndexChange={() => undefined}
+            manualVerify={manualVerify}
+          />
+        </AppTheme>,
+      );
+    });
+
+    expect(container.querySelector(".slide-nav-verify-btn")).toBeNull();
+  });
 });
 

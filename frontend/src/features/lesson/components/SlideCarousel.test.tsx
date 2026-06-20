@@ -185,4 +185,57 @@ describe("SlideCarousel navigation", () => {
     expect(container.querySelector(".slide-dot--quiz.active")).not.toBeNull();
     expect(container.textContent).toContain("Квиз");
   });
+
+  it("shows manual verify button on last slide only", () => {
+    const onVerify = vi.fn();
+
+    act(() => {
+      root.render(
+        <AppTheme>
+          <SlideCarousel slides={slides} currentIndex={0} onChange={vi.fn()} manualVerify={{ onVerify }} />
+        </AppTheme>,
+      );
+    });
+
+    expect(container.querySelector(".slide-nav-verify-btn")).toBeNull();
+
+    act(() => {
+      root.render(
+        <AppTheme>
+          <SlideCarousel slides={slides} currentIndex={2} onChange={vi.fn()} manualVerify={{ onVerify }} />
+        </AppTheme>,
+      );
+    });
+
+    const verifyButton = container.querySelector(".slide-nav-verify-btn") as HTMLButtonElement | null;
+    expect(verifyButton).not.toBeNull();
+    expect(verifyButton?.textContent).toContain("Я выполнил");
+    expect(container.querySelector(".slide-nav-end")?.getAttribute("aria-hidden")).toBeNull();
+
+    act(() => {
+      verifyButton?.click();
+    });
+
+    expect(onVerify).toHaveBeenCalledTimes(1);
+  });
+
+  it("hides manual verify button on quiz step even on last slide index", () => {
+    act(() => {
+      root.render(
+        <AppTheme>
+          <SlideCarousel
+            slides={slides}
+            currentIndex={slides.length}
+            onChange={vi.fn()}
+            hasTrailingQuiz
+            manualVerify={{ onVerify: vi.fn() }}
+          >
+            <div className="quiz-panel">Quiz</div>
+          </SlideCarousel>
+        </AppTheme>,
+      );
+    });
+
+    expect(container.querySelector(".slide-nav-verify-btn")).toBeNull();
+  });
 });

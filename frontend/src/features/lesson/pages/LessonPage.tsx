@@ -104,6 +104,12 @@ export default function LessonPage() {
   });
   const completeHint =
     feedback?.status === "failed" && showCompleteButton ? feedback.message : null;
+  const isManualLesson = lesson.verify.type === "manual";
+  const isOnLastSlide =
+    !isOnQuizStep && lesson.slides.length > 0 && slideIndex === lesson.slides.length - 1;
+  const showManualVerifyInNav =
+    !isPreview && isManualLesson && isOnLastSlide && lessonStatus !== "completed";
+  const manualVerifyDisabled = verifyBusy || lessonStatus === "locked";
 
   function handleCompleteLesson() {
     void completeLesson();
@@ -151,10 +157,7 @@ export default function LessonPage() {
           slideTotal={lesson.slides.length}
           isOnQuizStep={isOnQuizStep}
           lessonState={lessonState}
-          busy={verifyBusy}
           feedback={feedback}
-          isPreview={isPreview}
-          onVerify={() => void startVerify()}
         />
 
         <div className="lesson-main">
@@ -170,6 +173,15 @@ export default function LessonPage() {
             isPreview={isPreview}
             submitError={isOnQuizStep && feedback?.status === "failed" ? feedback.message : null}
             onQuizSubmit={handleQuizSubmit}
+            manualVerify={
+              showManualVerifyInNav
+                ? {
+                    onVerify: () => void startVerify(),
+                    busy: verifyBusy,
+                    disabled: manualVerifyDisabled,
+                  }
+                : null
+            }
           />
         </div>
 

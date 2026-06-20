@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { type ReactNode, useState } from "react";
 import type { LessonDetail, LessonSlide, LessonStateItem, VerifyResult } from "../../../types/lesson";
-import { isQuizOnlyLesson } from "../../../utils/lessonUi";
+import { isQuizOnlyLesson, hasLoadedQuiz } from "../../../utils/lessonUi";
 import LessonActions from "./LessonActions";
 import ContentHtml from "../../wiki/components/ContentHtml";
 
@@ -16,10 +16,7 @@ type LessonReferencePanelProps = {
   slideTotal: number;
   isOnQuizStep?: boolean;
   lessonState?: LessonStateItem;
-  busy?: boolean;
   feedback?: VerifyResult | null;
-  isPreview?: boolean;
-  onVerify?: () => void;
 };
 
 type ReferenceSectionProps = {
@@ -103,16 +100,13 @@ export default function LessonReferencePanel({
   slideTotal,
   isOnQuizStep = false,
   lessonState,
-  busy = false,
   feedback = null,
-  isPreview = false,
-  onVerify,
 }: LessonReferencePanelProps) {
   const isQuizLesson = lesson.verify.type === "quiz_passed";
-  const showAssignment = !isQuizLesson && Boolean(onVerify);
+  const showAssignment = !isQuizLesson && lessonState?.status !== "completed";
   const hasCaption = Boolean(slide?.caption_html?.trim());
   const hasQuizRef =
-    isQuizLesson && Boolean(lesson.quiz) && (isOnQuizStep || isQuizOnlyLesson(lesson));
+    isQuizLesson && hasLoadedQuiz(lesson) && (isOnQuizStep || isQuizOnlyLesson(lesson));
   const hasSlideContext = Boolean(slide && slideTotal > 0 && !isOnQuizStep);
   const hasPrimaryContent = showAssignment || hasCaption || hasQuizRef;
 
@@ -157,15 +151,7 @@ export default function LessonReferencePanel({
       )}
 
       {showAssignment && (
-        <LessonActions
-          lesson={lesson}
-          slide={slide}
-          lessonState={lessonState}
-          busy={busy}
-          feedback={feedback}
-          isPreview={isPreview}
-          onVerify={onVerify!}
-        />
+        <LessonActions lesson={lesson} slide={slide} lessonState={lessonState} feedback={feedback} />
       )}
 
       {hasCaption && (

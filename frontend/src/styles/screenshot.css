@@ -759,6 +759,14 @@ button.hotspot {
 
 .slide-nav-end {
   grid-column: 3;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.slide-nav-verify-btn {
+  white-space: nowrap;
 }
 
 .slide-nav-btn {

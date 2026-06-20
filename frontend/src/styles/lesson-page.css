@@ -945,7 +945,22 @@
   }
 
   .slide-nav-end {
+    display: flex;
+    grid-column: 1;
+    justify-self: stretch;
+    justify-content: stretch;
+    width: 100%;
+    margin-top: 0.35rem;
+  }
+
+  .slide-nav-end:empty,
+  .slide-nav-end[aria-hidden="true"] {
     display: none;
+  }
+
+  .slide-nav-verify-btn {
+    flex: 1 1 100%;
+    min-width: 0;
   }
 
   .slide-nav button:not(.slide-dot),

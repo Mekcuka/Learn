@@ -56,7 +56,7 @@ describe("LessonReferencePanel", () => {
     container.remove();
   });
 
-  it("shows assignment block with verify actions for active lesson", () => {
+  it("shows assignment block without verify button for active lesson", () => {
     act(() => {
       root.render(
         <AppTheme>
@@ -67,7 +67,6 @@ describe("LessonReferencePanel", () => {
               slideIndex={0}
               slideTotal={1}
               lessonState={{ lesson_id: "lesson-01", status: "active", completed_at: null, verify_result: null }}
-              onVerify={() => undefined}
             />
           </MemoryRouter>
         </AppTheme>,
@@ -79,7 +78,8 @@ describe("LessonReferencePanel", () => {
     expect(container.textContent).toContain("Задание");
     expect(container.textContent).toContain("Создайте проект в демо");
     expect(container.textContent).toContain("Ожидаемый результат");
-    expect(container.textContent).toContain("Я выполнил");
+    expect(container.querySelector(".step-actions")).toBeNull();
+    expect(container.textContent).not.toContain("Я выполнил");
   });
 
   it("hides assignment when lesson completed", () => {
@@ -98,7 +98,6 @@ describe("LessonReferencePanel", () => {
                 completed_at: "2026-06-18T10:00:00Z",
                 verify_result: null,
               }}
-              onVerify={() => undefined}
             />
           </MemoryRouter>
         </AppTheme>,
@@ -124,7 +123,6 @@ describe("LessonReferencePanel", () => {
               slide={baseLesson.slides[0]}
               slideIndex={0}
               slideTotal={1}
-              onVerify={() => undefined}
             />
           </MemoryRouter>
         </AppTheme>,
@@ -160,7 +158,6 @@ describe("LessonReferencePanel", () => {
               slideIndex={0}
               slideTotal={2}
               isOnQuizStep={false}
-              onVerify={() => undefined}
             />
           </MemoryRouter>
         </AppTheme>,
@@ -180,7 +177,6 @@ describe("LessonReferencePanel", () => {
               slideIndex={2}
               slideTotal={2}
               isOnQuizStep
-              onVerify={() => undefined}
             />
           </MemoryRouter>
         </AppTheme>,
@@ -210,7 +206,6 @@ describe("LessonReferencePanel", () => {
               slide={null}
               slideIndex={0}
               slideTotal={0}
-              onVerify={() => undefined}
             />
           </MemoryRouter>
         </AppTheme>,

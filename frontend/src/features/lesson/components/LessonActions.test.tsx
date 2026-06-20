@@ -65,9 +65,7 @@ describe("LessonActions", () => {
               lesson={baseLesson}
               slide={baseLesson.slides[0]}
               lessonState={{ lesson_id: "lesson-01", status: "active", completed_at: null, verify_result: null }}
-              busy={false}
               feedback={null}
-              onVerify={() => undefined}
             />
           </MemoryRouter>
         </AppTheme>,
@@ -93,9 +91,7 @@ describe("LessonActions", () => {
                 completed_at: "2026-06-18T10:00:00Z",
                 verify_result: null,
               }}
-              busy={false}
               feedback={null}
-              onVerify={() => undefined}
             />
           </MemoryRouter>
         </AppTheme>,
@@ -105,7 +101,7 @@ describe("LessonActions", () => {
     expect(container.querySelector(".lesson-actions")).toBeNull();
   });
 
-  it("shows actions in preview even when instruction is empty", () => {
+  it("shows assignment without verify button", () => {
     act(() => {
       root.render(
         <AppTheme>
@@ -114,10 +110,7 @@ describe("LessonActions", () => {
               lesson={{ ...baseLesson, instruction_html: "" }}
               slide={{ ...baseLesson.slides[0], expected_result_html: "" }}
               lessonState={{ lesson_id: "lesson-01", status: "active", completed_at: null, verify_result: null }}
-              busy={false}
               feedback={null}
-              isPreview
-              onVerify={() => undefined}
             />
           </MemoryRouter>
         </AppTheme>,
@@ -125,6 +118,7 @@ describe("LessonActions", () => {
     });
 
     expect(container.querySelector(".lesson-actions")).not.toBeNull();
-    expect(container.textContent).toContain("Проверка недоступна");
+    expect(container.querySelector(".step-actions")).toBeNull();
+    expect(container.textContent).not.toContain("Я выполнил");
   });
 });
