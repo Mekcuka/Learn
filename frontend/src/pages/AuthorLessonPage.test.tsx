@@ -34,7 +34,11 @@ vi.mock("../features/author/components/AuthorStoryboardView", () => ({ default: 
 vi.mock("../features/author/components/HotspotEditor", () => ({ default: () => null }));
 vi.mock("../features/lesson/components/LessonScreenshotHintsPanel", () => ({ default: () => null }));
 vi.mock("../features/lesson/components/LessonSlideView", () => ({ default: () => null }));
-vi.mock("../features/author/components/RichTextEditor", () => ({ default: () => null }));
+const { RichTextEditorMock } = vi.hoisted(() => ({
+  RichTextEditorMock: vi.fn(() => null),
+}));
+
+vi.mock("../features/author/components/RichTextEditor", () => ({ default: RichTextEditorMock }));
 
 import AuthorLessonPage from "./AuthorLessonPage";
 
@@ -149,5 +153,32 @@ describe("AuthorLessonPage", () => {
 
     expect(container.querySelector(".author-constructor-main")).not.toBeNull();
     expect(container.querySelector(".author-constructor-hotspots")).toBeNull();
+  });
+
+  it("does not enable rich text preview in slide editor fields", async () => {
+    await act(async () => {
+      root.render(
+        <AppTheme>
+          <MemoryRouter initialEntries={["/author/lessons/lesson-01"]}>
+            <Routes>
+              <Route path="/author/lessons/:lessonId" element={<AuthorLessonPage />} />
+            </Routes>
+          </MemoryRouter>
+        </AppTheme>,
+      );
+    });
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    const slideFieldCalls = RichTextEditorMock.mock.calls.filter(([props]) =>
+      ["Подпись", "Ожидаемый результат"].includes(props.label),
+    );
+
+    expect(slideFieldCalls).toHaveLength(2);
+    for (const [props] of slideFieldCalls) {
+      expect(props.showPreview).toBeFalsy();
+    }
   });
 });

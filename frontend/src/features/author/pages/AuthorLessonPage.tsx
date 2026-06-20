@@ -654,7 +654,6 @@ export default function AuthorLessonPage() {
                             onChange={(caption_html) => patchActiveSlide({ caption_html })}
                             rows={2}
                             editorMode="lesson"
-                            showPreview
                             compact
                           />
                           <RichTextEditor
@@ -663,7 +662,6 @@ export default function AuthorLessonPage() {
                             onChange={(expected_result_html) => patchActiveSlide({ expected_result_html })}
                             rows={2}
                             editorMode="lesson"
-                            showPreview
                             compact
                           />
                         </div>
