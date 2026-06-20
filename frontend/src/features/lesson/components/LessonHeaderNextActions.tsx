@@ -11,6 +11,7 @@ type LessonHeaderNextActionsProps = {
   showNextStep: boolean;
   showComplete: boolean;
   nextLessonNavigation: NextLessonNavigation | null;
+  upcomingLessonNavigation: NextLessonNavigation | null;
   verifyBusy: boolean;
   completeHint?: string | null;
   onNavigate: (path: string) => void;
@@ -19,12 +20,16 @@ type LessonHeaderNextActionsProps = {
 
 function LessonHeaderSplitButton({
   navigation,
+  nextEnabled,
+  showCompleteHalf,
   verifyBusy,
   completeHint,
   onNavigate,
   onComplete,
 }: {
   navigation: Extract<NextLessonNavigation, { kind: "lesson" }>;
+  nextEnabled: boolean;
+  showCompleteHalf: boolean;
   verifyBusy: boolean;
   completeHint?: string | null;
   onNavigate: (path: string) => void;
@@ -37,8 +42,10 @@ function LessonHeaderSplitButton({
           variant="contained"
           color="primary"
           className={styles.splitLeft}
-          onClick={() => onNavigate(`/lessons/${navigation.lessonId}`)}
+          disabled={!nextEnabled}
+          onClick={nextEnabled ? () => onNavigate(`/lessons/${navigation.lessonId}`) : undefined}
           aria-label={`Следующий урок: ${navigation.title}`}
+          title={nextEnabled ? undefined : "Завершите текущий урок, чтобы перейти дальше"}
         >
           <span className={styles.btnLabel}>Следующий урок</span>
           <Typography component="span" variant="body2" className={styles.btnTitle}>
@@ -46,16 +53,22 @@ function LessonHeaderSplitButton({
           </Typography>
         </Button>
         <div className={styles.divider} role="separator" aria-orientation="vertical" />
-        <Button
-          variant="contained"
-          color="primary"
-          className={styles.splitRight}
-          disabled={verifyBusy}
-          onClick={onComplete}
-          aria-live="polite"
-        >
-          {verifyBusy ? "Завершение…" : "Завершить урок"}
-        </Button>
+        {showCompleteHalf ? (
+          <Button
+            variant="contained"
+            color="primary"
+            className={styles.splitRight}
+            disabled={verifyBusy}
+            onClick={onComplete}
+            aria-live="polite"
+          >
+            {verifyBusy ? "Завершение…" : "Завершить урок"}
+          </Button>
+        ) : (
+          <Button variant="contained" color="primary" className={styles.splitRight} disabled aria-label="Урок выполнен">
+            Выполнен
+          </Button>
+        )}
       </div>
       {completeHint ? (
         <p className={styles.completeHint} role="alert">
@@ -70,21 +83,25 @@ export default function LessonHeaderNextActions({
   showNextStep,
   showComplete,
   nextLessonNavigation,
+  upcomingLessonNavigation,
   verifyBusy,
   completeHint,
   onNavigate,
   onComplete,
 }: LessonHeaderNextActionsProps) {
+  const splitNavigation =
+    upcomingLessonNavigation?.kind === "lesson" ? upcomingLessonNavigation : null;
+  const nextEnabled =
+    showNextStep && nextLessonNavigation != null && nextLessonNavigation.kind === "lesson";
   const showSplit =
-    showNextStep &&
-    showComplete &&
-    nextLessonNavigation != null &&
-    nextLessonNavigation.kind === "lesson";
+    splitNavigation != null && (showComplete || showNextStep);
 
-  if (showSplit) {
+  if (showSplit && splitNavigation) {
     return (
       <LessonHeaderSplitButton
-        navigation={nextLessonNavigation}
+        navigation={splitNavigation}
+        nextEnabled={nextEnabled}
+        showCompleteHalf={showComplete}
         verifyBusy={verifyBusy}
         completeHint={completeHint}
         onNavigate={onNavigate}

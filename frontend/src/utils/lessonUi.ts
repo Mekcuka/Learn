@@ -4,6 +4,29 @@ export type NextLessonNavigation =
   | { kind: "lesson"; lessonId: string; title: string }
   | { kind: "catalog" };
 
+function sortedModuleLessons(moduleLessons: ModuleLessonOutlineItem[]): ModuleLessonOutlineItem[] {
+  return [...moduleLessons].sort((a, b) => a.order - b.order);
+}
+
+/** Next lesson in module order for header preview (ignores lock/completion). */
+export function resolveUpcomingLessonNavigation(
+  currentLessonId: string,
+  moduleLessons: ModuleLessonOutlineItem[],
+): NextLessonNavigation | null {
+  const sorted = sortedModuleLessons(moduleLessons);
+  const currentIndex = sorted.findIndex((item) => item.id === currentLessonId);
+  if (currentIndex < 0) {
+    return null;
+  }
+
+  const nextLesson = sorted[currentIndex + 1];
+  if (nextLesson) {
+    return { kind: "lesson", lessonId: nextLesson.id, title: nextLesson.title };
+  }
+
+  return { kind: "catalog" };
+}
+
 export function resolveNextLessonNavigation(
   currentLessonId: string,
   currentLessonStatus: string | undefined,
@@ -13,7 +36,7 @@ export function resolveNextLessonNavigation(
     return null;
   }
 
-  const sorted = [...moduleLessons].sort((a, b) => a.order - b.order);
+  const sorted = sortedModuleLessons(moduleLessons);
   const currentIndex = sorted.findIndex((item) => item.id === currentLessonId);
   if (currentIndex < 0) {
     return null;

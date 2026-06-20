@@ -72,6 +72,7 @@ describe("LessonPageHeader", () => {
               showHintsColumn
               showNextStep={false}
               nextLessonNavigation={null}
+              upcomingLessonNavigation={null}
               showCompleteButton={false}
               verifyBusy={false}
               onBack={() => undefined}
@@ -86,8 +87,11 @@ describe("LessonPageHeader", () => {
     });
   }
 
-  it("renders full-width complete button in header next column when visible without next step", () => {
-    renderHeader({ showCompleteButton: true });
+  it("renders full-width complete button in header next column when visible without upcoming lesson", () => {
+    renderHeader({
+      showCompleteButton: true,
+      upcomingLessonNavigation: { kind: "catalog" },
+    });
 
     const nextColumn = container.querySelector(".lesson-page-header__next");
     expect(nextColumn).not.toBeNull();
@@ -96,11 +100,27 @@ describe("LessonPageHeader", () => {
     expect(nextColumn?.textContent).toContain("Завершить урок");
   });
 
+  it("renders split button on final step before lesson completion", () => {
+    renderHeader({
+      showCompleteButton: true,
+      upcomingLessonNavigation: { kind: "lesson", lessonId: "lesson-02", title: "Создание проекта" },
+    });
+
+    const nextColumn = container.querySelector(".lesson-page-header__next");
+    const splitGroup = nextColumn?.querySelector('[role="group"][aria-label="Следующий урок и завершение"]');
+    expect(splitGroup).not.toBeNull();
+    expect(nextColumn?.querySelector(".lesson-complete-button")).toBeNull();
+    expect(nextColumn?.textContent).toContain("Следующий урок");
+    expect(nextColumn?.textContent).toContain("Завершить урок");
+    expect(nextColumn?.textContent).toContain("Создание проекта");
+  });
+
   it("renders unified split button when next step and complete are both visible", () => {
     renderHeader({
       showNextStep: true,
       showCompleteButton: true,
       nextLessonNavigation: { kind: "lesson", lessonId: "lesson-02", title: "Создание проекта" },
+      upcomingLessonNavigation: { kind: "lesson", lessonId: "lesson-02", title: "Создание проекта" },
     });
 
     const nextColumn = container.querySelector(".lesson-page-header__next");
@@ -119,6 +139,7 @@ describe("LessonPageHeader", () => {
       showNextStep: true,
       showCompleteButton: true,
       nextLessonNavigation: { kind: "lesson", lessonId: "lesson-02", title: "Создание проекта" },
+      upcomingLessonNavigation: { kind: "lesson", lessonId: "lesson-02", title: "Создание проекта" },
       onComplete,
     });
 
@@ -138,15 +159,16 @@ describe("LessonPageHeader", () => {
     expect(onComplete).toHaveBeenCalledTimes(1);
   });
 
-  it("shows next step in header on quiz step after lesson is completed", () => {
+  it("shows split next step in header on quiz step after lesson is completed", () => {
     renderHeader({
       showNextStep: true,
       showCompleteButton: false,
       nextLessonNavigation: { kind: "lesson", lessonId: "lesson-02", title: "Создание проекта" },
+      upcomingLessonNavigation: { kind: "lesson", lessonId: "lesson-02", title: "Создание проекта" },
     });
 
     expect(container.querySelector(".lesson-page-header__next")).not.toBeNull();
-    expect(container.querySelector('[aria-label="Следующий урок"]')).not.toBeNull();
+    expect(container.querySelector('[role="group"][aria-label="Следующий урок и завершение"]')).not.toBeNull();
   });
 
   it("does not render header next column when neither next step nor complete button is shown", () => {

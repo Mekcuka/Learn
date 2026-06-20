@@ -21,6 +21,7 @@ type LessonPageHeaderProps = {
   showHintsColumn: boolean;
   showNextStep: boolean;
   nextLessonNavigation: NextLessonNavigation | null;
+  upcomingLessonNavigation: NextLessonNavigation | null;
   showCompleteButton: boolean;
   completeHint?: string | null;
   verifyBusy: boolean;
@@ -40,6 +41,7 @@ export default function LessonPageHeader({
   showHintsColumn,
   showNextStep,
   nextLessonNavigation,
+  upcomingLessonNavigation,
   showCompleteButton,
   completeHint,
   verifyBusy,
@@ -118,6 +120,7 @@ export default function LessonPageHeader({
               showNextStep={showNextStep}
               showComplete={showCompleteButton}
               nextLessonNavigation={nextLessonNavigation}
+              upcomingLessonNavigation={upcomingLessonNavigation}
               completeHint={completeHint}
               verifyBusy={verifyBusy}
               onNavigate={onNavigate}

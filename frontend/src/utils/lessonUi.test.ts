@@ -14,6 +14,7 @@ import {
   readStoredSlideIndex,
   resolveCompleteLessonAction,
   resolveNextLessonNavigation,
+  resolveUpcomingLessonNavigation,
   sanitizeStoredSlideIndex,
   shouldShowCompleteLessonButton,
   slideStorageKey,
@@ -166,6 +167,26 @@ describe("resolveNextLessonNavigation", () => {
 
   it("returns catalog navigation for last completed lesson", () => {
     expect(resolveNextLessonNavigation("lesson-4", "completed", moduleLessons)).toEqual({ kind: "catalog" });
+  });
+});
+
+describe("resolveUpcomingLessonNavigation", () => {
+  const moduleLessons = [
+    { id: "lesson-1", order: 1, title: "Урок 1", status: "active" },
+    { id: "lesson-2", order: 2, title: "Урок 2", status: "locked" },
+    { id: "lesson-3", order: 3, title: "Урок 3", status: "locked" },
+  ];
+
+  it("returns next lesson in order regardless of completion status", () => {
+    expect(resolveUpcomingLessonNavigation("lesson-1", moduleLessons)).toEqual({
+      kind: "lesson",
+      lessonId: "lesson-2",
+      title: "Урок 2",
+    });
+  });
+
+  it("returns catalog for the last lesson in module", () => {
+    expect(resolveUpcomingLessonNavigation("lesson-3", moduleLessons)).toEqual({ kind: "catalog" });
   });
 });
 

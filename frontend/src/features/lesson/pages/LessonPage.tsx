@@ -17,6 +17,7 @@ import { useLessonProgress } from "../hooks/useLessonProgress";
 import {
   isMixedQuizLesson,
   resolveNextLessonNavigation,
+  resolveUpcomingLessonNavigation,
   shouldShowCompleteLessonButton,
 } from "../../../utils/lessonUi";
 import { lessonLayoutGridClasses } from "../../../constants/lessonLayout";
@@ -83,6 +84,10 @@ export default function LessonPage() {
     !isPreview && lessonId
       ? resolveNextLessonNavigation(lessonId, lessonStatus, lesson.module_lessons)
       : null;
+  const upcomingLessonNavigation =
+    !isPreview && lessonId
+      ? resolveUpcomingLessonNavigation(lessonId, lesson.module_lessons)
+      : null;
   const showNextStep =
     !isPreview &&
     nextLessonNavigation != null &&
@@ -130,6 +135,7 @@ export default function LessonPage() {
         showHintsColumn={showHintsColumn}
         showNextStep={showNextStep}
         nextLessonNavigation={nextLessonNavigation}
+        upcomingLessonNavigation={upcomingLessonNavigation}
         showCompleteButton={showCompleteButton}
         completeHint={completeHint}
         verifyBusy={verifyBusy}
