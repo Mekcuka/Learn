@@ -75,6 +75,8 @@ describe("LessonReferencePanel", () => {
 
     const panel = container.querySelector(".lesson-reference-panel");
     expect(panel?.querySelector(".lesson-actions")).not.toBeNull();
+    expect(panel?.querySelector(".lesson-actions-block--assignment")).not.toBeNull();
+    expect(panel?.querySelector(".lesson-actions-block--expected")).not.toBeNull();
     expect(container.textContent).toContain("Задание");
     expect(container.textContent).toContain("Создайте проект в демо");
     expect(container.textContent).toContain("Ожидаемый результат");

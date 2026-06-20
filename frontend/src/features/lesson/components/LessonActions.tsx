@@ -39,7 +39,7 @@ export default function LessonActions({
     <section className="lesson-actions" aria-label="Задание" aria-live="polite">
       <div className="lesson-actions-card">
         {hasInstruction && (
-          <div className="lesson-actions-assignment">
+          <div className="lesson-actions-block lesson-actions-block--assignment">
             <Typography
               variant="overline"
               color="text.primary"
@@ -53,7 +53,9 @@ export default function LessonActions({
           </div>
         )}
 
-        {hasExpected && slide && <ExpectedResult html={slide.expected_result_html} />}
+        {hasExpected && slide && (
+          <ExpectedResult html={slide.expected_result_html} className="lesson-actions-block--expected" />
+        )}
 
         {feedback && (
           <Typography color={feedbackColor} className={`step-status step-status-${feedback.status}`}>

@@ -75,6 +75,8 @@ describe("LessonActions", () => {
     expect(container.textContent).toContain("Задание");
     expect(container.textContent).toContain("Войдите в демо");
     expect(container.textContent).toContain("Ожидаемый результат");
+    expect(container.querySelector(".lesson-actions-block--assignment")).not.toBeNull();
+    expect(container.querySelector(".lesson-actions-block--expected")).not.toBeNull();
   });
 
   it("hides block when lesson completed", () => {
