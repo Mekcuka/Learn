@@ -10,6 +10,7 @@ import {
   getHotspotKind,
   hotspotKindLabel,
   hotspotPinFillProps,
+  hotspotPulseAccentStyle,
   hotspotRectVisualStyle,
   isHotspotInBounds,
   hasPinLabel,
@@ -108,6 +109,7 @@ describe("hotspot utils", () => {
     const props = hotspotPinFillProps(hotspot);
     expect(props.className).toBe("hotspot-pin-filled");
     expect((props.style as Record<string, string>)["--hotspot-pin-accent"]).toBe("#22c55e");
+    expect((props.style as Record<string, string>)["--hotspot-pulse-accent"]).toBe("#22c55e");
 
     const disabled = hotspotPinFillProps({ ...hotspot, fill_enabled: false });
     expect(disabled.className).toBe("");
@@ -128,6 +130,10 @@ describe("hotspot utils", () => {
 
     expect(hotspotRectVisualStyle(hotspot).background).toBe("rgb(34 197 94 / 18%)");
     expect(hotspotRectVisualStyle(hotspot).borderColor).toBe("#a855f7");
+    expect((hotspotRectVisualStyle(hotspot) as Record<string, string>)["--hotspot-pulse-accent"]).toBe("#a855f7");
+    expect(hotspotPulseAccentStyle({ kind: "region", fill_color: "green", border_color: "purple" })).toEqual({
+      "--hotspot-pulse-accent": "#a855f7",
+    });
     expect(hotspotRectVisualStyle({ ...hotspot, fill_enabled: false }).background).toBe("transparent");
     expect(hotspotRectVisualStyle(hotspot, true).background).toBe("rgb(34 197 94 / 30%)");
     expect(getHotspotBorderColor({ kind: "region", fill_color: "green" })).toBe("green");

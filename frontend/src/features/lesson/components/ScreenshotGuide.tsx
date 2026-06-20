@@ -9,7 +9,7 @@ import {
 
 import { useScreenshotViewport } from "../hooks/useScreenshotViewport";
 import type { HotspotItem } from "../../../types/lesson";
-import { getHotspotKind, hotspotPinFillProps, hotspotRectVisualStyle, pinHotspotAriaLabel } from "../../../utils/hotspots";
+import { getHotspotKind, hotspotPinFillProps, hotspotPulseAccentStyle, hotspotRectVisualStyle, pinHotspotAriaLabel } from "../../../utils/hotspots";
 import { toggleHotspotSelection } from "../../../utils/screenshotViewport";
 import { hotspotOverlayStyle } from "../../../utils/imageContentRect";
 import PinHotspotMarker from "./PinHotspotMarker";
@@ -176,7 +176,7 @@ export default function ScreenshotGuide({
           key={hotspot.id}
           type="button"
           className={`hotspot-pin${isActive ? " hotspot-pin-active" : ""}${hotspot.pulse !== false ? " hotspot-pin-pulse" : ""}${pinFill.className ? ` ${pinFill.className}` : ""}`}
-          style={{ ...hotspotOverlayStyle(hotspot, "pin"), ...pinFill.style }}
+          style={{ ...hotspotOverlayStyle(hotspot, "pin"), ...hotspotPulseAccentStyle(hotspot), ...pinFill.style }}
           aria-label={pinHotspotAriaLabel(hotspot.label)}
           aria-pressed={activeHotspotId === hotspot.id}
           onClick={(event) => {

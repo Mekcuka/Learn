@@ -258,6 +258,16 @@ describe("ScreenshotGuide hotspot clicks", () => {
     expect(noFillButton?.style.background).toBe("transparent");
   });
 
+  it("sets pulse accent from border_color when fill differs", () => {
+    renderGuide(root, {
+      hotspots: [{ ...regionHotspot, fill_color: "green", border_color: "purple" }],
+    });
+
+    const button = container.querySelector<HTMLButtonElement>(".hotspot");
+    expect(button?.style.borderColor).toBe("rgb(168, 85, 247)");
+    expect(button?.style.getPropertyValue("--hotspot-pulse-accent")).toBe("#a855f7");
+  });
+
   it("applies pin fill accent via css variable", () => {
     renderGuide(root, {
       hotspots: [{ ...pinHotspot, fill_color: "green" }],

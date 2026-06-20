@@ -127,10 +127,10 @@ button.hotspot {
 @keyframes hotspot-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgb(251 191 36 / 60%);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--hotspot-pulse-accent, #fbbf24) 60%, transparent);
   }
   50% {
-    box-shadow: 0 0 0 8px rgb(251 191 36 / 0%);
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--hotspot-pulse-accent, #fbbf24) 0%, transparent);
   }
 }
 
@@ -200,17 +200,7 @@ button.hotspot {
 }
 
 .hotspot--zoom.hotspot-pulse {
-  animation: hotspot-zoom-pulse 1.8s ease-in-out infinite;
-}
-
-@keyframes hotspot-zoom-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgb(56 189 248 / 55%);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgb(56 189 248 / 0%);
-  }
+  animation: hotspot-pulse 1.8s ease-in-out infinite;
 }
 
 .hotspot--zoom.hotspot-active {
@@ -553,12 +543,12 @@ button.hotspot {
   100% {
     box-shadow:
       0 2px 6px rgb(15 23 42 / 30%),
-      0 0 0 0 rgb(229 72 77 / 55%);
+      0 0 0 0 color-mix(in srgb, var(--hotspot-pulse-accent, #e5484d) 55%, transparent);
   }
   50% {
     box-shadow:
       0 2px 6px rgb(15 23 42 / 30%),
-      0 0 0 10px rgb(229 72 77 / 0%);
+      0 0 0 10px color-mix(in srgb, var(--hotspot-pulse-accent, #e5484d) 0%, transparent);
   }
 }
 
@@ -567,12 +557,12 @@ button.hotspot {
   100% {
     box-shadow:
       0 2px 6px rgb(15 23 42 / 30%),
-      0 0 0 0 color-mix(in srgb, var(--hotspot-pin-accent) 55%, transparent);
+      0 0 0 0 color-mix(in srgb, var(--hotspot-pulse-accent, var(--hotspot-pin-accent)) 55%, transparent);
   }
   50% {
     box-shadow:
       0 2px 6px rgb(15 23 42 / 30%),
-      0 0 0 10px color-mix(in srgb, var(--hotspot-pin-accent) 0%, transparent);
+      0 0 0 10px color-mix(in srgb, var(--hotspot-pulse-accent, var(--hotspot-pin-accent)) 0%, transparent);
   }
 }
 

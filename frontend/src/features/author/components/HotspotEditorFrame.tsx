@@ -5,7 +5,7 @@ import HotspotZoneLabel from "../../lesson/components/HotspotZoneLabel";
 import ScreenshotHotspotOverlay from "../../lesson/components/ScreenshotHotspotOverlay";
 import ZoomHotspotPopup from "../../lesson/components/ZoomHotspotPopup";
 import type { HotspotItem } from "../../../types/lesson";
-import { getHotspotKind, hotspotPinFillProps, hotspotRectVisualStyle } from "../../../utils/hotspots";
+import { getHotspotKind, hotspotPinFillProps, hotspotPulseAccentStyle, hotspotRectVisualStyle } from "../../../utils/hotspots";
 import { hotspotOverlayStyle } from "../../../utils/imageContentRect";
 import { displayHotspot, zoneClassName, type DraftRect, type LiveRect } from "./hotspotEditorUtils";
 
@@ -66,12 +66,15 @@ const HotspotEditorFrame = memo(function HotspotEditorFrame({
               const kind = getHotspotKind(hotspot);
               const selected = selectedId === hotspot.id;
               const pinFill = kind === "pin" ? hotspotPinFillProps(display) : null;
+              const pulseClass =
+                display.pulse !== false ? (kind === "pin" ? " hotspot-pin-pulse" : " hotspot-pulse") : "";
               return (
                 <div
                   key={hotspot.id}
-                  className={`${zoneClassName(hotspot, selected)}${pinFill?.className ? ` ${pinFill.className}` : ""}`}
+                  className={`${zoneClassName(hotspot, selected)}${pinFill?.className ? ` ${pinFill.className}` : ""}${pulseClass}`}
                   style={{
                     ...hotspotOverlayStyle(display, kind === "pin" ? "pin" : "zone"),
+                    ...hotspotPulseAccentStyle(display),
                     ...(kind !== "pin" ? hotspotRectVisualStyle(display, selected) : pinFill?.style),
                   }}
                   onMouseDown={(event) => onHotspotMouseDown(event, hotspot)}

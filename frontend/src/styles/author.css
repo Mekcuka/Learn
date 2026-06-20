@@ -1094,6 +1094,10 @@
   background: rgb(124 58 237 / 25%);
 }
 
+.hotspot-editor-zone.hotspot-pulse {
+  animation: hotspot-pulse 1.8s ease-in-out infinite;
+}
+
 .hotspot-editor-zone--zoom {
   border-color: #0ea5e9;
   background: rgb(14 165 233 / 12%);

@@ -281,6 +281,14 @@ export function getHotspotFillPaletteEntry(colorId: HotspotFillColor) {
   return getHotspotColorPaletteEntry(colorId);
 }
 
+/** Border accent for pulse ring animation (matches getHotspotBorderColor). */
+export function hotspotPulseAccentStyle(
+  hotspot: Pick<HotspotItem, "border_color" | "fill_color" | "kind">,
+): CSSProperties {
+  const accentEntry = getHotspotColorPaletteEntry(getHotspotBorderColor(hotspot));
+  return { "--hotspot-pulse-accent": accentEntry.border } as CSSProperties;
+}
+
 /** Pin fill: accent on dot, connector and callout via CSS vars on the parent (.hotspot-pin-filled). */
 export function hotspotPinFillProps(
   hotspot: Pick<HotspotItem, "fill_enabled" | "fill_color" | "border_color" | "kind">,
@@ -291,9 +299,10 @@ export function hotspotPinFillProps(
   }
 
   const accentEntry = getHotspotColorPaletteEntry(getHotspotBorderColor(hotspot));
+  const accentStyle = hotspotPulseAccentStyle(hotspot);
   return {
     className: "hotspot-pin-filled",
-    style: { "--hotspot-pin-accent": accentEntry.border } as CSSProperties,
+    style: { ...accentStyle, "--hotspot-pin-accent": accentEntry.border } as CSSProperties,
   };
 }
 
@@ -307,6 +316,7 @@ export function hotspotRectVisualStyle(hotspot: HotspotItem, active = false): CS
   const fillEntry = getHotspotColorPaletteEntry(getHotspotFillColor(hotspot));
   const fillEnabled = getHotspotFillEnabled(hotspot);
   const style: CSSProperties = {
+    ...hotspotPulseAccentStyle(hotspot),
     borderColor: borderEntry.border,
     background: fillEnabled ? (active ? fillEntry.fillActive : fillEntry.fill) : "transparent",
   };
