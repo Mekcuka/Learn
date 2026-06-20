@@ -7,6 +7,7 @@ import type { LessonDetail, LessonStateItem } from "../../../types/lesson";
 import { lessonLayoutGridClasses } from "../../../constants/lessonLayout";
 import { moduleProgressLabel } from "../../../utils/lessonUi";
 import HashtagList from "../../../shared/content/HashtagList";
+import LessonCompleteButton from "./LessonCompleteButton";
 import LessonNextStepCard from "./LessonNextStepCard";
 import LessonRoadmap from "./LessonRoadmap";
 import type { NextLessonNavigation } from "../../../utils/lessonUi";
@@ -20,8 +21,11 @@ type LessonPageHeaderProps = {
   isDraftPreview: boolean;
   showHintsColumn: boolean;
   nextLessonNavigation: NextLessonNavigation | null;
+  showCompleteButton: boolean;
+  verifyBusy: boolean;
   onBack: () => void;
   onNavigate: (path: string) => void;
+  onComplete: () => void;
   roadmapLinkTo: (lessonId: string) => string;
 };
 
@@ -34,12 +38,17 @@ export default function LessonPageHeader({
   isDraftPreview,
   showHintsColumn,
   nextLessonNavigation,
+  showCompleteButton,
+  verifyBusy,
   onBack,
   onNavigate,
+  onComplete,
   roadmapLinkTo,
 }: LessonPageHeaderProps) {
   const { headerGrid } = lessonLayoutGridClasses(showHintsColumn);
   const lessonStatus = lessonState?.status;
+  const showNextStepCard = showHintsColumn && nextLessonNavigation != null;
+  const showNextColumn = showNextStepCard || showCompleteButton;
   const statusChip =
     lessonStatus === "completed"
       ? { color: "success" as const, label: "Выполнен" }
@@ -99,9 +108,14 @@ export default function LessonPageHeader({
             />
           )}
         </div>
-        {showHintsColumn && nextLessonNavigation && (
+        {showNextColumn && (
           <div className="lesson-page-header__next">
-            <LessonNextStepCard navigation={nextLessonNavigation} onNavigate={onNavigate} />
+            {showNextStepCard && (
+              <LessonNextStepCard navigation={nextLessonNavigation} onNavigate={onNavigate} />
+            )}
+            {showCompleteButton && (
+              <LessonCompleteButton busy={verifyBusy} onComplete={onComplete} />
+            )}
           </div>
         )}
       </div>

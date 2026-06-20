@@ -7,7 +7,6 @@ import "../../../styles/lesson-page.css";
 import "../../../styles/quiz-editor.css";
 import "../../../styles/screenshot.css";
 
-import LessonCompleteButton from "../components/LessonCompleteButton";
 import LessonPageHeader from "../components/LessonPageHeader";
 import LessonPreviewBanner from "../components/LessonPreviewBanner";
 import LessonReferencePanel from "../components/LessonReferencePanel";
@@ -117,8 +116,11 @@ export default function LessonPage() {
         isDraftPreview={isDraftPreview}
         showHintsColumn={showHintsColumn}
         nextLessonNavigation={nextLessonNavigation}
+        showCompleteButton={showCompleteButton}
+        verifyBusy={verifyBusy}
         onBack={() => navigate("/dashboard")}
         onNavigate={(path) => navigate(path)}
+        onComplete={() => void startVerify()}
         roadmapLinkTo={roadmapLinkTo}
       />
 
@@ -164,10 +166,6 @@ export default function LessonPage() {
           </div>
         )}
       </div>
-
-      {showCompleteButton && (
-        <LessonCompleteButton busy={verifyBusy} onComplete={() => void startVerify()} />
-      )}
     </LessonShell>
   );
 }

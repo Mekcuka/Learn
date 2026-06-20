@@ -36,6 +36,10 @@ describe("LessonCompleteButton", () => {
       );
     });
 
+    const wrapper = container.querySelector(".lesson-complete-button");
+    expect(wrapper).not.toBeNull();
+    expect(getComputedStyle(wrapper!).position).not.toBe("fixed");
+
     const button = container.querySelector("button");
     expect(button?.textContent).toBe("Завершить урок");
 
