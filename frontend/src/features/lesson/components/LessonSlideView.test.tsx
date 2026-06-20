@@ -126,9 +126,9 @@ describe("LessonSlideView", () => {
         questions: [
           {
             id: "q1",
+            order: 1,
             prompt_html: "<p>Вопрос?</p>",
             options: [{ id: "o1", text: "Да" }],
-            correct_option_ids: ["o1"],
             allow_multiple: false,
           },
         ],
@@ -162,9 +162,9 @@ describe("LessonSlideView", () => {
         questions: [
           {
             id: "q1",
+            order: 1,
             prompt_html: "<p>Вопрос?</p>",
             options: [{ id: "o1", text: "Да" }],
-            correct_option_ids: ["o1"],
             allow_multiple: false,
           },
         ],
@@ -201,9 +201,9 @@ describe("LessonSlideView", () => {
         questions: [
           {
             id: "q1",
+            order: 1,
             prompt_html: "<p>Вопрос?</p>",
             options: [{ id: "o1", text: "Да" }],
-            correct_option_ids: ["o1"],
             allow_multiple: false,
           },
         ],

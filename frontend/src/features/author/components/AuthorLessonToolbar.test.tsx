@@ -51,8 +51,6 @@ describe("AuthorLessonToolbar", () => {
             <AuthorLessonToolbar
               lesson={lessonFixture}
               toolbarAction={null}
-              autosaveDirty={false}
-              autosaveSaving={false}
               validationHint={null}
               activeSlide={false}
               importInputRef={createRef<HTMLInputElement>()}
@@ -89,8 +87,6 @@ describe("AuthorLessonToolbar", () => {
             <AuthorLessonToolbar
               lesson={lessonFixture}
               toolbarAction={null}
-              autosaveDirty={false}
-              autosaveSaving={false}
               validationHint={null}
               activeSlide={false}
               importInputRef={createRef<HTMLInputElement>()}
@@ -130,8 +126,6 @@ describe("AuthorLessonToolbar", () => {
             <AuthorLessonToolbar
               lesson={lessonFixture}
               toolbarAction="lesson"
-              autosaveDirty={false}
-              autosaveSaving={false}
               validationHint={null}
               activeSlide={false}
               importInputRef={createRef<HTMLInputElement>()}

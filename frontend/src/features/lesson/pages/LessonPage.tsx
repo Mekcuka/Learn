@@ -45,7 +45,6 @@ export default function LessonPage() {
     startVerify,
     completeLesson,
     handleQuizSubmit,
-    setFeedback,
   } = useLessonProgress({ lessonId, isPreview, isDraftPreview });
 
   useEffect(() => {
@@ -190,6 +189,8 @@ export default function LessonPage() {
             {(!isQuizLesson || isMixedLesson) && !isOnQuizStep && (
               <LessonScreenshotHintsPanel
                 slide={activeSlide}
+                slideIndex={slideIndex}
+                slideTotal={lesson.slides.length}
                 activeHotspotId={activeHotspotId}
                 onHotspotSelect={selectHotspot}
               />

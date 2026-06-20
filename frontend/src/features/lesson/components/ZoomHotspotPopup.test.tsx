@@ -168,6 +168,13 @@ describe("ZoomHotspotPopup", () => {
 
   });
 
+  it("enlarges popup when zoom_scale is above 1", () => {
+    renderPopup(root, { hotspot: { ...hotspot, zoom_scale: 2 } });
+
+    const popup = container.querySelector<HTMLDivElement>(".zoom-hotspot-popup");
+    expect(popup?.getAttribute("style")).toContain("--zoom-hotspot-popup-scale: 2");
+  });
+
 });
 
 

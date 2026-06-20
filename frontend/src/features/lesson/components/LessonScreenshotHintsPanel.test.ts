@@ -95,6 +95,20 @@ describe("LessonScreenshotHintsPanel markup", () => {
     expect(html).toContain("Кнопка входа");
   });
 
+  it("shows screen number and slide title in header", () => {
+    const html = renderToStaticMarkup(
+      createElement(LessonScreenshotHintsPanel, {
+        slide: slideWithDescriptions,
+        slideIndex: 3,
+        slideTotal: 8,
+      }),
+    );
+
+    expect(html).toContain("Экран 4");
+    expect(html).toContain("Тестовый слайд");
+    expect(html).toContain("2 меток");
+  });
+
   it("marks inactive hints collapsed and active hint expanded", () => {
     const html = renderToStaticMarkup(
       createElement(LessonScreenshotHintsPanel, {
@@ -119,6 +133,15 @@ describe("LessonScreenshotHintsPanel markup", () => {
 
     expect(html).toContain("lesson-hints-description--collapsed");
     expect(html).not.toContain('aria-expanded="true"');
+    expect(html).toContain("lesson-hints-helper");
+  });
+
+  it("renders empty state with icon and helper copy", () => {
+    const html = renderToStaticMarkup(createElement(LessonScreenshotHintsPanel, { slide: makeSlide([]) }));
+
+    expect(html).toContain("lesson-hints-empty");
+    expect(html).toContain("Меток нет");
+    expect(html).toContain("интерактивных подсказок");
   });
 });
 
@@ -173,7 +196,7 @@ describe("LessonScreenshotHintsPanel interaction", () => {
     });
 
     const secondButton = container.querySelector<HTMLButtonElement>(
-      '[data-hotspot-id="h2"] .lesson-hints-btn',
+      '[data-hotspot-id="h2"] .lesson-hints-card',
     );
     expect(secondButton?.getAttribute("aria-expanded")).toBe("false");
 
@@ -197,7 +220,7 @@ describe("LessonScreenshotHintsPanel interaction", () => {
     });
 
     const firstButton = container.querySelector<HTMLButtonElement>(
-      '[data-hotspot-id="h1"] .lesson-hints-btn',
+      '[data-hotspot-id="h1"] .lesson-hints-card',
     );
 
     await act(async () => {

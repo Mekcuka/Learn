@@ -7,7 +7,7 @@ import Paper from "@mui/material/Paper";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Tooltip from "@mui/material/Tooltip";
-import { BubbleMenu, type Editor } from "@tiptap/react";
+import { BubbleMenu, type Editor, useEditorState } from "@tiptap/react";
 
 type EditorBubbleMenuProps = {
   editor: Editor | null;
@@ -15,6 +15,22 @@ type EditorBubbleMenuProps = {
 };
 
 export default function EditorBubbleMenu({ editor, onOpenLink }: EditorBubbleMenuProps) {
+  const format = useEditorState({
+    editor,
+    selector: ({ editor: current }) => {
+      if (!current) {
+        return null;
+      }
+      return {
+        bold: current.isActive("bold"),
+        italic: current.isActive("italic"),
+        underline: current.isActive("underline"),
+        highlight: current.isActive("highlight"),
+        link: current.isActive("link"),
+      };
+    },
+  });
+
   if (!editor) {
     return null;
   }
@@ -30,7 +46,7 @@ export default function EditorBubbleMenu({ editor, onOpenLink }: EditorBubbleMen
           <Tooltip title="Жирный">
             <ToggleButton
               value="bold"
-              selected={editor.isActive("bold")}
+              selected={format?.bold ?? false}
               onClick={() => editor.chain().focus().toggleBold().run()}
               aria-label="Жирный"
             >
@@ -40,7 +56,7 @@ export default function EditorBubbleMenu({ editor, onOpenLink }: EditorBubbleMen
           <Tooltip title="Курсив">
             <ToggleButton
               value="italic"
-              selected={editor.isActive("italic")}
+              selected={format?.italic ?? false}
               onClick={() => editor.chain().focus().toggleItalic().run()}
               aria-label="Курсив"
             >
@@ -50,7 +66,7 @@ export default function EditorBubbleMenu({ editor, onOpenLink }: EditorBubbleMen
           <Tooltip title="Подчёркнутый">
             <ToggleButton
               value="underline"
-              selected={editor.isActive("underline")}
+              selected={format?.underline ?? false}
               onClick={() => editor.chain().focus().toggleUnderline().run()}
               aria-label="Подчёркнутый"
             >
@@ -60,7 +76,7 @@ export default function EditorBubbleMenu({ editor, onOpenLink }: EditorBubbleMen
           <Tooltip title="Выделение">
             <ToggleButton
               value="highlight"
-              selected={editor.isActive("highlight")}
+              selected={format?.highlight ?? false}
               onClick={() => editor.chain().focus().toggleHighlight().run()}
               aria-label="Выделение"
             >
@@ -68,7 +84,7 @@ export default function EditorBubbleMenu({ editor, onOpenLink }: EditorBubbleMen
             </ToggleButton>
           </Tooltip>
           <Tooltip title="Ссылка">
-            <ToggleButton value="link" selected={editor.isActive("link")} onClick={onOpenLink} aria-label="Ссылка">
+            <ToggleButton value="link" selected={format?.link ?? false} onClick={onOpenLink} aria-label="Ссылка">
               <LinkIcon fontSize="small" />
             </ToggleButton>
           </Tooltip>

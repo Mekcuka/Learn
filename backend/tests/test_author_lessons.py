@@ -166,6 +166,47 @@ def test_author_lesson_crud_and_slides(client, author_headers):
     assert pin_callout_side.status_code == 200
     assert pin_callout_side.json()["slide"]["hotspots"][0]["callout_side"] == "top"
 
+    zoom_hotspot = client.put(
+        "/api/v1/learn/author/slides/lesson-test-author-slide-01",
+        headers=author_headers,
+        json={
+            "hotspots": [
+                {
+                    "id": "zoom-1",
+                    "label": "Увеличение",
+                    "x_pct": 10,
+                    "y_pct": 20,
+                    "width_pct": 30,
+                    "height_pct": 15,
+                    "kind": "zoom",
+                    "zoom_scale": 2.5,
+                }
+            ]
+        },
+    )
+    assert zoom_hotspot.status_code == 200
+    assert zoom_hotspot.json()["slide"]["hotspots"][0]["zoom_scale"] == 2.5
+
+    invalid_zoom_scale = client.put(
+        "/api/v1/learn/author/slides/lesson-test-author-slide-01",
+        headers=author_headers,
+        json={
+            "hotspots": [
+                {
+                    "id": "zoom-1",
+                    "label": "Увеличение",
+                    "x_pct": 10,
+                    "y_pct": 20,
+                    "width_pct": 30,
+                    "height_pct": 15,
+                    "kind": "zoom",
+                    "zoom_scale": 10,
+                }
+            ]
+        },
+    )
+    assert invalid_zoom_scale.status_code == 422
+
     fill_hotspot = client.put(
         "/api/v1/learn/author/slides/lesson-test-author-slide-01",
         headers=author_headers,

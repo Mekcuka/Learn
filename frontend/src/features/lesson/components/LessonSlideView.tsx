@@ -46,6 +46,7 @@ export default function LessonSlideView({
   onQuizSubmit,
   manualVerify = null,
 }: LessonSlideViewProps) {
+  const hideSlideLabels = mode === "author";
   const showStudentActions = mode === "student" || mode === "preview";
   const slideNavManualVerify = mode === "student" ? manualVerify : null;
   const studentLesson = lesson as LessonDetail;
@@ -97,7 +98,7 @@ export default function LessonSlideView({
           currentIndex={slideIndex}
           onChange={onSlideIndexChange}
           hasTrailingQuiz={trailingQuiz}
-          hideSlideLabels={mode === "author"}
+          hideSlideLabels={hideSlideLabels}
           manualVerify={slideNavManualVerify}
         >
           {quizContent}
@@ -125,7 +126,7 @@ export default function LessonSlideView({
           activeHotspotId={activeHotspotId}
           onHotspotSelect={onHotspotSelect}
           hasTrailingQuiz={isMixedLesson && hasLoadedQuiz(studentLesson)}
-          hideSlideLabels={mode === "author"}
+          hideSlideLabels={hideSlideLabels}
           manualVerify={slideNavManualVerify}
         />
       ) : (

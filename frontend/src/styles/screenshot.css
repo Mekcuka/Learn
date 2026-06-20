@@ -246,8 +246,11 @@ button.hotspot {
 .zoom-hotspot-popup {
   position: relative;
   z-index: 1;
-  width: min(85%, 420px);
-  max-height: 72%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(85%, calc(420px * var(--zoom-hotspot-popup-scale, 1)));
+  max-height: min(90%, calc(72% * var(--zoom-hotspot-popup-scale, 1)));
   overflow: hidden;
   border-radius: 10px;
   background: #0f172a;
@@ -302,10 +305,14 @@ button.hotspot {
 }
 
 .zoom-hotspot-crop {
+  flex: 0 1 auto;
   width: 100%;
-  max-height: min(68vh, 420px);
+  max-width: 100%;
+  max-height: min(68vh, calc(420px * var(--zoom-hotspot-popup-scale, 1)));
+  height: auto;
   background-color: #0f172a;
   background-origin: border-box;
+  background-clip: padding-box;
 }
 
 .hotspot-pin {

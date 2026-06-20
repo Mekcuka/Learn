@@ -169,6 +169,8 @@ describe("LessonReferencePanel", () => {
     });
 
     expect(container.textContent).toContain("Слайд 1/2");
+    expect(container.querySelector(".lesson-ref-slide-bar")).toBeNull();
+    expect(container.querySelector(".lesson-ref-slide-title")).toBeNull();
     expect(container.textContent).not.toContain("Квиз");
 
     act(() => {

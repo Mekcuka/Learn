@@ -27,6 +27,7 @@ class HotspotItem(BaseModel):
     description_html: str | None = None
     callout_width: CalloutWidth | None = None
     callout_side: CalloutSide | None = None
+    zoom_scale: float | None = None
 
 
 class LessonSlideResponse(BaseModel):

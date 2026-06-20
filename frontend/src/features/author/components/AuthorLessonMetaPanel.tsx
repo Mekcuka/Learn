@@ -11,15 +11,14 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
 import type { AuthorLessonDetail } from "../../../api/authorApi";
+import { AUTHOR_QUIZ_SLIDE_ID } from "../constants";
 import { formatTagsInput, parseTagsInput } from "../../../utils/hashtags";
 import {
   mergeVerifyConfigOnTypeChange,
 } from "../../../utils/verifyConfigSchema";
 import { VERIFY_TYPE_VALUES, verifyTypeLabel, type VerifyType } from "../../../utils/verifyTypes";
-import QuizEditor from "./QuizEditor";
-import RichTextEditor from "./RichTextEditor";
-import SlideReorderList from "./SlideReorderList";
 import VerifyConfigForm from "./VerifyConfigForm";
+import SlideReorderList from "./SlideReorderList";
 
 type VerifyTypeItem = { id: string; label: string };
 
@@ -38,13 +37,11 @@ type AuthorLessonMetaPanelProps = {
   onReorderSlides: (slideIds: string[]) => void;
   onAddSlide: () => void;
   onEnableQuiz: () => void;
+  onRemoveQuiz: () => void;
+  onDeleteSlide: (slideId: string) => void;
   busy: boolean;
   metaExpanded: boolean;
-  quizExpanded: boolean;
   onMetaExpandedChange: (expanded: boolean) => void;
-  onQuizExpandedChange: (expanded: boolean) => void;
-  onQuizMessage: (message: string) => void;
-  onQuizError: (message: string) => void;
 };
 
 export default function AuthorLessonMetaPanel({
@@ -57,13 +54,11 @@ export default function AuthorLessonMetaPanel({
   onReorderSlides,
   onAddSlide,
   onEnableQuiz,
+  onRemoveQuiz,
+  onDeleteSlide,
   busy,
   metaExpanded,
-  quizExpanded,
   onMetaExpandedChange,
-  onQuizExpandedChange,
-  onQuizMessage,
-  onQuizError,
 }: AuthorLessonMetaPanelProps) {
   const isQuizLesson = selectedVerifyType?.id === "quiz_passed";
 
@@ -108,15 +103,6 @@ export default function AuthorLessonMetaPanel({
             size="small"
             margin="dense"
           />
-          <RichTextEditor
-            label="Инструкция"
-            value={lesson.instruction_html}
-            onChange={(instruction_html) => onLessonChange({ ...lesson, instruction_html })}
-            rows={2}
-            editorMode="lesson"
-            showPreview
-            toolbarMode="bubble"
-          />
           <FormControl fullWidth margin="dense" size="small">
             <InputLabel id="verify-type-label-meta">Тип проверки</InputLabel>
             <Select
@@ -158,53 +144,34 @@ export default function AuthorLessonMetaPanel({
         </AccordionDetails>
       </Accordion>
 
-      <Accordion
-        expanded={quizExpanded}
-        onChange={(_, expanded) => onQuizExpandedChange(expanded)}
-        className="author-section-accordion author-meta-accordion"
-        disableGutters
-      >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle1" fontWeight={700}>
-            Квиз
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails className="author-meta-accordion-body">
-          {!isQuizLesson && (
-            <Button variant="outlined" size="small" disabled={busy} onClick={onEnableQuiz}>
-              Добавить квиз
-            </Button>
-          )}
-          {isQuizLesson ? (
-            <QuizEditor
-              moduleId={lesson.module_id}
-              disabled={busy}
-              onMessage={onQuizMessage}
-              onError={onQuizError}
-            />
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              Квиз доступен для уроков с типом «Квиз пройден».
-            </Typography>
-          )}
-        </AccordionDetails>
-      </Accordion>
-
       <div className="author-meta-slides">
         <div className="author-section-header">
           <Typography variant="subtitle1" fontWeight={700}>
             Слайды
           </Typography>
-          <Button variant="outlined" size="small" disabled={busy} onClick={onAddSlide}>
-            + Слайд
-          </Button>
+          <div className="author-meta-slides-actions">
+            <Button variant="outlined" size="small" disabled={busy} onClick={onAddSlide}>
+              + Слайд
+            </Button>
+            <Button variant="outlined" size="small" disabled={busy || isQuizLesson} onClick={onEnableQuiz}>
+              + Квиз
+            </Button>
+          </div>
         </div>
+        {isQuizLesson && (
+          <Typography variant="body2" color="text.secondary" className="author-meta-quiz-hint">
+            Редактируйте вопросы во вкладке «Квиз».
+          </Typography>
+        )}
         <SlideReorderList
           slides={lesson.slides}
           activeSlideId={activeSlideId}
           disabled={busy}
+          quizSlide={isQuizLesson ? { id: AUTHOR_QUIZ_SLIDE_ID, title: "Квиз" } : null}
           onSelect={onSelectSlide}
           onReorder={onReorderSlides}
+          onDeleteSlide={onDeleteSlide}
+          onDeleteQuizSlide={isQuizLesson ? onRemoveQuiz : undefined}
         />
       </div>
     </div>

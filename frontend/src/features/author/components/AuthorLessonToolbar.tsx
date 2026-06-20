@@ -18,8 +18,6 @@ type AuthorLessonToolbarProps = {
   lesson: AuthorLessonDetail;
   toolbarAction?: ToolbarAction;
   busy?: boolean;
-  autosaveDirty: boolean;
-  autosaveSaving: boolean;
   validationHint: string | null;
   activeSlide: boolean;
   importInputRef: RefObject<HTMLInputElement | null>;
@@ -44,8 +42,6 @@ export default function AuthorLessonToolbar({
   lesson,
   toolbarAction = null,
   busy = false,
-  autosaveDirty,
-  autosaveSaving,
   validationHint,
   activeSlide,
   importInputRef,
@@ -110,14 +106,6 @@ export default function AuthorLessonToolbar({
             >
               {toolbarAction === "slide" ? "Сохранение…" : "Сохранить слайд"}
             </Button>
-          )}
-          {autosaveDirty && (
-            <Chip
-              size="small"
-              color="warning"
-              aria-live="polite"
-              label={autosaveSaving ? "Сохранение…" : "Несохранённые изменения"}
-            />
           )}
           <Button
             variant="contained"

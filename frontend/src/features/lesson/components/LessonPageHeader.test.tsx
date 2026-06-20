@@ -22,7 +22,7 @@ const baseLesson: LessonDetail = {
   title: "Вход",
   summary: null,
   tags: [],
-  instruction_html: null,
+  instruction_html: "",
   deep_link: null,
   verify: { type: "manual", config: {} },
   progress_percent: 0,
@@ -38,8 +38,8 @@ const baseLesson: LessonDetail = {
       id: "s1",
       order: 1,
       title: "Слайд 1",
-      caption_html: null,
-      expected_result_html: null,
+      caption_html: "",
+      expected_result_html: "",
       image_path: "/content/placeholder-slide.svg",
       hotspots: [],
     },
@@ -68,7 +68,7 @@ describe("LessonPageHeader", () => {
           <AppTheme>
             <LessonPageHeader
               lesson={baseLesson}
-              lessonState={{ lesson_id: "lesson-01", status: "active" }}
+              lessonState={{ lesson_id: "lesson-01", status: "active", completed_at: null, verify_result: null }}
               totalLessons={2}
               isPreview={false}
               isDraftPreview={false}
@@ -155,7 +155,7 @@ describe("LessonPageHeader", () => {
     });
 
     const buttons = container.querySelectorAll('[role="group"] button');
-    act(() => buttons[1]?.click());
+    act(() => (buttons[1] as HTMLButtonElement).click());
 
     expect(onComplete).toHaveBeenCalledTimes(1);
   });
@@ -165,7 +165,7 @@ describe("LessonPageHeader", () => {
     renderHeader({ showCompleteButton: true, onComplete });
 
     const completeButton = container.querySelector(".lesson-complete-button button");
-    act(() => completeButton?.click());
+    act(() => (completeButton as HTMLButtonElement).click());
 
     expect(onComplete).toHaveBeenCalledTimes(1);
   });

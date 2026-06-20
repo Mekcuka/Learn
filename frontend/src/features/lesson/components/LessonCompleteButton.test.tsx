@@ -106,7 +106,7 @@ describe("LessonCompleteButton", () => {
     });
 
     const button = container.querySelector(".lesson-complete-button button");
-    const topWithoutHint = button?.offsetTop;
+    const topWithoutHint = (button as HTMLElement | null)?.offsetTop;
 
     act(() => {
       root.render(
@@ -121,6 +121,6 @@ describe("LessonCompleteButton", () => {
     });
 
     const buttonWithHint = container.querySelector(".lesson-complete-button button");
-    expect(buttonWithHint?.offsetTop).toBe(topWithoutHint);
+    expect((buttonWithHint as HTMLElement | null)?.offsetTop).toBe(topWithoutHint);
   });
 });

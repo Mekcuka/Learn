@@ -1,6 +1,6 @@
 import { useImageNaturalAspectRatio } from "../hooks/useImageNaturalAspectRatio";
 import type { HotspotItem } from "../../../types/lesson";
-import { getHotspotCropBackgroundStyle } from "../../../utils/hotspotZoomCrop";
+import { getHotspotCropBackgroundStyle, getHotspotPopupStyle } from "../../../utils/hotspotZoomCrop";
 
 type ZoomHotspotPopupProps = {
   open: boolean;
@@ -32,6 +32,7 @@ export default function ZoomHotspotPopup({
   const cropStyle = getHotspotCropBackgroundStyle(hotspot, {
     imageAspectRatio: imageAspectRatio ?? 1,
   });
+  const popupStyle = getHotspotPopupStyle(hotspot);
   const overlayClass = [
     "zoom-hotspot-overlay",
     interactive ? "zoom-hotspot-overlay--interactive" : "zoom-hotspot-overlay--preview",
@@ -51,7 +52,7 @@ export default function ZoomHotspotPopup({
       {interactive ? (
         <button type="button" className="zoom-hotspot-backdrop" aria-label="Закрыть" onClick={onClose} />
       ) : null}
-      <div className={popupClass}>
+      <div className={popupClass} style={popupStyle}>
         {interactive ? (
           <button type="button" className="zoom-hotspot-close" aria-label="Закрыть" onClick={onClose}>
             <span aria-hidden="true">×</span>

@@ -2,10 +2,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
-import Button from "@mui/material/Button";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -32,16 +30,15 @@ import { LearnApiError } from "../../../api/httpClient";
 import AuthorConstructorLayout from "../components/AuthorConstructorLayout";
 import AuthorLessonMetaPanel from "../components/AuthorLessonMetaPanel";
 import AuthorLessonToolbar, { type ToolbarAction } from "../components/AuthorLessonToolbar";
+import AuthorSlideEditors, { type AuthorSlideEditorsHandle } from "../components/AuthorSlideEditors";
 import AuthorStoryboardView from "../components/AuthorStoryboardView";
 import HotspotEditor from "../components/HotspotEditor";
-import RichTextEditor from "../components/RichTextEditor";
 import LessonScreenshotHintsPanel from "../../lesson/components/LessonScreenshotHintsPanel";
 import LessonSlideView from "../../lesson/components/LessonSlideView";
 import type { HotspotItem, LessonSlide } from "../../../types/lesson";
 import { PageLoading } from "../../../components/mui/PageStatus";
 import { AppToast } from "../../../components/mui/AppToast";
 import { ConfirmModal } from "../../../components/mui/ConfirmModal";
-import { useAuthorSlideAutosave } from "../hooks/useAuthorSlideAutosave";
 import { draftSaveMessage } from "../../../utils/authorPreview";
 import { clampSlideIndex } from "../../../utils/lessonUi";
 import {
@@ -68,6 +65,7 @@ export default function AuthorLessonPage() {
   const navigate = useNavigate();
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
+  const slideEditorsRef = useRef<AuthorSlideEditorsHandle>(null);
   const [lesson, setLesson] = useState<AuthorLessonDetail | null>(null);
   const [activeSlideId, setActiveSlideId] = useState<string | null>(null);
   const [previewHotspotId, setPreviewHotspotId] = useState<string | null>(null);
@@ -79,7 +77,6 @@ export default function AuthorLessonPage() {
   const [pendingConfirm, setPendingConfirm] = useState<PendingConfirm>(null);
   const [selectedVerifyType, setSelectedVerifyType] = useState<VerifyTypeItem | null>(null);
   const [metaExpanded, setMetaExpanded] = useState(true);
-  const [quizExpanded, setQuizExpanded] = useState(false);
   const [storyboardMode, setStoryboardMode] = useState(false);
   const [constructorViewMode, setConstructorViewMode] = useState<ConstructorViewMode>("slide");
   const [moreMenuAnchor, setMoreMenuAnchor] = useState<null | HTMLElement>(null);
@@ -98,6 +95,29 @@ export default function AuthorLessonPage() {
       };
     });
   }, []);
+
+  const patchSlideById = useCallback((slideId: string, patch: Partial<LessonSlide>) => {
+    setLesson((current) => {
+      if (!current) {
+        return current;
+      }
+      return {
+        ...current,
+        slides: current.slides.map((slide) => (slide.id === slideId ? { ...slide, ...patch } : slide)),
+      };
+    });
+  }, []);
+
+  const handleInstructionChange = useCallback((instruction_html: string) => {
+    setLesson((current) => (current ? { ...current, instruction_html } : current));
+  }, []);
+
+  const handleSlideEditorsPatch = useCallback(
+    (slideId: string, patch: { caption_html: string; expected_result_html: string }) => {
+      patchSlideById(slideId, patch);
+    },
+    [patchSlideById],
+  );
 
   const loadLesson = useCallback(async () => {
     if (!lessonId) {
@@ -163,30 +183,34 @@ export default function AuthorLessonPage() {
     return null;
   }, [lesson, selectedVerifyType]);
 
-  const autosave = useAuthorSlideAutosave({
-    slide: activeSlide,
-    lessonId: lesson?.id ?? "",
-    enabled: Boolean(activeSlide && lesson),
-    onSaved: (savedSlide, hasUnpublishedChanges) => {
-      mergeSavedSlide(savedSlide, hasUnpublishedChanges);
-      setMessage(draftSaveMessage("Слайд автосохранён", hasUnpublishedChanges));
-    },
-    onError: (autosaveError) => setErrorToast(autosaveError),
-  });
-
   const persistLessonMeta = useCallback(async () => {
     if (!lesson || !selectedVerifyType) {
       throw new Error("Урок не загружен");
     }
-    let currentLesson = lesson;
-    if (autosave.dirty) {
-      const flushed = await autosave.flush();
-      if (flushed) {
+    const editorDraft = slideEditorsRef.current?.flush();
+    let currentLesson =
+      editorDraft != null ? { ...lesson, instruction_html: editorDraft.instruction_html } : lesson;
+    if (editorDraft != null && editorDraft.instruction_html !== lesson.instruction_html) {
+      setLesson(currentLesson);
+    }
+    if (activeSlide && editorDraft) {
+      const { caption_html, expected_result_html } = editorDraft;
+      if (
+        caption_html !== activeSlide.caption_html ||
+        expected_result_html !== activeSlide.expected_result_html
+      ) {
+        const updated = await updateAuthorSlide(activeSlide.id, {
+          title: activeSlide.title,
+          caption_html,
+          expected_result_html,
+          image_path: activeSlide.image_path,
+          hotspots: activeSlide.hotspots,
+        });
         currentLesson = {
           ...currentLesson,
-          has_unpublished_changes: flushed.has_unpublished_changes,
+          has_unpublished_changes: updated.has_unpublished_changes,
           slides: currentLesson.slides.map((item) =>
-            item.id === flushed.slide.id ? flushed.slide : item,
+            item.id === updated.slide.id ? updated.slide : item,
           ),
         };
       }
@@ -200,7 +224,7 @@ export default function AuthorLessonPage() {
       verify_type: selectedVerifyType.id,
       verify_config: currentLesson.verify.config ?? {},
     });
-  }, [lesson, selectedVerifyType, autosave]);
+  }, [lesson, selectedVerifyType, activeSlide]);
 
   const handlePublish = useCallback(async () => {
     if (!lesson) {
@@ -241,12 +265,25 @@ export default function AuthorLessonPage() {
     setPreviewHotspotId(null);
   }, [activeSlideId]);
 
-  useEffect(() => {
-    if (selectedVerifyType?.id === "quiz_passed") {
-      setQuizExpanded(true);
-    }
-  }, [selectedVerifyType?.id]);
 
+
+  function removeQuizLesson() {
+    if (!lesson) {
+      return;
+    }
+    const manualVerify = VERIFY_TYPE_ITEMS.find((item) => item.id === "manual") ?? null;
+    setSelectedVerifyType(manualVerify);
+    const nextConfig = mergeVerifyConfigOnTypeChange("manual", lesson.verify.config ?? {});
+    setLesson({
+      ...lesson,
+      verify: { type: "manual", config: nextConfig },
+    });
+  }
+
+  function requestDeleteSlide(slideId: string) {
+    setActiveSlideId(slideId);
+    setPendingConfirm("slide");
+  }
   function enableQuizLesson() {
     if (!lesson) {
       return;
@@ -258,7 +295,6 @@ export default function AuthorLessonPage() {
       ...lesson,
       verify: { type: "quiz_passed", config: nextConfig },
     });
-    setQuizExpanded(true);
     setMessage("Тип проверки переключён на «Квиз». Сохраните урок и настройте вопросы.");
   }
 
@@ -285,19 +321,31 @@ export default function AuthorLessonPage() {
     if (!activeSlide) {
       return;
     }
+    const editorDraft = slideEditorsRef.current?.flush();
+    const caption_html = editorDraft?.caption_html ?? activeSlide.caption_html;
+    const expected_result_html = editorDraft?.expected_result_html ?? activeSlide.expected_result_html;
+    if (
+      editorDraft &&
+      (caption_html !== activeSlide.caption_html ||
+        expected_result_html !== activeSlide.expected_result_html)
+    ) {
+      patchSlideById(activeSlide.id, { caption_html, expected_result_html });
+    }
+    if (editorDraft && editorDraft.instruction_html !== lesson?.instruction_html) {
+      handleInstructionChange(editorDraft.instruction_html);
+    }
     setToolbarAction("slide");
     setBusy(true);
     setErrorToast(null);
     try {
       const updated = await updateAuthorSlide(activeSlide.id, {
         title: activeSlide.title,
-        caption_html: activeSlide.caption_html,
-        expected_result_html: activeSlide.expected_result_html,
+        caption_html,
+        expected_result_html,
         image_path: activeSlide.image_path,
         hotspots: activeSlide.hotspots,
       });
       mergeSavedSlide(updated.slide, updated.has_unpublished_changes);
-      autosave.markClean(updated.slide);
       setMessage(draftSaveMessage("Слайд сохранён", updated.has_unpublished_changes));
     } catch (err) {
       setErrorToast(err instanceof LearnApiError ? err.message : "Не удалось сохранить слайд");
@@ -305,7 +353,7 @@ export default function AuthorLessonPage() {
       setToolbarAction(null);
       setBusy(false);
     }
-  }, [activeSlide, autosave, mergeSavedSlide]);
+  }, [activeSlide, mergeSavedSlide, handleInstructionChange, lesson?.instruction_html, patchSlideById]);
 
   async function handleAddSlide() {
     if (!lesson) {
@@ -418,7 +466,6 @@ export default function AuthorLessonPage() {
         hotspots: activeSlide.hotspots,
       });
       mergeSavedSlide(updated.slide, updated.has_unpublished_changes);
-      autosave.markClean(updated.slide);
       setMessage(draftSaveMessage("Изображение загружено", updated.has_unpublished_changes));
     } catch (err) {
       setErrorToast(err instanceof LearnApiError ? err.message : "Не удалось загрузить файл");
@@ -505,13 +552,10 @@ export default function AuthorLessonPage() {
   }, [activeSlide, saveActiveSlide, saveLessonMeta]);
 
   function patchActiveSlide(patch: Partial<LessonSlide>) {
-    if (!lesson || !activeSlide) {
+    if (!activeSlide) {
       return;
     }
-    setLesson({
-      ...lesson,
-      slides: lesson.slides.map((slide) => (slide.id === activeSlide.id ? { ...slide, ...patch } : slide)),
-    });
+    patchSlideById(activeSlide.id, patch);
   }
 
   function patchHotspots(hotspots: HotspotItem[]) {
@@ -537,8 +581,6 @@ export default function AuthorLessonPage() {
           lesson={lesson}
           toolbarAction={toolbarAction}
           busy={busy && toolbarAction === null}
-          autosaveDirty={autosave.dirty}
-          autosaveSaving={autosave.saving}
           validationHint={validationHint}
           activeSlide={Boolean(activeSlide)}
           importInputRef={importInputRef}
@@ -572,13 +614,11 @@ export default function AuthorLessonPage() {
               onReorderSlides={handleReorderSlides}
               onAddSlide={handleAddSlide}
               onEnableQuiz={enableQuizLesson}
+              onRemoveQuiz={removeQuizLesson}
+              onDeleteSlide={requestDeleteSlide}
               busy={busy}
               metaExpanded={metaExpanded}
-              quizExpanded={quizExpanded}
               onMetaExpandedChange={setMetaExpanded}
-              onQuizExpandedChange={setQuizExpanded}
-              onQuizMessage={setMessage}
-              onQuizError={setErrorToast}
             />
           </div>
 
@@ -628,59 +668,28 @@ export default function AuthorLessonPage() {
                       />
 
                       {activeSlide && (
-                        <div className="author-slide-editors">
-                          <div className="step-actions author-slide-toolbar">
-                            <Tooltip title="Загрузить PNG, WebP или SVG">
-                              <span>
-                                <Button
-                                  variant="outlined"
-                                  size="small"
-                                  disabled={busy}
-                                  onClick={() => uploadInputRef.current?.click()}
-                                >
-                                  Загрузить изображение
-                                </Button>
-                              </span>
-                            </Tooltip>
-                            <input
-                              ref={uploadInputRef}
-                              type="file"
-                              accept="image/png,image/webp,image/svg+xml"
-                              onChange={handleUploadImage}
-                              hidden
-                            />
-                            <Button variant="outlined" size="small" disabled={busy} onClick={handleDuplicateSlide}>
-                              Дублировать
-                            </Button>
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              color="error"
-                              disabled={busy}
-                              onClick={() => setPendingConfirm("slide")}
-                            >
-                              Удалить слайд
-                            </Button>
-                          </div>
-                          <RichTextEditor
-                            label="Подсказка"
-                            value={activeSlide.caption_html}
-                            onChange={(caption_html) => patchActiveSlide({ caption_html })}
-                            rows={2}
-                            editorMode="lesson"
-                            compact
-                            toolbarMode="full"
+                        <>
+                          <input
+                            ref={uploadInputRef}
+                            type="file"
+                            accept="image/png,image/webp,image/svg+xml"
+                            onChange={handleUploadImage}
+                            hidden
                           />
-                          <RichTextEditor
-                            label="Ожидаемый результат"
-                            value={activeSlide.expected_result_html}
-                            onChange={(expected_result_html) => patchActiveSlide({ expected_result_html })}
-                            rows={2}
-                            editorMode="lesson"
-                            compact
-                            toolbarMode="full"
+                          <AuthorSlideEditors
+                            ref={slideEditorsRef}
+                            slideId={activeSlide.id}
+                            instructionHtml={lesson.instruction_html}
+                            captionHtml={activeSlide.caption_html}
+                            expectedResultHtml={activeSlide.expected_result_html}
+                            busy={busy}
+                            onInstructionChange={handleInstructionChange}
+                            onSlidePatch={handleSlideEditorsPatch}
+                            onUploadClick={() => uploadInputRef.current?.click()}
+                            onDuplicate={() => void handleDuplicateSlide()}
+                            onDelete={() => setPendingConfirm("slide")}
                           />
-                        </div>
+                        </>
                       )}
                     </>
                   )}

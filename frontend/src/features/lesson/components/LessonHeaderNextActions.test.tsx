@@ -116,8 +116,8 @@ describe("LessonHeaderNextActions", () => {
     });
 
     const buttons = container.querySelectorAll('[role="group"] button');
-    act(() => buttons[0]?.click());
-    act(() => buttons[1]?.click());
+    act(() => (buttons[0] as HTMLButtonElement).click());
+    act(() => (buttons[1] as HTMLButtonElement).click());
 
     expect(onNavigate).toHaveBeenCalledWith("/lessons/lesson-02");
     expect(onComplete).toHaveBeenCalledTimes(1);

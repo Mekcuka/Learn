@@ -189,4 +189,40 @@ describe("HotspotEditorProperties", () => {
     expect(proseMirror!.innerHTML).toMatch(/font-size:\s*24px/);
     expect(document.querySelector(".hotspot-pin-dot")).toBeNull();
   });
+
+  it("shows zoom scale field for zoom hotspot", () => {
+    renderProperties({
+      ...regionHotspot,
+      id: "zoom-1",
+      kind: "zoom",
+      label: "Увеличение",
+    });
+
+    expect(container.textContent).toContain("Масштаб увеличения");
+    expect(container.textContent).not.toContain("Пульс");
+
+    const scaleInput = container.querySelector('input[type="number"]') as HTMLInputElement;
+    expect(scaleInput).not.toBeNull();
+    expect(scaleInput.value).toBe("1");
+  });
+
+  it("updates zoom_scale on change", () => {
+    renderProperties({
+      ...regionHotspot,
+      id: "zoom-1",
+      kind: "zoom",
+    });
+
+    const scaleInput = container.querySelector('input[type="number"]') as HTMLInputElement;
+    const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+
+    act(() => {
+      valueSetter?.call(scaleInput, "2.5");
+      scaleInput.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
+    const zoomUpdate = onUpdate.mock.calls.find((call) => call[1].zoom_scale !== undefined);
+    expect(zoomUpdate).toBeTruthy();
+    expect(zoomUpdate![1].zoom_scale).toBe(2.5);
+  });
 });

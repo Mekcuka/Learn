@@ -73,6 +73,7 @@ export type HotspotItem = {
   description_html?: string;
   callout_width?: CalloutWidth;
   callout_side?: CalloutSide;
+  zoom_scale?: number;
 };
 export type LessonSlide = {
   id: string;

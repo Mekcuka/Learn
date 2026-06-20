@@ -26,6 +26,13 @@ import {
   isRectHotspot,
 } from "../../../utils/hotspots";
 import RichTextEditor from "./RichTextEditor";
+import {
+  clampZoomScale,
+  DEFAULT_ZOOM_SCALE,
+  getHotspotZoomScale,
+  MAX_ZOOM_SCALE,
+  MIN_ZOOM_SCALE,
+} from "../../../utils/hotspotZoomCrop";
 
 type HotspotEditorPropertiesProps = {
   hotspot: HotspotItem | null;
@@ -145,6 +152,30 @@ const HotspotEditorProperties = memo(function HotspotEditorProperties({
               </Select>
             </FormControl>
           </>
+        ) : null}
+
+        {kind === "zoom" ? (
+          <TextField
+            size="small"
+            type="number"
+            label="Масштаб увеличения"
+            helperText={`${DEFAULT_ZOOM_SCALE} — по умолчанию, больше — сильнее увеличение`}
+            value={getHotspotZoomScale(hotspot)}
+            slotProps={{
+              htmlInput: {
+                min: MIN_ZOOM_SCALE,
+                max: MAX_ZOOM_SCALE,
+                step: 0.25,
+              },
+            }}
+            onChange={(event) => {
+              const parsed = Number.parseFloat(event.target.value);
+              if (Number.isFinite(parsed)) {
+                onUpdate(hotspot.id, { zoom_scale: clampZoomScale(parsed) });
+              }
+            }}
+            fullWidth
+          />
         ) : null}
 
         <div className="hotspot-editor-properties-actions">

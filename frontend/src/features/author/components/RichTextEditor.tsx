@@ -1,7 +1,7 @@
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, useEditorState } from "@tiptap/react";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { nextFootnoteNumber, sanitizeContentHtml } from "../../wiki/utils/contentHtml";
 import { AlertModal, CalloutTypeModal, PromptModal } from "../../../components/mui/PromptModal";
@@ -44,7 +44,7 @@ type EditorModal =
   | { kind: "alert"; title: string; message: string }
   | null;
 
-export default function RichTextEditor({
+function RichTextEditor({
   label,
   value,
   onChange,
@@ -55,6 +55,8 @@ export default function RichTextEditor({
   compact = false,
   toolbarMode,
 }: RichTextEditorProps) {
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
   const mode: EditorMode = editorMode ?? (enableImages ? "wiki" : "lesson");
   const imagesEnabled = mode === "wiki" || enableImages;
   const resolvedToolbarMode: ToolbarMode = toolbarMode ?? (compact ? "minimal" : "full");
@@ -72,15 +74,17 @@ export default function RichTextEditor({
   });
 
   const extensions = useMemo(
-    () => createEditorExtensions(mode, imagesEnabled, setSlashState),
-    [mode, imagesEnabled],
+    () => createEditorExtensions(mode, imagesEnabled, setSlashState, { lightweight: compact }),
+    [mode, imagesEnabled, compact],
   );
 
   const editor = useEditor({
     extensions,
     content: value || "<p></p>",
+    immediatelyRender: true,
+    shouldRerenderOnTransaction: false,
     onUpdate: ({ editor: current }) => {
-      onChange(current.getHTML());
+      onChangeRef.current(current.getHTML());
     },
     editorProps: {
       attributes: {
@@ -283,7 +287,10 @@ export default function RichTextEditor({
     setSourceMode(false);
   }
 
-  const charCount = editor?.storage.characterCount?.characters?.() ?? 0;
+  const charCount = useEditorState({
+    editor,
+    selector: ({ editor: current }) => current?.storage.characterCount?.characters?.() ?? 0,
+  }) ?? 0;
   const slashRect = slashState.clientRect?.();
 
   return (
@@ -429,3 +436,5 @@ export default function RichTextEditor({
     </div>
   );
 }
+
+export default memo(RichTextEditor);

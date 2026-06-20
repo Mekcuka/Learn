@@ -36,11 +36,11 @@ vi.mock("../features/author/components/AuthorStoryboardView", () => ({ default: 
 vi.mock("../features/author/components/HotspotEditor", () => ({ default: () => null }));
 vi.mock("../features/lesson/components/LessonScreenshotHintsPanel", () => ({ default: () => null }));
 vi.mock("../features/lesson/components/LessonSlideView", () => ({ default: () => null }));
-const { RichTextEditorMock } = vi.hoisted(() => ({
-  RichTextEditorMock: vi.fn(() => null),
+const { AuthorSlideEditorsMock } = vi.hoisted(() => ({
+  AuthorSlideEditorsMock: vi.fn(() => null),
 }));
 
-vi.mock("../features/author/components/RichTextEditor", () => ({ default: RichTextEditorMock }));
+vi.mock("../features/author/components/AuthorSlideEditors", () => ({ default: AuthorSlideEditorsMock }));
 
 import AuthorLessonPage from "./AuthorLessonPage";
 
@@ -192,7 +192,7 @@ describe("AuthorLessonPage", () => {
     expect(container.querySelector(".page-status-error")).toBeNull();
   });
 
-  it("does not enable rich text preview in slide editor fields", async () => {
+  it("renders debounced slide editors with full toolbars", async () => {
     await act(async () => {
       root.render(
         <AppTheme>
@@ -209,15 +209,19 @@ describe("AuthorLessonPage", () => {
       await new Promise((resolve) => setTimeout(resolve, 50));
     });
 
-    const slideFieldCalls = RichTextEditorMock.mock.calls.filter(([props]) =>
-      ["Подсказка", "Ожидаемый результат"].includes(props.label),
-    );
-
-    expect(slideFieldCalls).toHaveLength(2);
-    for (const [props] of slideFieldCalls) {
-      expect(props.showPreview).toBeFalsy();
-      expect(props.toolbarMode).toBe("full");
-      expect(props.compact).toBe(true);
-    }
+    expect(AuthorSlideEditorsMock).toHaveBeenCalled();
+    type SlideEditorProps = {
+      slideId: string;
+      instructionHtml: string;
+      captionHtml: string;
+      expectedResultHtml: string;
+    };
+    const lastCall = AuthorSlideEditorsMock.mock.calls.at(-1) as [SlideEditorProps] | undefined;
+    expect(lastCall).toBeDefined();
+    const props = lastCall![0];
+    expect(props.slideId).toBe("s1");
+    expect(props.instructionHtml).toBe("");
+    expect(props.captionHtml).toBe("");
+    expect(props.expectedResultHtml).toBe("");
   });
 });

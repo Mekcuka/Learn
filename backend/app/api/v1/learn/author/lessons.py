@@ -8,7 +8,9 @@ from app.db import get_db
 from app.models.lesson import Lesson, LessonSlide, LessonState
 from app.models.lesson_revision import LessonRevision
 from app.models.module import Module
+from app.models.progress import UserProgress
 from app.models.user import User
+from app.models.verify_audit_log import VerifyAuditLog
 from app.schemas.author import (
     AuthorLessonDetail,
     CreateLessonRequest,
@@ -125,9 +127,21 @@ def delete_lesson(
     _: Annotated[User, Depends(get_current_author)],
 ):
     lesson = get_lesson_or_404(db, lesson_id)
-    db.query(LessonState).filter(LessonState.lesson_id == lesson_id).delete()
-    db.query(LessonSlide).filter(LessonSlide.lesson_id == lesson_id).delete()
-    db.query(LessonRevision).filter(LessonRevision.lesson_id == lesson_id).delete()
+    state_ids = [
+        row[0]
+        for row in db.query(LessonState.id).filter(LessonState.lesson_id == lesson_id).all()
+    ]
+    if state_ids:
+        db.query(VerifyAuditLog).filter(VerifyAuditLog.lesson_state_id.in_(state_ids)).delete(
+            synchronize_session=False,
+        )
+    db.query(LessonState).filter(LessonState.lesson_id == lesson_id).delete(synchronize_session=False)
+    db.query(UserProgress).filter(UserProgress.current_lesson_id == lesson_id).update(
+        {UserProgress.current_lesson_id: None},
+        synchronize_session=False,
+    )
+    db.query(LessonSlide).filter(LessonSlide.lesson_id == lesson_id).delete(synchronize_session=False)
+    db.query(LessonRevision).filter(LessonRevision.lesson_id == lesson_id).delete(synchronize_session=False)
     db.delete(lesson)
     db.commit()
     return None

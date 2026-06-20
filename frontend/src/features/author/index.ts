@@ -14,6 +14,5 @@ export { default as SlashCommandList } from "./components/SlashCommandList";
 export { default as SlideReorderList } from "./components/SlideReorderList";
 export { default as ScreenshotToolbar } from "./components/ScreenshotToolbar";
 export { default as VerifyConfigForm } from "./components/VerifyConfigForm";
-export { useAuthorSlideAutosave } from "./hooks/useAuthorSlideAutosave";
 export { default as AuthorLessonPage } from "./pages/AuthorLessonPage";
 export { default as AuthorModulesPage } from "./pages/AuthorModulesPage";

@@ -706,7 +706,7 @@
   overflow: hidden;
 }
 
-.author-constructor-hotspots .lesson-screenshot-hints-panel .lesson-hints-hint {
+.author-constructor-hotspots .lesson-screenshot-hints-panel .lesson-hints-helper {
   flex-shrink: 0;
 }
 

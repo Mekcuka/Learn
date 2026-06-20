@@ -352,6 +352,36 @@ def validate_hotspots(hotspots: list[dict]) -> list[dict]:
                 )
             if kind == "pin" and callout_side != "auto":
                 entry["callout_side"] = str(callout_side)
+        zoom_scale_raw = item.get("zoom_scale")
+        if zoom_scale_raw not in (None, ""):
+            if kind != "zoom":
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail={
+                        "detail": "validation_error",
+                        "message": "zoom_scale допустим только для hotspot kind=zoom",
+                    },
+                )
+            try:
+                zoom_scale = float(zoom_scale_raw)
+            except (TypeError, ValueError) as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail={
+                        "detail": "validation_error",
+                        "message": "zoom_scale должен быть числом",
+                    },
+                ) from exc
+            if zoom_scale < 0.5 or zoom_scale > 5.0:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail={
+                        "detail": "validation_error",
+                        "message": "zoom_scale должен быть от 0.5 до 5",
+                    },
+                )
+            if abs(zoom_scale - 1.0) > 0.001:
+                entry["zoom_scale"] = zoom_scale
         validated.append(entry)
     return validated
 

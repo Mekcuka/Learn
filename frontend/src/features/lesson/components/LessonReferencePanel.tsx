@@ -134,14 +134,6 @@ export default function LessonReferencePanel({
         )}
       </div>
 
-      {hasSlideContext && (
-        <div className="lesson-ref-slide-bar">
-          <Typography variant="body2" fontWeight={600} className="lesson-ref-slide-title">
-            {slide!.title}
-          </Typography>
-        </div>
-      )}
-
       {!hasPrimaryContent && (
         <div className="lesson-ref-empty">
           <Typography variant="body2" color="text.secondary">

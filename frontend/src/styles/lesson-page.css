@@ -416,8 +416,7 @@
 }
 
 .panel-sticky,
-.lesson-reference-panel,
-.lesson-screenshot-hints-panel {
+.lesson-reference-panel {
   position: sticky;
   top: 1rem;
   display: flex;
@@ -430,6 +429,19 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+}
+
+.lesson-screenshot-hints-panel {
+  position: sticky;
+  top: 1rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
+  max-height: calc(100dvh - 2rem);
+  box-shadow: 0 1px 3px rgb(15 23 42 / 6%);
+  overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 .lesson-reference-panel {
@@ -487,22 +499,6 @@
 
 .lesson-ref-empty {
   padding: var(--lesson-ref-pad-y) var(--lesson-ref-pad-x);
-}
-
-.lesson-ref-slide-bar {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  padding: 0.55rem var(--lesson-ref-pad-x) 0.65rem;
-  border-bottom: 1px solid var(--lesson-ref-border);
-  background: var(--lesson-ref-bg);
-}
-
-.lesson-ref-slide-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  line-height: 1.35;
-  color: var(--lesson-ref-typo) !important;
 }
 
 .lesson-ref-section {
@@ -641,9 +637,14 @@
   --lesson-hints-typo: var(--color-typo-primary, #1a1a1a);
   --lesson-hints-typo-muted: var(--color-typo-secondary, var(--text-muted));
   --lesson-hints-accent: var(--color-typo-brand, var(--accent));
-  --lesson-hints-accent-bg: var(--color-bg-brand, var(--accent-soft));
+  --lesson-hints-accent-bg: color-mix(
+    in srgb,
+    var(--color-bg-brand, var(--accent-soft)) 48%,
+    var(--color-bg-default, #fff)
+  );
+  --lesson-hints-accent-border: color-mix(in srgb, var(--lesson-hints-accent) 72%, var(--lesson-hints-bg));
   --lesson-hints-radius: var(--control-radius, 12px);
-  --lesson-hints-pad-x: 1rem;
+  --lesson-hints-pad-x: 0.85rem;
   --lesson-hints-pad-y: 0.75rem;
 
   border: 1px solid var(--lesson-hints-border);
@@ -658,6 +659,7 @@
   --lesson-ref-pad-x: var(--lesson-hints-pad-x);
   --lesson-ref-pad-y: var(--lesson-hints-pad-y);
 
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -671,7 +673,8 @@
 .lesson-hints-header-main {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.5rem;
   width: 100%;
   min-width: 0;
 }
@@ -679,8 +682,15 @@
 .lesson-hints-body {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--lesson-hints-border) 70%, transparent) transparent;
 }
 
 .lesson-screenshot-hints-panel .lesson-panel-header-title {
@@ -689,30 +699,68 @@
   color: var(--lesson-hints-accent) !important;
 }
 
-.lesson-hints-count {
+.lesson-hints-count-chip {
   flex-shrink: 0;
+  height: 1.35rem !important;
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+  background: var(--lesson-hints-bg) !important;
+  border: 1px solid var(--lesson-hints-border) !important;
 }
 
-.lesson-hints-hint {
-  display: block;
-  padding: 0.5rem var(--lesson-hints-pad-x) 0;
-  line-height: 1.35;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+.lesson-hints-helper {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.55rem var(--lesson-hints-pad-x);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--lesson-hints-typo-muted);
+  background: var(--lesson-hints-bg-subtle);
+  border-bottom: 1px solid var(--lesson-hints-border);
+}
+
+.lesson-hints-helper-icon {
+  flex-shrink: 0;
+  width: 1rem !important;
+  height: 1rem !important;
+  margin-top: 0.05rem;
+  color: var(--lesson-hints-accent);
+  opacity: 0.85;
 }
 
 .lesson-hints-empty {
-  padding: var(--lesson-hints-pad-y) var(--lesson-hints-pad-x);
+  margin: var(--lesson-hints-pad-y) var(--lesson-hints-pad-x);
+  padding: 1rem 0.85rem;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  align-items: center;
+  gap: 0.4rem;
   min-width: 0;
+  text-align: center;
+  border: 1px dashed color-mix(in srgb, var(--lesson-hints-border) 85%, var(--lesson-hints-accent));
+  border-radius: var(--lesson-hints-radius);
+  background: var(--lesson-hints-bg-subtle);
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+.lesson-hints-empty-icon {
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+  color: var(--lesson-hints-typo-muted);
+  opacity: 0.55;
 }
 
 .lesson-hints-empty-title {
   color: var(--lesson-hints-typo);
+}
+
+.lesson-hints-empty-text {
+  max-width: 16rem;
+  line-height: 1.45;
 }
 
 .lesson-hints-slide-name {
@@ -724,70 +772,142 @@
 
 .lesson-hints-list {
   margin: 0;
-  padding: 0.5rem var(--lesson-hints-pad-x) 0.65rem;
+  padding: 0.55rem var(--lesson-hints-pad-x) 0.75rem;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.45rem;
   min-width: 0;
 }
 
 .lesson-hints-item {
   min-width: 0;
-  border: 2px solid transparent;
+  border: 1px solid var(--lesson-hints-border);
   border-radius: var(--lesson-hints-radius);
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  background: var(--lesson-hints-bg);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.lesson-hints-item:not(.lesson-hints-item--active):hover {
+  border-color: color-mix(in srgb, var(--lesson-hints-accent) 35%, var(--lesson-hints-border));
+  background: color-mix(in srgb, var(--lesson-hints-accent-bg) 55%, var(--lesson-hints-bg));
 }
 
 .lesson-hints-item--active {
   background: var(--lesson-hints-accent-bg);
-  border-color: var(--lesson-hints-accent);
+  border-color: var(--lesson-hints-accent-border);
+  box-shadow: inset 3px 0 0 var(--lesson-hints-accent);
 }
 
-.lesson-hints-btn {
-  display: block;
+.lesson-hints-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  height: auto !important;
   min-height: 2.75rem;
-  justify-content: flex-start !important;
+  margin: 0;
+  padding: 0.55rem 0.65rem;
+  border: none;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   text-align: left;
-  white-space: normal !important;
-  overflow: visible;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lesson-hints-card:focus-visible {
+  outline: 2px solid var(--lesson-hints-accent);
+  outline-offset: -2px;
+}
+
+.lesson-hints-index {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  margin-top: 0.05rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--lesson-hints-accent);
+  background: color-mix(in srgb, var(--lesson-hints-accent-bg) 70%, var(--lesson-hints-bg));
+  border: 1px solid color-mix(in srgb, var(--lesson-hints-accent) 28%, var(--lesson-hints-border));
+}
+
+.lesson-hints-item--active .lesson-hints-index {
+  color: #fff;
+  background: var(--lesson-hints-accent);
+  border-color: var(--lesson-hints-accent);
+}
+
+.lesson-hints-card-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.lesson-hints-title {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--lesson-hints-typo);
   overflow-wrap: anywhere;
   word-break: break-word;
-  line-height: 1.35;
-  padding: 0.55rem 0.75rem !important;
 }
 
-.lesson-hints-btn-label {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-  width: 100%;
-  min-width: 0;
+.lesson-hints-item--active .lesson-hints-title {
+  color: var(--lesson-hints-accent);
 }
 
-.lesson-hints-item--active .lesson-hints-btn-label {
-  -webkit-line-clamp: unset;
-  display: block;
-  overflow: visible;
+.lesson-hints-chevron {
+  flex-shrink: 0;
+  width: 1.15rem !important;
+  height: 1.15rem !important;
+  margin-top: 0.15rem;
+  color: var(--lesson-hints-typo-muted);
+  transition: transform 0.2s ease, color 0.15s ease;
 }
 
-.lesson-hints-item--active .lesson-hints-btn:focus-visible {
-  outline: 2px solid var(--lesson-hints-accent);
-  outline-offset: 2px;
+.lesson-hints-chevron--open {
+  transform: rotate(180deg);
+  color: var(--lesson-hints-accent);
 }
 
-.lesson-hints-btn--pulse {
-  border-left: 3px solid var(--color-typo-warning, #f97316) !important;
-  padding-left: calc(0.75rem - 3px) !important;
+.lesson-hints-card--pulse {
+  position: relative;
+}
+
+.lesson-hints-card--pulse::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.45rem;
+  bottom: 0.45rem;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--color-typo-warning, #f97316);
+}
+
+.lesson-hints-card--pulse .lesson-hints-index {
+  border-color: color-mix(in srgb, var(--color-typo-warning, #f97316) 45%, var(--lesson-hints-border));
 }
 
 .lesson-hints-description {
-  padding: 0 0.75rem 0.55rem;
+  padding: 0 0.65rem 0.6rem 2.65rem;
   font-size: 0.8rem;
   line-height: 1.45;
   color: var(--lesson-hints-typo-muted);
@@ -796,13 +916,16 @@
   word-break: break-word;
 }
 
+.lesson-hints-card .lesson-hints-description {
+  padding: 0;
+  margin-top: 0.05rem;
+}
+
 .lesson-hints-description--collapsed {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
-  padding-top: 0;
-  margin-top: -0.15rem;
   pointer-events: none;
 }
 
@@ -829,10 +952,29 @@
 
 .lesson-hints-description-placeholder {
   display: block;
-  padding: 0 0.75rem 0.55rem;
+  padding: 0 0.65rem 0.6rem 2.65rem;
   min-width: 0;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+@media (max-width: 640px) {
+  .lesson-hints-card {
+    min-height: 2.85rem;
+    padding: 0.65rem 0.7rem;
+  }
+
+  .lesson-hints-index {
+    width: 1.55rem;
+    height: 1.55rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lesson-hints-item,
+  .lesson-hints-chevron {
+    transition: none;
+  }
 }
 
 /* Screenshot guide */

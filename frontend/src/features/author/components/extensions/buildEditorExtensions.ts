@@ -34,12 +34,15 @@ export type BuildEditorExtensionsOptions = {
   mode: EditorMode;
   enableImages: boolean;
   placeholder?: string;
+  /** Без таблиц, details, task list и счётчика — для компактных полей. */
+  lightweight?: boolean;
 };
 
 export function buildEditorExtensions({
   mode,
   enableImages,
   placeholder = "Начните писать…",
+  lightweight = false,
 }: BuildEditorExtensionsOptions): Extensions {
   const extensions: Extensions = [
     StarterKit.configure({
@@ -64,22 +67,27 @@ export function buildEditorExtensions({
     Subscript,
     Superscript,
     Typography,
-    Table.configure({ resizable: false }),
-    TableRow,
-    TableHeader,
-    TableCell,
-    Details.configure({ persist: true }),
-    DetailsSummary,
-    DetailsContent,
-    TaskList,
-    TaskItem.configure({ nested: true }),
     Callout,
     Footnote,
     Popup,
     Placeholder.configure({ placeholder }),
-    CharacterCount,
     SlashCommands.configure({ mode, enableImages }),
   ];
+
+  if (!lightweight) {
+    extensions.push(
+      Table.configure({ resizable: false }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      Details.configure({ persist: true }),
+      DetailsSummary,
+      DetailsContent,
+      TaskList,
+      TaskItem.configure({ nested: true }),
+      CharacterCount,
+    );
+  }
 
   if (enableImages) {
     extensions.push(
