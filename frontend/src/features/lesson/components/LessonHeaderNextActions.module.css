@@ -62,3 +62,10 @@
   text-overflow: ellipsis;
   max-width: 100%;
 }
+
+.completeHint {
+  margin: 0.45rem 0 0;
+  color: var(--mui-palette-error-main, #d32f2f);
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}

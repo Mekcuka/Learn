@@ -120,6 +120,13 @@
   width: 100%;
 }
 
+.lesson-complete-button__hint {
+  margin: 0.45rem 0 0;
+  color: var(--mui-palette-error-main, #d32f2f);
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
 .lesson-page-title {
   display: flex;
   flex-direction: column;

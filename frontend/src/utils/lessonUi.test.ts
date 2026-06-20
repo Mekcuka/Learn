@@ -10,7 +10,9 @@ import {
   isQuizOnlyLesson,
   maxLessonSlideIndex,
   moduleProgressLabel,
+  patchLessonCompleted,
   readStoredSlideIndex,
+  resolveCompleteLessonAction,
   resolveNextLessonNavigation,
   sanitizeStoredSlideIndex,
   shouldShowCompleteLessonButton,
@@ -297,5 +299,128 @@ describe("isOnFinalLessonStep", () => {
     expect(isOnFinalLessonStep(mixedWithQuiz, 1, false)).toBe(true);
     expect(isOnFinalLessonStep(mixedWithQuiz, 2, true)).toBe(true);
     expect(isOnFinalLessonStep(mixedWithQuiz, 0, false)).toBe(false);
+  });
+});
+
+describe("resolveCompleteLessonAction", () => {
+  const manualMultiSlide = {
+    verify: { type: "manual" as const },
+    slides: [{ id: "s1" }, { id: "s2" }],
+  };
+
+  const mixedWithQuiz = {
+    verify: { type: "quiz_passed" as const },
+    slides: [{ id: "s1" }, { id: "s2" }],
+    quiz: { questions: [{ id: "q1" }] },
+  };
+
+  const quizOnly = {
+    verify: { type: "quiz_passed" as const },
+    slides: [],
+    quiz: { questions: [{ id: "q1" }] },
+  };
+
+  it("verifies manual lessons on the final step", () => {
+    expect(
+      resolveCompleteLessonAction({
+        lesson: manualMultiSlide,
+        slideIndex: 1,
+        isOnQuizStep: false,
+        lessonStatus: "active",
+        quizPassed: false,
+      }),
+    ).toEqual({ type: "verify" });
+  });
+
+  it("routes mixed lessons from last slide to quiz with guidance", () => {
+    expect(
+      resolveCompleteLessonAction({
+        lesson: mixedWithQuiz,
+        slideIndex: 1,
+        isOnQuizStep: false,
+        lessonStatus: "active",
+        quizPassed: false,
+      }),
+    ).toEqual({
+      type: "goToQuiz",
+      message: "Перед завершением ответьте на вопросы квиза.",
+    });
+  });
+
+  it("requires quiz submission before completing quiz-based lessons", () => {
+    expect(
+      resolveCompleteLessonAction({
+        lesson: mixedWithQuiz,
+        slideIndex: 2,
+        isOnQuizStep: true,
+        lessonStatus: "active",
+        quizPassed: false,
+      }),
+    ).toEqual({
+      type: "requireQuiz",
+      message: "Сначала отправьте ответы на квиз.",
+    });
+
+    expect(
+      resolveCompleteLessonAction({
+        lesson: quizOnly,
+        slideIndex: 0,
+        isOnQuizStep: false,
+        lessonStatus: "active",
+        quizPassed: false,
+      }),
+    ).toEqual({
+      type: "requireQuiz",
+      message: "Сначала отправьте ответы на квиз.",
+    });
+  });
+
+  it("reloads quiz-based lessons after quiz is passed instead of calling verify", () => {
+    expect(
+      resolveCompleteLessonAction({
+        lesson: mixedWithQuiz,
+        slideIndex: 2,
+        isOnQuizStep: true,
+        lessonStatus: "active",
+        quizPassed: true,
+      }),
+    ).toEqual({ type: "reload" });
+  });
+
+  it("does nothing when the lesson is already completed", () => {
+    expect(
+      resolveCompleteLessonAction({
+        lesson: manualMultiSlide,
+        slideIndex: 1,
+        isOnQuizStep: false,
+        lessonStatus: "completed",
+        quizPassed: false,
+      }),
+    ).toEqual({ type: "noop" });
+  });
+});
+
+describe("patchLessonCompleted", () => {
+  it("marks current lesson as completed in local lesson detail", () => {
+    const lesson = {
+      lesson_states: [
+        { lesson_id: "lesson-01", status: "active", completed_at: null },
+        { lesson_id: "lesson-02", status: "locked", completed_at: null },
+      ],
+      module_lessons: [
+        { id: "lesson-01", status: "active" },
+        { id: "lesson-02", status: "locked" },
+      ],
+    };
+
+    const patched = patchLessonCompleted(lesson, "lesson-01", "2026-06-20T10:00:00.000Z");
+
+    expect(patched.lesson_states[0]).toMatchObject({
+      lesson_id: "lesson-01",
+      status: "completed",
+      completed_at: "2026-06-20T10:00:00.000Z",
+    });
+    expect(patched.module_lessons[0]).toMatchObject({ id: "lesson-01", status: "completed" });
+    expect(patched.lesson_states[1]?.status).toBe("locked");
   });
 });

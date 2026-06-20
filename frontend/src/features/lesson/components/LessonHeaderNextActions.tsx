@@ -12,6 +12,7 @@ type LessonHeaderNextActionsProps = {
   showComplete: boolean;
   nextLessonNavigation: NextLessonNavigation | null;
   verifyBusy: boolean;
+  completeHint?: string | null;
   onNavigate: (path: string) => void;
   onComplete: () => void;
 };
@@ -19,11 +20,13 @@ type LessonHeaderNextActionsProps = {
 function LessonHeaderSplitButton({
   navigation,
   verifyBusy,
+  completeHint,
   onNavigate,
   onComplete,
 }: {
   navigation: Extract<NextLessonNavigation, { kind: "lesson" }>;
   verifyBusy: boolean;
+  completeHint?: string | null;
   onNavigate: (path: string) => void;
   onComplete: () => void;
 }) {
@@ -54,6 +57,11 @@ function LessonHeaderSplitButton({
           {verifyBusy ? "Завершение…" : "Завершить урок"}
         </Button>
       </div>
+      {completeHint ? (
+        <p className={styles.completeHint} role="alert">
+          {completeHint}
+        </p>
+      ) : null}
     </section>
   );
 }
@@ -63,6 +71,7 @@ export default function LessonHeaderNextActions({
   showComplete,
   nextLessonNavigation,
   verifyBusy,
+  completeHint,
   onNavigate,
   onComplete,
 }: LessonHeaderNextActionsProps) {
@@ -77,6 +86,7 @@ export default function LessonHeaderNextActions({
       <LessonHeaderSplitButton
         navigation={nextLessonNavigation}
         verifyBusy={verifyBusy}
+        completeHint={completeHint}
         onNavigate={onNavigate}
         onComplete={onComplete}
       />
@@ -88,7 +98,7 @@ export default function LessonHeaderNextActions({
   }
 
   if (showComplete) {
-    return <LessonCompleteButton busy={verifyBusy} onComplete={onComplete} />;
+    return <LessonCompleteButton busy={verifyBusy} hint={completeHint} onComplete={onComplete} />;
   }
 
   return null;

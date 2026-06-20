@@ -63,4 +63,21 @@ describe("LessonCompleteButton", () => {
     expect(button?.textContent).toBe("Завершение…");
     expect(button?.disabled).toBe(true);
   });
+
+  it("renders validation hint when provided", () => {
+    act(() => {
+      root.render(
+        <AppTheme>
+          <LessonCompleteButton
+            busy={false}
+            hint="Сначала отправьте ответы на квиз."
+            onComplete={() => undefined}
+          />
+        </AppTheme>,
+      );
+    });
+
+    const hint = container.querySelector(".lesson-complete-button__hint");
+    expect(hint?.textContent).toBe("Сначала отправьте ответы на квиз.");
+  });
 });

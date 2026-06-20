@@ -42,6 +42,7 @@ export default function LessonPage() {
     goToSlide,
     selectHotspot,
     startVerify,
+    completeLesson,
     handleQuizSubmit,
     setFeedback,
   } = useLessonProgress({ lessonId, isPreview, isDraftPreview });
@@ -92,22 +93,11 @@ export default function LessonPage() {
     isPreview,
     isOnQuizStep,
   });
+  const completeHint =
+    feedback?.status === "failed" && showCompleteButton ? feedback.message : null;
 
   function handleCompleteLesson() {
-    if (isMixedLesson && !isOnQuizStep && slideIndex >= lesson.slides.length - 1) {
-      goToSlide(lesson.slides.length);
-      return;
-    }
-
-    if (isQuizLesson && !quizResult?.passed) {
-      setFeedback({
-        status: "failed",
-        message: "Сначала отправьте ответы на квиз.",
-      });
-      return;
-    }
-
-    void startVerify();
+    void completeLesson();
   }
 
   function roadmapLinkTo(targetLessonId: string): string {
@@ -135,6 +125,7 @@ export default function LessonPage() {
         showHintsColumn={showHintsColumn}
         nextLessonNavigation={nextLessonNavigation}
         showCompleteButton={showCompleteButton}
+        completeHint={completeHint}
         verifyBusy={verifyBusy}
         onBack={() => navigate("/dashboard")}
         onNavigate={(path) => navigate(path)}

@@ -97,6 +97,80 @@ export function shouldShowCompleteLessonButton({
   return isOnFinalLessonStep(lesson, slideIndex, isOnQuizStep);
 }
 
+export type CompleteLessonAction =
+  | { type: "verify" }
+  | { type: "goToQuiz"; message: string }
+  | { type: "requireQuiz"; message: string }
+  | { type: "reload" }
+  | { type: "noop" };
+
+export type CompleteLessonContext = {
+  lesson: LessonSlideNavLesson;
+  slideIndex: number;
+  isOnQuizStep: boolean;
+  lessonStatus?: string;
+  quizPassed: boolean;
+};
+
+/** Resolves what the header «Завершить урок» action should do for the current step. */
+export function resolveCompleteLessonAction({
+  lesson,
+  slideIndex,
+  isOnQuizStep,
+  lessonStatus,
+  quizPassed,
+}: CompleteLessonContext): CompleteLessonAction {
+  if (lessonStatus === "completed") {
+    return { type: "noop" };
+  }
+
+  const mixed = isMixedQuizLesson(lesson);
+  const quizOnly = isQuizOnlyLesson(lesson);
+
+  if (mixed && !isOnQuizStep && slideIndex >= lesson.slides.length - 1) {
+    return {
+      type: "goToQuiz",
+      message: "Перед завершением ответьте на вопросы квиза.",
+    };
+  }
+
+  if ((mixed || quizOnly) && !quizPassed) {
+    return {
+      type: "requireQuiz",
+      message: "Сначала отправьте ответы на квиз.",
+    };
+  }
+
+  if (mixed || quizOnly) {
+    return { type: "reload" };
+  }
+
+  if (isManualVerifyLesson(lesson.verify.type)) {
+    return { type: "verify" };
+  }
+
+  return { type: "verify" };
+}
+
+export function patchLessonCompleted<
+  T extends {
+    lesson_states: Array<{ lesson_id: string; status: string; completed_at: string | null }>;
+    module_lessons: Array<{ id: string; status: string }>;
+  },
+>(lesson: T, lessonId: string, completedAt = new Date().toISOString()): T {
+  return {
+    ...lesson,
+    lesson_states: lesson.lesson_states.map((state) =>
+      state.lesson_id === lessonId
+        ? { ...state, status: "completed", completed_at: completedAt }
+        : state,
+    ),
+    module_lessons: lesson.module_lessons.map((item) =>
+      item.id === lessonId ? { ...item, status: "completed" } : item,
+    ),
+  };
+}
+
 export type LessonSlideNavLesson = {
   verify: { type: string };
   slides: unknown[];

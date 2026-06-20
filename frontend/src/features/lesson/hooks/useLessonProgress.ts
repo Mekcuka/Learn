@@ -10,6 +10,9 @@ import {
 import type { LessonDetail } from "../../../types/lesson";
 import {
   clampLessonSlideIndex,
+  isMixedQuizLesson,
+  patchLessonCompleted,
+  resolveCompleteLessonAction,
   sanitizeStoredSlideIndex,
   slideStorageKey,
 } from "../../../utils/lessonUi";
@@ -61,6 +64,13 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
     }
   }, [isDraftPreview, isPreview, lessonId]);
 
+  const reloadLessonAfterVerify = useCallback(async () => {
+    if (lessonId) {
+      setLesson((prev) => (prev ? patchLessonCompleted(prev, lessonId) : prev));
+    }
+    await loadLesson();
+  }, [lessonId, loadLesson]);
+
   const {
     feedback,
     verifyBusy,
@@ -72,7 +82,7 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
   } = useLessonVerify({
     lessonId,
     isPreview,
-    onLessonReload: loadLesson,
+    onLessonReload: reloadLessonAfterVerify,
   });
 
   useEffect(() => {
@@ -183,7 +193,9 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
     goToSlide(slideIndex - 1);
   }, [goToSlide, slideIndex]);
 
-  const lessonState = lesson?.lesson_states.find((item) => item.lesson_id === lesson.id);
+  const lessonState = lesson?.lesson_states.find(
+    (item) => item.lesson_id === (lessonId ?? lesson.id),
+  );
 
   const phase: LessonProgressPhase = loading
     ? "loading"
@@ -194,6 +206,49 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
         : isVerifying
           ? "verifying"
           : "active";
+
+  const completeLesson = useCallback(async () => {
+    if (!lesson || !lessonId || isPreview) {
+      return;
+    }
+
+    const action = resolveCompleteLessonAction({
+      lesson,
+      slideIndex,
+      isOnQuizStep: isMixedQuizLesson(lesson) && slideIndex >= lesson.slides.length,
+      lessonStatus: lessonState?.status,
+      quizPassed: Boolean(quizResult?.passed),
+    });
+
+    switch (action.type) {
+      case "goToQuiz":
+        setFeedback({ status: "failed", message: action.message });
+        goToSlide(lesson.slides.length);
+        return;
+      case "requireQuiz":
+        setFeedback({ status: "failed", message: action.message });
+        return;
+      case "reload":
+        await loadLesson();
+        return;
+      case "verify":
+        await startVerify();
+        return;
+      case "noop":
+        return;
+    }
+  }, [
+    goToSlide,
+    isPreview,
+    lesson,
+    lessonId,
+    lessonState?.status,
+    loadLesson,
+    quizResult?.passed,
+    setFeedback,
+    slideIndex,
+    startVerify,
+  ]);
 
   async function handleQuizSubmit(answers: Record<string, string[]>) {
     if (!lesson || !lessonId || !lesson.quiz) {
@@ -225,6 +280,7 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
       setQuizResult(result);
 
       if (result.lesson_completed) {
+        setLesson((prev) => (prev && lessonId ? patchLessonCompleted(prev, lessonId) : prev));
         await loadLesson();
       }
     } catch (err) {
@@ -250,6 +306,7 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
     loadLesson,
     startVerify,
     completeManual,
+    completeLesson,
     nextSlide,
     prevSlide,
     goToSlide,
