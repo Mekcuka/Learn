@@ -147,7 +147,7 @@ describe("LessonHeaderNextActions", () => {
     expect(container.querySelector('[role="group"]')).toBeNull();
   });
 
-  it("reserves complete hint slot in split bar without shifting buttons", () => {
+  it("shows complete hint overlay without shifting split bar", () => {
     renderActions({
       showComplete: true,
       upcomingLessonNavigation: { kind: "lesson", lessonId: "lesson-02", title: "Создание проекта" },
@@ -156,9 +156,7 @@ describe("LessonHeaderNextActions", () => {
     const splitGroup = container.querySelector('[role="group"]');
     const topWithoutHint = splitGroup?.getBoundingClientRect().top;
 
-    const hintSlot = container.querySelector('[class*="completeHintSlot"]');
-    expect(hintSlot).not.toBeNull();
-    expect(hintSlot?.getAttribute("aria-hidden")).toBe("true");
+    expect(container.querySelector('[role="alert"]')).toBeNull();
 
     renderActions({
       showComplete: true,
@@ -168,6 +166,6 @@ describe("LessonHeaderNextActions", () => {
 
     const splitGroupWithHint = container.querySelector('[role="group"]');
     expect(splitGroupWithHint?.getBoundingClientRect().top).toBe(topWithoutHint);
-    expect(container.textContent).toContain("Сначала отправьте ответы на квиз.");
+    expect(container.querySelector('[role="alert"]')?.textContent).toBe("Сначала отправьте ответы на квиз.");
   });
 });

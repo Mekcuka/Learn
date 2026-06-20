@@ -20,5 +20,4 @@
   --catalog-module-grid-gap: 1rem;
   --lesson-ref-width: clamp(260px, 22vw, 320px);
   --lesson-hints-width: clamp(240px, 18vw, 280px);
-  --lesson-complete-hint-slot-height: calc(0.45rem + 0.8125rem * 1.35 * 2);
 }

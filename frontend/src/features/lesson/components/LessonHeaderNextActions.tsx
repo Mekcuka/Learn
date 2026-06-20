@@ -66,13 +66,11 @@ function LessonHeaderSplitButton({
           </Button>
         )}
       </div>
-      <div className={styles.completeHintSlot} aria-hidden={!completeHint}>
-        {completeHint ? (
-          <p className={styles.completeHint} role="alert">
-            {completeHint}
-          </p>
-        ) : null}
-      </div>
+      {completeHint ? (
+        <p className={styles.completeHint} role="alert">
+          {completeHint}
+        </p>
+      ) : null}
     </section>
   );
 }
