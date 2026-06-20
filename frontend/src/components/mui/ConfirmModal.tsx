@@ -1,5 +1,6 @@
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
 
 import { BaseModal } from "./BaseModal";
 
@@ -7,6 +8,7 @@ type ConfirmModalProps = {
   isOpen: boolean;
   title: string;
   message: string;
+  error?: string | null;
   confirmLabel?: string;
   cancelLabel?: string;
   danger?: boolean;
@@ -19,6 +21,7 @@ export function ConfirmModal({
   isOpen,
   title,
   message,
+  error = null,
   confirmLabel = "Подтвердить",
   cancelLabel = "Отмена",
   danger = false,
@@ -48,6 +51,12 @@ export function ConfirmModal({
           </Button>
         </>
       }
-    />
+    >
+      {error ? (
+        <Typography color="error" role="alert">
+          {error}
+        </Typography>
+      ) : null}
+    </BaseModal>
   );
 }

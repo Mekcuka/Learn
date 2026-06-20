@@ -7,7 +7,7 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import AppTheme from "../../../components/mui/AppTheme";
-import type { DashboardResponse } from "../../../api/learnApi";
+import { LearnApiError, type DashboardResponse } from "../../../api/learnApi";
 
 const getDashboard = vi.fn();
 const resetProgress = vi.fn();
@@ -120,9 +120,7 @@ describe("StudentProfilePage", () => {
     expect(container.textContent).toContain("Сбросить статистику");
   });
 
-  it("opens confirm modal and resets stats", async () => {
-    await renderPage();
-
+  async function openConfirmModal() {
     const resetButton = Array.from(container.querySelectorAll("button")).find((button) =>
       button.textContent?.includes("Сбросить статистику"),
     );
@@ -139,14 +137,37 @@ describe("StudentProfilePage", () => {
       (button) => button.textContent === "Сбросить",
     );
     expect(confirmButton).toBeTruthy();
+    return confirmButton!;
+  }
+
+  it("opens confirm modal and resets stats", async () => {
+    await renderPage();
+
+    const confirmButton = await openConfirmModal();
 
     await act(async () => {
-      confirmButton!.click();
+      confirmButton.click();
       await Promise.resolve();
     });
 
     expect(resetProgress).toHaveBeenCalledTimes(1);
     expect(getDashboard).toHaveBeenCalledTimes(2);
     expect(document.body.textContent).toContain("Статистика уроков сброшена");
+  });
+
+  it("shows reset error in confirm modal when API fails", async () => {
+    resetProgress.mockRejectedValue(new LearnApiError(500, "Не удалось сбросить статистику"));
+    await renderPage();
+
+    const confirmButton = await openConfirmModal();
+
+    await act(async () => {
+      confirmButton.click();
+      await Promise.resolve();
+    });
+
+    expect(resetProgress).toHaveBeenCalledTimes(1);
+    expect(document.body.textContent).toContain("Не удалось сбросить статистику");
+    expect(document.body.textContent).toContain("Сбросить статистику?");
   });
 });

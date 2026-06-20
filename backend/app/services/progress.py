@@ -3,9 +3,9 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from app.models.lesson import Lesson
+from app.models.lesson import Lesson, LessonState
 from app.models.progress import UserProgress
-from app.models.lesson import LessonState
+from app.models.verify_audit_log import VerifyAuditLog
 
 
 def get_or_create_progress(db: Session, user_id: UUID, module_id: str) -> UserProgress:
@@ -173,6 +173,16 @@ def reset_user_lesson_progress(db: Session, user_id: UUID) -> int:
         return 0
 
     progress_ids = [progress.id for progress in progress_records]
+    state_ids = [
+        row[0]
+        for row in db.query(LessonState.id)
+        .filter(LessonState.user_progress_id.in_(progress_ids))
+        .all()
+    ]
+    if state_ids:
+        db.query(VerifyAuditLog).filter(VerifyAuditLog.lesson_state_id.in_(state_ids)).delete(
+            synchronize_session=False,
+        )
     db.query(LessonState).filter(LessonState.user_progress_id.in_(progress_ids)).delete(
         synchronize_session=False
     )

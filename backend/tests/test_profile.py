@@ -1,4 +1,7 @@
-def test_reset_progress_clears_lesson_stats(client, student_headers):
+from app.models.verify_audit_log import VerifyAuditLog
+
+
+def test_reset_progress_clears_lesson_stats(client, student_headers, db_session):
     lesson_id = "lesson-01-login-context"
 
     start = client.post(f"/api/v1/learn/lessons/{lesson_id}/start", headers=student_headers)
@@ -12,6 +15,7 @@ def test_reset_progress_clears_lesson_stats(client, student_headers):
     assert dashboard_before.status_code == 200
     module = dashboard_before.json()["modules"][0]
     assert module["completed_lessons"] >= 1
+    assert db_session.query(VerifyAuditLog).count() >= 1
 
     reset = client.post("/api/v1/learn/profile/reset-progress", headers=student_headers)
     assert reset.status_code == 200
@@ -25,6 +29,7 @@ def test_reset_progress_clears_lesson_stats(client, student_headers):
     assert module_after["completed_lessons"] == 0
     assert module_after["progress_percent"] == 0
     assert module_after["lessons"][0]["status"] == "active"
+    assert db_session.query(VerifyAuditLog).count() == 0
 
 
 def test_reset_progress_requires_auth(client):
