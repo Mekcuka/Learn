@@ -193,5 +193,6 @@ describe("HotspotEditorProperties", () => {
     expect(descriptionUpdate).toBeTruthy();
     expect(descriptionUpdate![1].description_html).toMatch(/font-size:\s*24px/);
     expect(proseMirror!.innerHTML).toMatch(/font-size:\s*24px/);
+    expect(document.querySelector(".hotspot-pin-dot")).toBeNull();
   });
 });

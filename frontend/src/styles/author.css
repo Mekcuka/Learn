@@ -877,6 +877,11 @@
   overscroll-behavior: auto;
 }
 
+.hotspot-editor-properties-description .rich-text-content span[style*="font-size"],
+.hotspot-editor-properties-description .ProseMirror span[style*="font-size"] {
+  line-height: inherit;
+}
+
 .hotspot-editor-properties-actions {
   display: flex;
   flex-wrap: wrap;

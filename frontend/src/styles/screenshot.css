@@ -503,6 +503,8 @@ button.hotspot {
   top: 50%;
   width: 12px;
   height: 12px;
+  font-size: 12px;
+  line-height: 1;
   transform: translate(-50%, -50%);
   border-radius: 50%;
   background: #e5484d;
@@ -512,6 +514,11 @@ button.hotspot {
     background-color 0.15s ease,
     transform 0.15s ease,
     box-shadow 0.15s ease;
+}
+
+/* Author editor canvas: description rich text must not restyle the pin marker */
+.hotspot-editor-pin .hotspot-pin-callout-html [style*="font-size"] {
+  font-size: inherit !important;
 }
 
 .hotspot-pin-filled .hotspot-pin-dot {

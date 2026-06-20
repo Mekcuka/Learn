@@ -5,7 +5,13 @@ import HotspotZoneLabel from "../../lesson/components/HotspotZoneLabel";
 import ScreenshotHotspotOverlay from "../../lesson/components/ScreenshotHotspotOverlay";
 import ZoomHotspotPopup from "../../lesson/components/ZoomHotspotPopup";
 import type { HotspotItem } from "../../../types/lesson";
-import { getHotspotKind, hotspotPinFillProps, hotspotPulseAccentStyle, hotspotRectVisualStyle } from "../../../utils/hotspots";
+import {
+  getHotspotKind,
+  hotspotPinFillProps,
+  hotspotPulseAccentStyle,
+  hotspotRectVisualStyle,
+  stripInlineFontSizeFromHtml,
+} from "../../../utils/hotspots";
 import { hotspotOverlayStyle } from "../../../utils/imageContentRect";
 import { displayHotspot, zoneClassName, type DraftRect, type LiveRect } from "./hotspotEditorUtils";
 
@@ -81,7 +87,7 @@ const HotspotEditorFrame = memo(function HotspotEditorFrame({
                   {kind === "pin" ? (
                     <PinHotspotMarker
                       label={hotspot.label}
-                      descriptionHtml={hotspot.description_html}
+                      descriptionHtml={stripInlineFontSizeFromHtml(hotspot.description_html ?? "")}
                       calloutWidth={hotspot.callout_width}
                       calloutSide={hotspot.callout_side}
                       anchorXPct={display.x_pct + display.width_pct / 2}

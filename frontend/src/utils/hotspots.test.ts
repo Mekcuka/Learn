@@ -24,6 +24,7 @@ import {
   resolveCalloutSide,
   resolveZoneLabelPlacement,
   shouldFlipCallout,
+  stripInlineFontSizeFromHtml,
   PIN_CALLOUT_FLIP_THRESHOLD_PCT,
   ZONE_LABEL_EDGE_THRESHOLD_PCT,
   ZONE_LABEL_TOP_THRESHOLD_PCT,
@@ -183,5 +184,12 @@ describe("hotspot utils", () => {
       resolveZoneLabelPlacement(100 - ZONE_LABEL_EDGE_THRESHOLD_PCT, ZONE_LABEL_TOP_THRESHOLD_PCT - 1, 10, 6),
     ).toBe("below-end");
     expect(resolveZoneLabelPlacement(40, 30, 12, 8)).toBe("center");
+  });
+
+  it("strips inline font-size from hotspot description HTML for canvas preview", () => {
+    const html = '<p><span style="font-size: 24px">Подсказка</span></p>';
+    expect(stripInlineFontSizeFromHtml(html)).not.toMatch(/font-size/i);
+    expect(stripInlineFontSizeFromHtml(html)).toContain("Подсказка");
+    expect(stripInlineFontSizeFromHtml("")).toBe("");
   });
 });

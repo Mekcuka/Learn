@@ -177,6 +177,18 @@ export type PinCalloutContent =
   | { mode: "html"; html: string }
   | { mode: "label"; text: string };
 
+/** Strip inline font-size from rich HTML before editor canvas callout preview. */
+export function stripInlineFontSizeFromHtml(html: string): string {
+  if (!html?.trim()) {
+    return html;
+  }
+
+  return html
+    .replace(/\s*font-size\s*:\s*[^;"]+;?/gi, "")
+    .replace(/\s*style="\s*"/gi, "")
+    .replace(/\s*style='\s*'/gi, "");
+}
+
 /** Pin callout shows description_html; label is fallback when description is empty. */
 export function resolvePinCalloutContent(
   descriptionHtml: string | undefined,

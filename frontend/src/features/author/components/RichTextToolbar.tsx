@@ -361,6 +361,7 @@ export default function RichTextToolbar({
       >
         <MenuItem
           selected={!activeFontSize}
+          onMouseDown={preventToolbarFocusLoss}
           onClick={() => {
             unsetFontSize(editor, savedTextSelection);
             setFontSizeAnchor(null);
@@ -373,6 +374,7 @@ export default function RichTextToolbar({
           <MenuItem
             key={preset.value}
             selected={activeFontSize === preset.value}
+            onMouseDown={preventToolbarFocusLoss}
             onClick={() => {
               applyFontSize(editor, preset.value, savedTextSelection);
               setFontSizeAnchor(null);

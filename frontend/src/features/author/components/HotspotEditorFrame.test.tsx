@@ -164,4 +164,25 @@ describe("HotspotEditorFrame", () => {
     expect(container.querySelector(".hotspot-pin-callout")).toBeNull();
     expect(container.querySelector(".zoom-hotspot-overlay")).toBeNull();
   });
+
+  it("strips font-size from description HTML in editor canvas callout", () => {
+    renderFrame(
+      [
+        {
+          ...pinA,
+          description_html: '<p><span style="font-size: 24px">Крупная подсказка</span></p>',
+        },
+      ],
+      "pin-a",
+    );
+
+    const calloutHtml = container.querySelector(".hotspot-pin-callout-html");
+    expect(calloutHtml).not.toBeNull();
+    expect(calloutHtml!.innerHTML).not.toMatch(/font-size/i);
+    expect(calloutHtml!.textContent).toContain("Крупная подсказка");
+
+    const pinDot = container.querySelector(".hotspot-pin-dot") as HTMLElement | null;
+    expect(pinDot).not.toBeNull();
+    expect(pinDot!.style.fontSize).toBe("");
+  });
 });
