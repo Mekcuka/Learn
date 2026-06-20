@@ -1,5 +1,7 @@
 /* ——— Quiz ——— */
 
+@import "./content-html.css";
+
 .quiz-panel {
   border: 1px solid #e2e8f0;
   border-radius: var(--radius-card);
@@ -141,100 +143,7 @@
   min-width: auto !important;
 }
 
-/* Callout, footnote, popup — author editor + student view */
-
-.learn-callout {
-  border-radius: 8px;
-  padding: 0.75rem 0.9rem;
-  margin: 0.75rem 0;
-  border-left: 4px solid #3b82f6;
-  background: #eff6ff;
-}
-
-.learn-callout--warning {
-  border-left-color: #f59e0b;
-  background: #fffbeb;
-}
-
-.learn-callout--tip {
-  border-left-color: #10b981;
-  background: #ecfdf5;
-}
-
-.learn-callout-label {
-  display: block;
-  margin-bottom: 0.35rem;
-  font-size: 0.85rem;
-  color: #1e3a8a;
-}
-
-.learn-callout--warning .learn-callout-label {
-  color: #92400e;
-}
-
-.learn-callout--tip .learn-callout-label {
-  color: #065f46;
-}
-
-.learn-callout-body p {
-  margin: 0;
-  color: #1e293b;
-}
-
-.learn-footnote-ref {
-  font-size: 0.75em;
-  line-height: 0;
-  vertical-align: super;
-  margin-left: 0.1rem;
-}
-
-.learn-footnote-link {
-  color: #2563eb;
-  text-decoration: none;
-}
-
-.learn-footnote-link:hover {
-  text-decoration: underline;
-}
-
-.learn-footnotes {
-  margin-top: 1rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid #e2e8f0;
-}
-
-.learn-footnotes-title {
-  margin: 0 0 0.5rem;
-  font-size: 0.85rem;
-  color: #64748b;
-}
-
-.learn-footnotes-list {
-  margin: 0;
-  padding-left: 1.25rem;
-  font-size: 0.9rem;
-  color: #334155;
-}
-
-.learn-footnote-item {
-  margin-bottom: 0.35rem;
-}
-
-.learn-footnote-marker {
-  font-weight: 600;
-  margin-right: 0.25rem;
-}
-
-.learn-popup {
-  border-bottom: 1px dashed #2563eb;
-  color: #1d4ed8;
-  cursor: pointer;
-}
-
-.learn-popup:focus-visible {
-  outline: 2px solid #93c5fd;
-  outline-offset: 2px;
-}
+/* Callout, footnote, popup — see content-html.css */
 
 .lesson-html {
   position: relative;
@@ -242,19 +151,4 @@
 
 .lesson-html-body {
   position: relative;
-}
-
-.lesson-html-body .learn-popup-bubble,
-.learn-popup-bubble {
-  position: absolute;
-  z-index: 20;
-  max-width: min(20rem, 90vw);
-  padding: 0.55rem 0.7rem;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  background: #fff;
-  box-shadow: 0 8px 24px rgb(15 23 42 / 12%);
-  font-size: 0.88rem;
-  color: #1e293b;
-  line-height: 1.4;
 }

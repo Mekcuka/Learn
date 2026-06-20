@@ -327,7 +327,7 @@ export default function QuizEditor({
           return (
             <li
               key={question.id}
-              className={`author-quiz-question${isDragging ? " author-quiz-question-dragging" : ""}${isOver ? " author-quiz-question-over" : ""}`}
+              className={`author-quiz-question${isDragging ? " dnd-dragging" : ""}${isOver ? " dnd-drop-target" : ""}`}
               draggable={!disabled && !busy}
               onDragStart={(event) => handleDragStart(index, event)}
               onDragOver={(event) => handleDragOver(index, event)}

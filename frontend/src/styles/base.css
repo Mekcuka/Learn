@@ -77,3 +77,12 @@ code {
   border-radius: 4px;
 }
 
+.page-shell,
+.lesson-shell,
+.catalog-main,
+.catalog-layout--author-modules .author-modules-shell {
+  padding: clamp(1rem, 2vw, 1.75rem) var(--page-padding) clamp(2rem, 4vw, 3rem);
+  padding-left: max(var(--page-padding), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--page-padding), env(safe-area-inset-right, 0px));
+}
+

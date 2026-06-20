@@ -1,12 +1,11 @@
 /* ——— Lesson shell ——— */
 
+@import "./content-html.css";
+
 .lesson-shell {
   width: 100%;
   max-width: min(1280px, 100%);
   margin: 0 auto;
-  padding: clamp(1rem, 2vw, 1.75rem) var(--page-padding) clamp(2rem, 4vw, 3rem);
-  padding-left: max(var(--page-padding), env(safe-area-inset-left, 0px));
-  padding-right: max(var(--page-padding), env(safe-area-inset-right, 0px));
 }
 
 /* Lesson page */
@@ -333,7 +332,7 @@
 
 .catalog-layout--lesson .quiz-panel {
   flex: 1;
-  min-height: 0;
+  min-height: min(40vh, 360px);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -347,11 +346,19 @@
 
   .catalog-layout--lesson .lesson-body {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, auto) minmax(0, 1fr) minmax(0, auto);
+    grid-template-rows: minmax(0, auto) minmax(min(36vh, 320px), 1fr) minmax(0, auto);
   }
 
   .catalog-layout--lesson .lesson-body--no-hints {
-    grid-template-rows: minmax(0, auto) minmax(0, 1fr);
+    grid-template-rows: minmax(0, auto) minmax(min(42vh, 420px), 1fr);
+  }
+
+  .catalog-layout--lesson .lesson-main {
+    min-height: min(36vh, 320px);
+  }
+
+  .catalog-layout--lesson .lesson-body--no-hints .lesson-main {
+    min-height: min(42vh, 420px);
   }
 
   .catalog-layout--lesson .lesson-reference-panel {
@@ -396,6 +403,23 @@
   }
 }
 
+.panel-sticky,
+.lesson-reference-panel,
+.lesson-screenshot-hints-panel {
+  position: sticky;
+  top: 1rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
+  max-height: calc(100dvh - 2rem);
+  box-shadow: 0 1px 3px rgb(15 23 42 / 6%);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
 .lesson-reference-panel {
   --lesson-ref-border: var(--color-bg-border, var(--border));
   --lesson-ref-bg: var(--color-bg-default, #fff);
@@ -419,21 +443,9 @@
   --lesson-ref-pad-x: 0.85rem;
   --lesson-ref-pad-y: 0.75rem;
 
-  position: sticky;
-  top: 1rem;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  max-width: 100%;
-  max-height: calc(100dvh - 2rem);
   border: 1px solid var(--lesson-ref-border);
   border-radius: var(--radius-card);
   background: var(--lesson-ref-bg);
-  box-shadow: 0 1px 3px rgb(15 23 42 / 6%);
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--lesson-ref-border) 70%, transparent) transparent;
 }
@@ -643,22 +655,10 @@
   --lesson-hints-pad-x: 1rem;
   --lesson-hints-pad-y: 0.75rem;
 
-  position: sticky;
-  top: 1rem;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  max-width: 100%;
-  max-height: calc(100dvh - 2rem);
   border: 1px solid var(--lesson-hints-border);
   border-radius: var(--radius-card);
   background: var(--lesson-hints-bg);
-  box-shadow: 0 1px 3px rgb(15 23 42 / 6%);
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
   scrollbar-gutter: stable;
-  -webkit-overflow-scrolling: touch;
 }
 
 .lesson-screenshot-hints-panel .lesson-panel-header.lesson-hints-header {
@@ -849,4 +849,83 @@
 
 .slide-carousel-header strong {
   color: #1a1a1a;
+}
+
+@media (max-width: 1024px) {
+  .lesson-shell {
+    padding: 1.25rem var(--page-padding) 2.5rem;
+  }
+
+  .catalog-layout--lesson .lesson-shell {
+    padding: 0.65rem var(--page-padding) 0.65rem;
+  }
+
+  .lesson-body {
+    grid-template-columns: 1fr;
+  }
+
+  .lesson-body--no-hints {
+    grid-template-columns: 1fr;
+  }
+
+  .lesson-reference-panel {
+    position: static;
+    max-height: none;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .lesson-page-title h1 {
+    font-size: clamp(1.25rem, 5vw, 1.75rem);
+  }
+
+  .slide-carousel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .slide-nav {
+    grid-template-columns: 1fr;
+    justify-items: stretch;
+  }
+
+  .slide-nav-toolbar {
+    grid-column: 1;
+    justify-self: stretch;
+  }
+
+  .slide-nav-controls {
+    grid-column: 1;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .slide-nav-end {
+    display: none;
+  }
+
+  .slide-nav button:not(.slide-dot),
+  .slide-nav .slide-nav-btn {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .lesson-shell {
+    padding: 1rem var(--page-padding) 2rem;
+  }
+
+  .catalog-layout--lesson .lesson-shell {
+    padding: 0.5rem max(var(--page-padding), env(safe-area-inset-left, 0px)) 0.5rem
+      max(var(--page-padding), env(safe-area-inset-right, 0px));
+  }
+
+  .slide-nav button:not(.slide-dot),
+  .slide-nav .slide-nav-btn {
+    flex: 1 1 100%;
+  }
 }

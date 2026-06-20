@@ -319,8 +319,6 @@
 .catalog-main {
   container-type: inline-size;
   container-name: catalog-main;
-  padding: clamp(1rem, 2vw, 1.75rem) var(--page-padding) clamp(2rem, 4vw, 3rem);
-  padding-right: max(var(--page-padding), env(safe-area-inset-right, 0px));
   min-width: 0;
   width: 100%;
   max-width: none;
@@ -511,34 +509,6 @@
   .catalog-body {
     grid-template-columns: minmax(200px, 220px) minmax(0, 1fr);
   }
-
-  .lesson-shell {
-    padding: 1.25rem var(--page-padding) 2.5rem;
-  }
-
-  .catalog-layout--lesson .lesson-shell {
-    padding: 0.65rem var(--page-padding) 0.65rem;
-  }
-
-  .lesson-body {
-    grid-template-columns: 1fr;
-  }
-
-  .lesson-body--no-hints {
-    grid-template-columns: 1fr;
-  }
-
-  .lesson-page-header-grid,
-  .lesson-page-header-grid--no-hints {
-    grid-template-columns: 1fr;
-    align-items: stretch;
-  }
-
-  .lesson-reference-panel {
-    position: static;
-    max-height: none;
-    width: 100%;
-  }
 }
 
 /* ——— Stacked catalog (sidebar сверху) ——— */
@@ -654,43 +624,6 @@
     height: 72px;
   }
 
-  .lesson-page-title h1 {
-    font-size: clamp(1.25rem, 5vw, 1.75rem);
-  }
-
-  .slide-carousel-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
-  }
-
-  .slide-nav {
-    grid-template-columns: 1fr;
-    justify-items: stretch;
-  }
-
-  .slide-nav-toolbar {
-    grid-column: 1;
-    justify-self: stretch;
-  }
-
-  .slide-nav-controls {
-    grid-column: 1;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 100%;
-  }
-
-  .slide-nav-end {
-    display: none;
-  }
-
-  .slide-nav button:not(.slide-dot),
-  .slide-nav .slide-nav-btn {
-    flex: 1 1 calc(50% - 0.5rem);
-    min-width: 7rem;
-  }
-
   .step-actions {
     flex-direction: column;
   }
@@ -729,20 +662,6 @@
 
   .catalog-card-visual {
     display: none;
-  }
-
-  .lesson-shell {
-    padding: 1rem var(--page-padding) 2rem;
-  }
-
-  .catalog-layout--lesson .lesson-shell {
-    padding: 0.5rem max(var(--page-padding), env(safe-area-inset-left, 0px)) 0.5rem
-      max(var(--page-padding), env(safe-area-inset-right, 0px));
-  }
-
-  .slide-nav button:not(.slide-dot),
-  .slide-nav .slide-nav-btn {
-    flex: 1 1 100%;
   }
 }
 

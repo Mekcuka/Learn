@@ -14,6 +14,7 @@ import "../../../styles/author.css";
 
 import {
   createAuthorLesson,
+  deleteAuthorLesson,
   duplicateAuthorLesson,
   getAuthorModuleLessons,
   getAuthorModules,
@@ -23,9 +24,15 @@ import {
   type AuthorModule,
 } from "../../../api/authorApi";
 import { LearnApiError } from "../../../api/learnApi";
+import { ConfirmModal } from "../../../components/mui/ConfirmModal";
 import { PageError, PageLoading } from "../../../components/mui/PageStatus";
 import PortalTopbar from "../../../components/PortalTopbar";
 import { verifyTypeLabel } from "../../../utils/verifyTypes";
+
+type DeleteLessonContext = {
+  lesson: AuthorLessonListItem;
+  moduleId: string;
+};
 
 export default function AuthorModulesPage() {
   const navigate = useNavigate();
@@ -36,6 +43,8 @@ export default function AuthorModulesPage() {
   const [error, setError] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState("");
   const [busy, setBusy] = useState(false);
+  const [deleteContext, setDeleteContext] = useState<DeleteLessonContext | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
   const skipInitialLessonsFetchRef = useRef(true);
@@ -89,6 +98,14 @@ export default function AuthorModulesPage() {
       });
   }, [selectedModule]);
 
+  function syncModuleLessonCount(moduleId: string, lessonCount: number) {
+    setModules((prev) =>
+      prev.map((module) =>
+        module.id === moduleId ? { ...module, lesson_count: lessonCount } : module,
+      ),
+    );
+  }
+
   async function handleCreateLesson(event: FormEvent) {
     event.preventDefault();
     if (!selectedModule || !newTitle.trim()) {
@@ -99,17 +116,21 @@ export default function AuthorModulesPage() {
     try {
       const lesson = await createAuthorLesson(selectedModule.id, { title: newTitle.trim() });
       setNewTitle("");
-      setLessons((prev) => [
-        ...prev,
-        {
-          id: lesson.id,
-          order: lesson.order,
-          title: lesson.title,
-          summary: lesson.summary,
-          slide_count: lesson.slides.length,
-          verify_type: lesson.verify.type,
-        },
-      ]);
+      setLessons((prev) => {
+        const next = [
+          ...prev,
+          {
+            id: lesson.id,
+            order: lesson.order,
+            title: lesson.title,
+            summary: lesson.summary,
+            slide_count: lesson.slides.length,
+            verify_type: lesson.verify.type,
+          },
+        ];
+        syncModuleLessonCount(selectedModule.id, next.length);
+        return next;
+      });
     } catch (err) {
       setError(err instanceof LearnApiError ? err.message : "Не удалось создать урок");
     } finally {
@@ -130,7 +151,7 @@ export default function AuthorModulesPage() {
       const lesson = await importAuthorLesson(selectedModule.id, payload);
       setLessons((prev) => {
         const without = prev.filter((item) => item.id !== lesson.id);
-        return [
+        const next = [
           ...without,
           {
             id: lesson.id,
@@ -141,6 +162,8 @@ export default function AuthorModulesPage() {
             verify_type: lesson.verify.type,
           },
         ].sort((a, b) => a.order - b.order);
+        syncModuleLessonCount(selectedModule.id, next.length);
+        return next;
       });
     } catch (err) {
       setError(err instanceof LearnApiError ? err.message : "Не удалось импортировать JSON");
@@ -148,6 +171,37 @@ export default function AuthorModulesPage() {
       setBusy(false);
       event.target.value = "";
     }
+  }
+
+  async function handleDeleteLesson() {
+    if (!deleteContext) {
+      return;
+    }
+    setBusy(true);
+    setDeleteError(null);
+    setError(null);
+    try {
+      await deleteAuthorLesson(deleteContext.lesson.id);
+      const updated = await getAuthorModuleLessons(deleteContext.moduleId);
+      setLessons(updated);
+      syncModuleLessonCount(deleteContext.moduleId, updated.length);
+      setDeleteContext(null);
+    } catch (err) {
+      const message = err instanceof LearnApiError ? err.message : "Не удалось удалить урок";
+      setDeleteError(message);
+      setError(message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function openDeleteDialog(lesson: AuthorLessonListItem) {
+    if (!selectedModule) {
+      setError("Выберите модуль перед удалением урока");
+      return;
+    }
+    setDeleteError(null);
+    setDeleteContext({ lesson, moduleId: selectedModule.id });
   }
 
   async function handleDuplicateLesson(lesson: AuthorLessonListItem) {
@@ -158,8 +212,8 @@ export default function AuthorModulesPage() {
     setError(null);
     try {
       const copy = await duplicateAuthorLesson(lesson.id);
-      setLessons((prev) =>
-        [
+      setLessons((prev) => {
+        const next = [
           ...prev,
           {
             id: copy.id,
@@ -169,8 +223,10 @@ export default function AuthorModulesPage() {
             slide_count: copy.slides.length,
             verify_type: copy.verify.type,
           },
-        ].sort((a, b) => a.order - b.order),
-      );
+        ].sort((a, b) => a.order - b.order);
+        syncModuleLessonCount(selectedModule.id, next.length);
+        return next;
+      });
     } catch (err) {
       setError(err instanceof LearnApiError ? err.message : "Не удалось дублировать урок");
     } finally {
@@ -341,7 +397,7 @@ export default function AuthorModulesPage() {
                       return (
                         <li
                           key={lesson.id}
-                          className={`author-lesson-item${isDragging ? " author-lesson-item-dragging" : ""}${isOver ? " author-lesson-item-over" : ""}`}
+                          className={`author-lesson-item${isDragging ? " dnd-dragging" : ""}${isOver ? " dnd-drop-target" : ""}`}
                           draggable={!busy && lessons.length >= 2}
                           onDragStart={(event) => handleLessonDragStart(index, event)}
                           onDragOver={(event) => handleLessonDragOver(index, event)}
@@ -386,6 +442,15 @@ export default function AuthorModulesPage() {
                             >
                               Дублировать
                             </Button>
+                            <Button
+                              size="small"
+                              color="error"
+                              variant="text"
+                              disabled={busy}
+                              onClick={() => openDeleteDialog(lesson)}
+                            >
+                              Удалить
+                            </Button>
                           </div>
                         </li>
                       );
@@ -397,6 +462,26 @@ export default function AuthorModulesPage() {
           )}
         </div>
       </main>
+
+      <ConfirmModal
+        isOpen={deleteContext != null}
+        title="Удалить урок?"
+        message={
+          deleteContext
+            ? `Урок «${deleteContext.lesson.title}», все слайды и прогресс учеников по нему будут удалены без возможности восстановления.`
+            : ""
+        }
+        error={deleteError}
+        confirmLabel="Удалить урок"
+        cancelLabel="Отмена"
+        danger
+        loading={busy}
+        onConfirm={() => void handleDeleteLesson()}
+        onCancel={() => {
+          setDeleteContext(null);
+          setDeleteError(null);
+        }}
+      />
     </div>
   );
 }
