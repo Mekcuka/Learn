@@ -50,7 +50,7 @@ describe("AuthorLessonToolbar", () => {
           <AppTheme>
             <AuthorLessonToolbar
               lesson={lessonFixture}
-              busy={false}
+              toolbarAction={null}
               autosaveDirty={false}
               autosaveSaving={false}
               validationHint={null}
@@ -78,5 +78,86 @@ describe("AuthorLessonToolbar", () => {
     expect(heading?.querySelector(".meta")).toBeNull();
     expect(heading?.textContent).toContain("Вход");
     expect(heading?.textContent).not.toContain("Основной интерфейс");
+  });
+
+  it("calls onPublish when publish button is clicked", () => {
+    const onPublish = vi.fn();
+    act(() => {
+      root.render(
+        <MemoryRouter>
+          <AppTheme>
+            <AuthorLessonToolbar
+              lesson={lessonFixture}
+              toolbarAction={null}
+              autosaveDirty={false}
+              autosaveSaving={false}
+              validationHint={null}
+              activeSlide={false}
+              importInputRef={createRef<HTMLInputElement>()}
+              moreMenuAnchor={null}
+              onMoreMenuOpen={noop}
+              onMoreMenuClose={noop}
+              onSaveLesson={noop}
+              onSaveSlide={noop}
+              onPublish={onPublish}
+              onToggleStoryboard={noop}
+              onExport={noop}
+              onDeleteLesson={noop}
+              onImport={noop}
+              storyboardMode={false}
+            />
+          </AppTheme>
+        </MemoryRouter>,
+      );
+    });
+
+    const publishButton = Array.from(container.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Опубликовать"),
+    );
+    expect(publishButton).toBeDefined();
+    act(() => {
+      publishButton?.click();
+    });
+    expect(onPublish).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not call onPublish while toolbar action is in progress", () => {
+    const onPublish = vi.fn();
+    act(() => {
+      root.render(
+        <MemoryRouter>
+          <AppTheme>
+            <AuthorLessonToolbar
+              lesson={lessonFixture}
+              toolbarAction="lesson"
+              autosaveDirty={false}
+              autosaveSaving={false}
+              validationHint={null}
+              activeSlide={false}
+              importInputRef={createRef<HTMLInputElement>()}
+              moreMenuAnchor={null}
+              onMoreMenuOpen={noop}
+              onMoreMenuClose={noop}
+              onSaveLesson={noop}
+              onSaveSlide={noop}
+              onPublish={onPublish}
+              onToggleStoryboard={noop}
+              onExport={noop}
+              onDeleteLesson={noop}
+              onImport={noop}
+              storyboardMode={false}
+            />
+          </AppTheme>
+        </MemoryRouter>,
+      );
+    });
+
+    const publishButton = Array.from(container.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Опубликовать"),
+    );
+    act(() => {
+      publishButton?.click();
+    });
+    expect(onPublish).not.toHaveBeenCalled();
   });
 });

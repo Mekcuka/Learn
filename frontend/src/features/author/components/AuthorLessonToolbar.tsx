@@ -12,9 +12,12 @@ import { useNavigate } from "react-router-dom";
 import type { AuthorLessonDetail } from "../../../api/authorApi";
 import { authorLessonPreviewUrl } from "../../../utils/authorPreview";
 
+export type ToolbarAction = "lesson" | "slide" | "publish" | null;
+
 type AuthorLessonToolbarProps = {
   lesson: AuthorLessonDetail;
-  busy: boolean;
+  toolbarAction?: ToolbarAction;
+  busy?: boolean;
   autosaveDirty: boolean;
   autosaveSaving: boolean;
   validationHint: string | null;
@@ -33,9 +36,14 @@ type AuthorLessonToolbarProps = {
   storyboardMode: boolean;
 };
 
+function toolbarButtonClass(action: ToolbarAction, current: ToolbarAction): string {
+  return current === action ? "author-toolbar-action-busy" : "";
+}
+
 export default function AuthorLessonToolbar({
   lesson,
-  busy,
+  toolbarAction = null,
+  busy = false,
   autosaveDirty,
   autosaveSaving,
   validationHint,
@@ -54,6 +62,7 @@ export default function AuthorLessonToolbar({
   storyboardMode,
 }: AuthorLessonToolbarProps) {
   const navigate = useNavigate();
+  const actionInProgress = toolbarAction !== null || busy;
 
   return (
     <header className="author-lesson-header author-toolbar--sticky">
@@ -61,6 +70,8 @@ export default function AuthorLessonToolbar({
         <Button
           size="small"
           variant="text"
+          disableRipple
+          disableFocusRipple
           className="author-back-link"
           onClick={() => navigate("/author")}
         >
@@ -80,33 +91,54 @@ export default function AuthorLessonToolbar({
       </div>
       <div className="author-toolbar">
         <div className="author-toolbar-primary">
-          <Button variant="contained" disabled={busy} onClick={onSaveLesson}>
-            Сохранить урок
+          <Button
+            variant="contained"
+            disableRipple
+            disableFocusRipple
+            className={toolbarButtonClass("lesson", toolbarAction)}
+            onClick={actionInProgress ? undefined : onSaveLesson}
+          >
+            {toolbarAction === "lesson" ? "Сохранение…" : "Сохранить урок"}
           </Button>
           {activeSlide && (
-            <Button variant="outlined" disabled={busy} onClick={onSaveSlide}>
-              Сохранить слайд
+            <Button
+              variant="outlined"
+              disableRipple
+              disableFocusRipple
+              className={toolbarButtonClass("slide", toolbarAction)}
+              onClick={actionInProgress ? undefined : onSaveSlide}
+            >
+              {toolbarAction === "slide" ? "Сохранение…" : "Сохранить слайд"}
             </Button>
           )}
           {autosaveDirty && (
             <Chip
               size="small"
               color="warning"
+              aria-live="polite"
               label={autosaveSaving ? "Сохранение…" : "Несохранённые изменения"}
             />
           )}
-          <Button variant="contained" color="secondary" disabled={busy} onClick={onPublish}>
-            Опубликовать
+          <Button
+            variant="contained"
+            color="secondary"
+            disableRipple
+            disableFocusRipple
+            className={toolbarButtonClass("publish", toolbarAction)}
+            onClick={actionInProgress ? undefined : onPublish}
+          >
+            {toolbarAction === "publish" ? "Публикация…" : "Опубликовать"}
           </Button>
         </div>
         <div className="author-toolbar-secondary">
-          <Button variant="outlined" disabled={busy} onClick={onToggleStoryboard}>
+          <Button variant="outlined" disableRipple disableFocusRipple onClick={onToggleStoryboard}>
             {storyboardMode ? "Редактор" : "Раскадровка"}
           </Button>
           <Tooltip title="Дополнительные действия">
             <IconButton
               aria-label="Дополнительные действия"
-              disabled={busy}
+              disableRipple
+              disableFocusRipple
               onClick={(event) => onMoreMenuOpen(event.currentTarget)}
             >
               <MoreVertIcon />
@@ -114,7 +146,6 @@ export default function AuthorLessonToolbar({
           </Tooltip>
           <Menu anchorEl={moreMenuAnchor} open={Boolean(moreMenuAnchor)} onClose={onMoreMenuClose}>
             <MenuItem
-              disabled={busy}
               onClick={() => {
                 onMoreMenuClose();
                 onExport();
@@ -123,7 +154,6 @@ export default function AuthorLessonToolbar({
               Экспорт JSON
             </MenuItem>
             <MenuItem
-              disabled={busy}
               onClick={() => {
                 onMoreMenuClose();
                 importInputRef.current?.click();
@@ -141,7 +171,6 @@ export default function AuthorLessonToolbar({
               Превью для ученика (опубликовано)
             </MenuItem>
             <MenuItem
-              disabled={busy}
               onClick={() => {
                 onMoreMenuClose();
                 onDeleteLesson();

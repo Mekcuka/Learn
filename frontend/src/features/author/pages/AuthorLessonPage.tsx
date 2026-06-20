@@ -31,7 +31,7 @@ import {
 import { LearnApiError } from "../../../api/httpClient";
 import AuthorConstructorLayout from "../components/AuthorConstructorLayout";
 import AuthorLessonMetaPanel from "../components/AuthorLessonMetaPanel";
-import AuthorLessonToolbar from "../components/AuthorLessonToolbar";
+import AuthorLessonToolbar, { type ToolbarAction } from "../components/AuthorLessonToolbar";
 import AuthorStoryboardView from "../components/AuthorStoryboardView";
 import HotspotEditor from "../components/HotspotEditor";
 import RichTextEditor from "../components/RichTextEditor";
@@ -72,6 +72,7 @@ export default function AuthorLessonPage() {
   const [previewHotspotId, setPreviewHotspotId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [toolbarAction, setToolbarAction] = useState<ToolbarAction>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [pendingConfirm, setPendingConfirm] = useState<PendingConfirm>(null);
@@ -172,25 +173,57 @@ export default function AuthorLessonPage() {
     onError: (autosaveError) => setError(autosaveError),
   });
 
+  const persistLessonMeta = useCallback(async () => {
+    if (!lesson || !selectedVerifyType) {
+      throw new Error("Урок не загружен");
+    }
+    let currentLesson = lesson;
+    if (autosave.dirty) {
+      const flushed = await autosave.flush();
+      if (flushed) {
+        currentLesson = {
+          ...currentLesson,
+          has_unpublished_changes: flushed.has_unpublished_changes,
+          slides: currentLesson.slides.map((item) =>
+            item.id === flushed.slide.id ? flushed.slide : item,
+          ),
+        };
+      }
+    }
+    return updateAuthorLesson(currentLesson.id, {
+      title: currentLesson.title,
+      summary: currentLesson.summary ?? undefined,
+      tags: currentLesson.tags,
+      instruction_html: currentLesson.instruction_html,
+      deep_link_template: currentLesson.deep_link_template ?? undefined,
+      verify_type: selectedVerifyType.id,
+      verify_config: currentLesson.verify.config ?? {},
+    });
+  }, [lesson, selectedVerifyType, autosave]);
+
   const handlePublish = useCallback(async () => {
     if (!lesson) {
       return;
     }
+    if (validationHint) {
+      setError(validationHint);
+      return;
+    }
+    setToolbarAction("publish");
     setBusy(true);
     setError(null);
     try {
-      if (autosave.dirty) {
-        await autosave.flush();
-      }
-      const updated = await publishAuthorLesson(lesson.id);
-      setLesson(updated);
+      const synced = await persistLessonMeta();
+      const published = await publishAuthorLesson(synced.id);
+      setLesson(published);
       setMessage("Урок опубликован");
     } catch (err) {
       setError(err instanceof LearnApiError ? err.message : "Не удалось опубликовать урок");
     } finally {
+      setToolbarAction(null);
       setBusy(false);
     }
-  }, [lesson, autosave]);
+  }, [lesson, validationHint, persistLessonMeta]);
 
   function isEditableTarget(target: EventTarget | null): boolean {
     if (!(target instanceof HTMLElement)) {
@@ -232,44 +265,26 @@ export default function AuthorLessonPage() {
     if (!lesson || !selectedVerifyType) {
       return;
     }
+    setToolbarAction("lesson");
     setBusy(true);
     setError(null);
     try {
-      let currentLesson = lesson;
-      if (autosave.dirty) {
-        const flushed = await autosave.flush();
-        if (flushed) {
-          currentLesson = {
-            ...currentLesson,
-            has_unpublished_changes: flushed.has_unpublished_changes,
-            slides: currentLesson.slides.map((item) =>
-              item.id === flushed.slide.id ? flushed.slide : item,
-            ),
-          };
-        }
-      }
-      const updated = await updateAuthorLesson(currentLesson.id, {
-        title: currentLesson.title,
-        summary: currentLesson.summary ?? undefined,
-        tags: currentLesson.tags,
-        instruction_html: currentLesson.instruction_html,
-        deep_link_template: currentLesson.deep_link_template ?? undefined,
-        verify_type: selectedVerifyType.id,
-        verify_config: currentLesson.verify.config ?? {},
-      });
+      const updated = await persistLessonMeta();
       setLesson(updated);
       setMessage(draftSaveMessage("Урок сохранён", updated.has_unpublished_changes));
     } catch (err) {
       setError(err instanceof LearnApiError ? err.message : "Не удалось сохранить урок");
     } finally {
+      setToolbarAction(null);
       setBusy(false);
     }
-  }, [lesson, selectedVerifyType, autosave]);
+  }, [lesson, selectedVerifyType, persistLessonMeta]);
 
   const saveActiveSlide = useCallback(async () => {
     if (!activeSlide) {
       return;
     }
+    setToolbarAction("slide");
     setBusy(true);
     setError(null);
     try {
@@ -286,6 +301,7 @@ export default function AuthorLessonPage() {
     } catch (err) {
       setError(err instanceof LearnApiError ? err.message : "Не удалось сохранить слайд");
     } finally {
+      setToolbarAction(null);
       setBusy(false);
     }
   }, [activeSlide, autosave, mergeSavedSlide]);
@@ -513,7 +529,8 @@ export default function AuthorLessonPage() {
     <AuthorConstructorLayout>
         <AuthorLessonToolbar
           lesson={lesson}
-          busy={busy}
+          toolbarAction={toolbarAction}
+          busy={busy && toolbarAction === null}
           autosaveDirty={autosave.dirty}
           autosaveSaving={autosave.saving}
           validationHint={validationHint}
