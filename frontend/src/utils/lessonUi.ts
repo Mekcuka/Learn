@@ -57,6 +57,31 @@ export type CompleteLessonButtonContext = {
   isOnQuizStep: boolean;
 };
 
+/** Whether the learner reached the last navigable step of the lesson. */
+export function isOnFinalLessonStep(
+  lesson: LessonSlideNavLesson,
+  slideIndex: number,
+  isOnQuizStep: boolean,
+): boolean {
+  if (isQuizOnlyLesson(lesson)) {
+    return hasLoadedQuiz(lesson);
+  }
+
+  if (isMixedQuizLesson(lesson)) {
+    if (!hasLoadedQuiz(lesson)) {
+      return slideIndex >= lesson.slides.length - 1;
+    }
+    const onLastContentSlide = slideIndex >= lesson.slides.length - 1 && !isOnQuizStep;
+    return isOnQuizStep || onLastContentSlide;
+  }
+
+  if (!isManualVerifyLesson(lesson.verify.type)) {
+    return false;
+  }
+
+  return slideIndex >= maxLessonSlideIndex(lesson);
+}
+
 /** Whether the floating «Завершить урок» action should appear. */
 export function shouldShowCompleteLessonButton({
   lesson,
@@ -69,12 +94,7 @@ export function shouldShowCompleteLessonButton({
     return false;
   }
 
-  if (!isManualVerifyLesson(lesson.verify.type)) {
-    return false;
-  }
-
-  const onFinalStep = slideIndex >= maxLessonSlideIndex(lesson);
-  return onFinalStep && !isOnQuizStep;
+  return isOnFinalLessonStep(lesson, slideIndex, isOnQuizStep);
 }
 
 export type LessonSlideNavLesson = {

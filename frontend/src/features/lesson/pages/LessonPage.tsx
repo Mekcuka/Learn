@@ -43,6 +43,7 @@ export default function LessonPage() {
     selectHotspot,
     startVerify,
     handleQuizSubmit,
+    setFeedback,
   } = useLessonProgress({ lessonId, isPreview, isDraftPreview });
 
   useEffect(() => {
@@ -92,6 +93,23 @@ export default function LessonPage() {
     isOnQuizStep,
   });
 
+  function handleCompleteLesson() {
+    if (isMixedLesson && !isOnQuizStep && slideIndex >= lesson.slides.length - 1) {
+      goToSlide(lesson.slides.length);
+      return;
+    }
+
+    if (isQuizLesson && !quizResult?.passed) {
+      setFeedback({
+        status: "failed",
+        message: "Сначала отправьте ответы на квиз.",
+      });
+      return;
+    }
+
+    void startVerify();
+  }
+
   function roadmapLinkTo(targetLessonId: string): string {
     if (!isPreview) {
       return `/lessons/${targetLessonId}`;
@@ -120,7 +138,7 @@ export default function LessonPage() {
         verifyBusy={verifyBusy}
         onBack={() => navigate("/dashboard")}
         onNavigate={(path) => navigate(path)}
-        onComplete={() => void startVerify()}
+        onComplete={handleCompleteLesson}
         roadmapLinkTo={roadmapLinkTo}
       />
 

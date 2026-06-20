@@ -45,7 +45,9 @@ export default function LessonPageHeader({
   onComplete,
   roadmapLinkTo,
 }: LessonPageHeaderProps) {
-  const { headerGrid } = lessonLayoutGridClasses(showHintsColumn);
+  const { headerGrid } = lessonLayoutGridClasses(
+    showHintsColumn || showCompleteButton || nextLessonNavigation != null,
+  );
   const lessonStatus = lessonState?.status;
   const showNextStepCard = showHintsColumn && nextLessonNavigation != null;
   const showNextColumn = showNextStepCard || showCompleteButton;

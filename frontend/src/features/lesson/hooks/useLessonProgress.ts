@@ -255,5 +255,6 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
     goToSlide,
     selectHotspot,
     handleQuizSubmit,
+    setFeedback,
   };
 }

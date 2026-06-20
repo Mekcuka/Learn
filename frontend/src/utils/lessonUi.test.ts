@@ -6,6 +6,7 @@ import {
   clampLessonSlideIndex,
   clampSlideIndex,
   isMixedQuizLesson,
+  isOnFinalLessonStep,
   isQuizOnlyLesson,
   maxLessonSlideIndex,
   moduleProgressLabel,
@@ -226,14 +227,14 @@ describe("shouldShowCompleteLessonButton", () => {
     );
   });
 
-  it("hides for quiz and mixed quiz lessons", () => {
+  it("shows on last content slide and quiz step for mixed quiz lessons", () => {
     expect(
       shouldShowCompleteLessonButton({
         lesson: mixedWithQuiz,
-        slideIndex: 2,
+        slideIndex: 0,
         lessonStatus: "active",
         isPreview: false,
-        isOnQuizStep: true,
+        isOnQuizStep: false,
       }),
     ).toBe(false);
     expect(
@@ -244,6 +245,57 @@ describe("shouldShowCompleteLessonButton", () => {
         isPreview: false,
         isOnQuizStep: false,
       }),
-    ).toBe(false);
+    ).toBe(true);
+    expect(
+      shouldShowCompleteLessonButton({
+        lesson: mixedWithQuiz,
+        slideIndex: 2,
+        lessonStatus: "active",
+        isPreview: false,
+        isOnQuizStep: true,
+      }),
+    ).toBe(true);
+  });
+
+  it("shows for quiz-only lessons when quiz is loaded", () => {
+    const quizOnly = {
+      verify: { type: "quiz_passed" as const },
+      slides: [],
+      quiz: { questions: [{ id: "q1" }] },
+    };
+
+    expect(
+      shouldShowCompleteLessonButton({
+        lesson: quizOnly,
+        slideIndex: 0,
+        lessonStatus: "active",
+        isPreview: false,
+        isOnQuizStep: false,
+      }),
+    ).toBe(true);
+  });
+});
+
+describe("isOnFinalLessonStep", () => {
+  const mixedWithQuiz = {
+    verify: { type: "quiz_passed" as const },
+    slides: [{ id: "s1" }, { id: "s2" }],
+    quiz: { questions: [{ id: "q1" }] },
+  };
+
+  it("treats quiz-only lessons as always on final step when quiz loaded", () => {
+    expect(
+      isOnFinalLessonStep(
+        { verify: { type: "quiz_passed" }, slides: [], quiz: { questions: [{ id: "q1" }] } },
+        0,
+        false,
+      ),
+    ).toBe(true);
+  });
+
+  it("treats mixed lesson last slide and quiz step as final", () => {
+    expect(isOnFinalLessonStep(mixedWithQuiz, 1, false)).toBe(true);
+    expect(isOnFinalLessonStep(mixedWithQuiz, 2, true)).toBe(true);
+    expect(isOnFinalLessonStep(mixedWithQuiz, 0, false)).toBe(false);
   });
 });
