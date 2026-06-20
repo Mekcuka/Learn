@@ -1,5 +1,10 @@
 /* Hotspot overlay buttons (ScreenshotGuide, HotspotEditor) */
 button.hotspot-editor-handle {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 12px;
+  height: 12px;
   padding: 0;
   min-width: 0;
   border: none;
@@ -582,7 +587,8 @@ button.hotspot {
   transform: translate(-50%, -50%) scale(1.12);
 }
 
-.hotspot-pin-filled:not(.hotspot-pin-active) .hotspot-pin-callout-box {
+.hotspot-pin-filled:not(.hotspot-pin-active) .hotspot-pin-callout-box,
+.hotspot-pin-filled:not(.hotspot-editor-zone-active) .hotspot-pin-callout-box {
   border-color: color-mix(in srgb, var(--hotspot-pin-accent) 35%, transparent);
 }
 
@@ -607,7 +613,8 @@ button.hotspot {
   stroke: #0078d2;
 }
 
-.hotspot-pin-active:not(.hotspot-pin-filled) .hotspot-pin-dot {
+.hotspot-pin-active:not(.hotspot-pin-filled) .hotspot-pin-dot,
+.hotspot-editor-zone-active:not(.hotspot-pin-filled) .hotspot-pin-dot {
   background: #005a9e;
   transform: translate(-50%, -50%) scale(1.08);
   box-shadow:
@@ -616,7 +623,8 @@ button.hotspot {
     0 0 0 4px rgb(0 120 210 / 42%);
 }
 
-.hotspot-pin-active.hotspot-pin-filled .hotspot-pin-dot {
+.hotspot-pin-active.hotspot-pin-filled .hotspot-pin-dot,
+.hotspot-editor-zone-active.hotspot-pin-filled .hotspot-pin-dot {
   background: var(--hotspot-pin-accent);
   transform: translate(-50%, -50%) scale(1.08);
   box-shadow:
@@ -625,7 +633,8 @@ button.hotspot {
     0 0 0 4px color-mix(in srgb, var(--hotspot-pin-accent) 42%, transparent);
 }
 
-.hotspot-pin-active:not(.hotspot-pin-filled) .hotspot-pin-callout-box {
+.hotspot-pin-active:not(.hotspot-pin-filled) .hotspot-pin-callout-box,
+.hotspot-editor-zone-active:not(.hotspot-pin-filled) .hotspot-pin-callout-box {
   color: #fff;
   background: #0078d2;
   border-color: #005a9e;
@@ -634,7 +643,8 @@ button.hotspot {
     0 0 0 1px rgb(255 255 255 / 75%);
 }
 
-.hotspot-pin-active.hotspot-pin-filled .hotspot-pin-callout-box {
+.hotspot-pin-active.hotspot-pin-filled .hotspot-pin-callout-box,
+.hotspot-editor-zone-active.hotspot-pin-filled .hotspot-pin-callout-box {
   color: #fff;
   background: var(--hotspot-pin-accent);
   border-color: var(--hotspot-pin-accent);
@@ -643,15 +653,18 @@ button.hotspot {
     0 0 0 1px rgb(255 255 255 / 75%);
 }
 
-.hotspot-pin-active .hotspot-pin-callout-html a {
+.hotspot-pin-active .hotspot-pin-callout-html a,
+.hotspot-editor-zone-active .hotspot-pin-callout-html a {
   color: #fff;
 }
 
-.hotspot-pin-active:not(.hotspot-pin-filled) .hotspot-pin-connector path {
+.hotspot-pin-active:not(.hotspot-pin-filled) .hotspot-pin-connector path,
+.hotspot-editor-zone-active:not(.hotspot-pin-filled) .hotspot-pin-connector path {
   stroke: #005a9e;
 }
 
-.hotspot-pin-active.hotspot-pin-filled .hotspot-pin-connector path {
+.hotspot-pin-active.hotspot-pin-filled .hotspot-pin-connector path,
+.hotspot-editor-zone-active.hotspot-pin-filled .hotspot-pin-connector path {
   stroke: var(--hotspot-pin-accent);
 }
 
