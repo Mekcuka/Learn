@@ -4,28 +4,30 @@ import ContentHtml from "../../wiki/components/ContentHtml";
 
 type ExpectedResultProps = {
   html: string;
-  className?: string;
 };
 
-export default function ExpectedResult({ html, className }: ExpectedResultProps) {
+export default function ExpectedResult({ html }: ExpectedResultProps) {
   if (!html?.trim()) {
     return null;
   }
 
-  const blockClass = ["expected-result", "lesson-actions-block", className].filter(Boolean).join(" ");
-
   return (
-    <div className={blockClass}>
+    <section
+      className="lesson-ref-section lesson-ref-section--expected lesson-actions-expected"
+      aria-label="Ожидаемый результат"
+    >
       <Typography
         variant="overline"
         color="text.primary"
         fontWeight="bold"
         component="h3"
-        className="expected-result-title"
+        className="lesson-ref-section-title"
       >
         Ожидаемый результат
       </Typography>
-      <ContentHtml html={html} className="lesson-actions-expected-body" />
-    </div>
+      <div className="lesson-ref-section-content">
+        <ContentHtml html={html} className="lesson-ref-body" />
+      </div>
+    </section>
   );
 }

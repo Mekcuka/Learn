@@ -74,9 +74,9 @@ describe("LessonReferencePanel", () => {
     });
 
     const panel = container.querySelector(".lesson-reference-panel");
-    expect(panel?.querySelector(".lesson-actions")).not.toBeNull();
-    expect(panel?.querySelector(".lesson-actions-block--assignment")).not.toBeNull();
-    expect(panel?.querySelector(".lesson-actions-block--expected")).not.toBeNull();
+    expect(panel?.querySelector(".lesson-actions-assignment")).not.toBeNull();
+    expect(panel?.querySelector(".lesson-actions-expected")).not.toBeNull();
+    expect(panel?.querySelector(".lesson-actions")).toBeNull();
     expect(container.textContent).toContain("Задание");
     expect(container.textContent).toContain("Создайте проект в демо");
     expect(container.textContent).toContain("Ожидаемый результат");
@@ -106,7 +106,8 @@ describe("LessonReferencePanel", () => {
       );
     });
 
-    expect(container.querySelector(".lesson-actions")).toBeNull();
+    expect(container.querySelector(".lesson-actions-assignment")).toBeNull();
+    expect(container.querySelector(".lesson-actions-expected")).toBeNull();
   });
 
   it("does not show assignment for quiz lessons", () => {
@@ -131,7 +132,8 @@ describe("LessonReferencePanel", () => {
       );
     });
 
-    expect(container.querySelector(".lesson-actions")).toBeNull();
+    expect(container.querySelector(".lesson-actions-assignment")).toBeNull();
+    expect(container.querySelector(".lesson-actions-expected")).toBeNull();
     expect(container.textContent).not.toContain("Квиз");
   });
 

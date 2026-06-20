@@ -28,6 +28,10 @@ export default function LessonActions({
     return null;
   }
 
+  if (!hasInstruction && !hasExpected && !feedback) {
+    return null;
+  }
+
   const feedbackColor =
     feedback?.status === "passed"
       ? "success.main"
@@ -36,28 +40,32 @@ export default function LessonActions({
         : "warning.main";
 
   return (
-    <section className="lesson-actions" aria-label="Задание" aria-live="polite">
-      <div className="lesson-actions-card">
-        {hasInstruction && (
-          <div className="lesson-actions-block lesson-actions-block--assignment">
-            <Typography
-              variant="overline"
-              color="text.primary"
-              fontWeight="bold"
-              component="h3"
-              className="lesson-actions-assignment-title"
-            >
-              Задание
-            </Typography>
-            <ContentHtml html={lesson.instruction_html} className="lesson-actions-assignment-body" />
+    <>
+      {hasInstruction && (
+        <section
+          className="lesson-ref-section lesson-ref-section--primary lesson-actions-assignment"
+          aria-label="Задание"
+          aria-live="polite"
+        >
+          <Typography
+            variant="overline"
+            color="text.primary"
+            fontWeight="bold"
+            component="h3"
+            className="lesson-ref-section-title"
+          >
+            Задание
+          </Typography>
+          <div className="lesson-ref-section-content">
+            <ContentHtml html={lesson.instruction_html} className="lesson-ref-body" />
           </div>
-        )}
+        </section>
+      )}
 
-        {hasExpected && slide && (
-          <ExpectedResult html={slide.expected_result_html} className="lesson-actions-block--expected" />
-        )}
+      {hasExpected && slide && <ExpectedResult html={slide.expected_result_html} />}
 
-        {feedback && (
+      {feedback && (
+        <section className="lesson-ref-section lesson-actions-feedback" aria-live="polite">
           <Typography color={feedbackColor} className={`step-status step-status-${feedback.status}`}>
             {feedback.message}
             {feedback.status === "failed" && feedback.hint_lesson_id && (
@@ -67,9 +75,8 @@ export default function LessonActions({
               </>
             )}
           </Typography>
-        )}
-      </div>
-    </section>
+        </section>
+      )}
+    </>
   );
 }
-

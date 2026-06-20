@@ -75,8 +75,9 @@ describe("LessonActions", () => {
     expect(container.textContent).toContain("Задание");
     expect(container.textContent).toContain("Войдите в демо");
     expect(container.textContent).toContain("Ожидаемый результат");
-    expect(container.querySelector(".lesson-actions-block--assignment")).not.toBeNull();
-    expect(container.querySelector(".lesson-actions-block--expected")).not.toBeNull();
+    expect(container.querySelector(".lesson-actions-assignment")).not.toBeNull();
+    expect(container.querySelector(".lesson-actions-expected")).not.toBeNull();
+    expect(container.querySelectorAll(".lesson-ref-section").length).toBeGreaterThanOrEqual(2);
   });
 
   it("hides block when lesson completed", () => {
@@ -100,7 +101,8 @@ describe("LessonActions", () => {
       );
     });
 
-    expect(container.querySelector(".lesson-actions")).toBeNull();
+    expect(container.querySelector(".lesson-actions-assignment")).toBeNull();
+    expect(container.querySelector(".lesson-actions-expected")).toBeNull();
   });
 
   it("shows assignment without verify button", () => {
@@ -119,7 +121,8 @@ describe("LessonActions", () => {
       );
     });
 
-    expect(container.querySelector(".lesson-actions")).not.toBeNull();
+    expect(container.querySelector(".lesson-actions-assignment")).toBeNull();
+    expect(container.querySelector(".lesson-actions-expected")).toBeNull();
     expect(container.querySelector(".step-actions")).toBeNull();
     expect(container.textContent).not.toContain("Я выполнил");
   });

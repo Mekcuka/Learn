@@ -560,76 +560,17 @@
   padding: 0 var(--lesson-ref-pad-x) var(--lesson-ref-pad-y);
 }
 
-.lesson-reference-panel .lesson-actions {
+.lesson-ref-section--expected {
   padding: calc(var(--lesson-ref-pad-y) + 0.1rem) var(--lesson-ref-pad-x);
-  border-bottom: 1px solid var(--lesson-ref-border);
-  background: var(--lesson-ref-accent-bg);
-  box-shadow: inset 3px 0 0 var(--lesson-ref-accent-border);
-  border-top: none;
-  gap: 0;
-}
-
-.lesson-reference-panel .lesson-actions-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 0;
-  border: none;
-  border-radius: 0;
-  background: transparent;
-}
-
-.lesson-reference-panel .lesson-actions-block {
-  padding: 0.65rem 0.75rem;
-  border: 1px solid var(--lesson-ref-border);
-  border-radius: var(--lesson-ref-radius);
-  background: var(--lesson-ref-bg);
-}
-
-.lesson-reference-panel .lesson-actions-block--assignment {
-  box-shadow: inset 3px 0 0 var(--lesson-ref-accent-border);
-}
-
-.lesson-reference-panel .lesson-actions-block--expected {
   background: var(--lesson-ref-success-bg);
-  border-color: color-mix(in srgb, var(--lesson-ref-success-typo) 22%, var(--lesson-ref-border));
   box-shadow: inset 3px 0 0 color-mix(in srgb, var(--lesson-ref-success-typo) 42%, transparent);
 }
 
-.lesson-reference-panel .lesson-actions-assignment-title,
-.lesson-reference-panel .expected-result-title {
-  display: block;
-  margin: 0 0 0.45rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.lesson-reference-panel .lesson-actions-assignment-title {
-  color: var(--lesson-ref-accent) !important;
-}
-
-.lesson-reference-panel .expected-result-title {
+.lesson-ref-section--expected .lesson-ref-section-title {
   color: var(--lesson-ref-success-typo) !important;
 }
 
-.lesson-reference-panel .lesson-actions-assignment-body,
-.lesson-reference-panel .lesson-actions-expected-body {
-  font-size: 0.95rem;
-  line-height: 1.55;
-  color: var(--lesson-ref-typo);
-}
-
-.lesson-reference-panel .lesson-actions-block--assignment + .lesson-actions-block--expected {
-  margin-top: 0.1rem;
-}
-
-.lesson-reference-panel .lesson-actions-card .expected-result {
-  margin: 0;
-}
-
-.lesson-reference-panel .lesson-actions-card .step-status {
+.lesson-reference-panel .lesson-actions-feedback .step-status {
   margin: 0;
   padding: 0.55rem 0.65rem;
   border: 1px solid var(--lesson-ref-border);
