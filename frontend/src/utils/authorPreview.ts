@@ -1,10 +1,6 @@
-/** URL предпросмотра урока в новой вкладке. */
-export function authorLessonPreviewUrl(lessonId: string, options?: { draft?: boolean }): string {
-  const params = new URLSearchParams({ preview: "1" });
-  if (options?.draft !== false) {
-    params.set("draft", "1");
-  }
-  return `/lessons/${lessonId}?${params.toString()}`;
+/** URL предпросмотра опубликованного урока для ученика в новой вкладке. */
+export function authorLessonPreviewUrl(lessonId: string): string {
+  return `/lessons/${lessonId}?preview=1`;
 }
 
 export function draftSaveMessage(base: string, hasUnpublishedChanges?: boolean): string {

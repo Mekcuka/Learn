@@ -101,15 +101,6 @@ export default function AuthorLessonToolbar({
           <Button variant="contained" color="secondary" disabled={busy} onClick={onPublish}>
             Опубликовать
           </Button>
-          <Button
-            variant="outlined"
-            component="a"
-            href={authorLessonPreviewUrl(lesson.id)}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Превью черновика
-          </Button>
         </div>
         <div className="author-toolbar-secondary">
           <Button variant="outlined" disabled={busy} onClick={onToggleStoryboard}>
@@ -146,15 +137,6 @@ export default function AuthorLessonToolbar({
             <MenuItem
               component="a"
               href={authorLessonPreviewUrl(lesson.id)}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={onMoreMenuClose}
-            >
-              Превью черновика
-            </MenuItem>
-            <MenuItem
-              component="a"
-              href={authorLessonPreviewUrl(lesson.id, { draft: false })}
               target="_blank"
               rel="noopener noreferrer"
               onClick={onMoreMenuClose}
