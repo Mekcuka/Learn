@@ -69,8 +69,9 @@ describe("HotspotEditorProperties", () => {
     renderProperties(regionHotspot);
 
     expect(container.textContent).toContain("Заливка");
+    expect(container.textContent).toContain("Рамка");
     expect(container.textContent).toContain("Пульс");
-    expect(container.querySelectorAll(".hotspot-fill-swatch")).toHaveLength(5);
+    expect(container.querySelectorAll(".hotspot-fill-swatch")).toHaveLength(20);
     expect(container.querySelector(".hotspot-editor-coords-grid")).not.toBeNull();
   });
 
@@ -97,7 +98,8 @@ describe("HotspotEditorProperties", () => {
     });
 
     expect(container.textContent).toContain("Заливка");
-    expect(container.querySelectorAll(".hotspot-fill-swatch")).toHaveLength(5);
+    expect(container.textContent).toContain("Рамка");
+    expect(container.querySelectorAll(".hotspot-fill-swatch")).toHaveLength(20);
     expect(container.textContent).not.toContain("Пульс");
   });
 
@@ -128,7 +130,7 @@ describe("HotspotEditorProperties", () => {
     expect(container.textContent).toContain("Сверху");
   });
 
-  it("updates fill_enabled and fill_color", () => {
+  it("updates fill_enabled, fill_color and border_color", () => {
     renderProperties(regionHotspot);
 
     const fillSwitch = container.querySelector('input[type="checkbox"]');
@@ -138,14 +140,20 @@ describe("HotspotEditorProperties", () => {
       fillSwitch?.dispatchEvent(new Event("change", { bubbles: true }));
     });
 
-    const greenSwatch = container.querySelector<HTMLButtonElement>('[aria-label="Зелёный"]');
+    const greenSwatch = container.querySelectorAll<HTMLButtonElement>('[aria-label="Зелёный"]');
     act(() => {
-      greenSwatch?.click();
+      greenSwatch[0]?.click();
+    });
+
+    const purpleSwatch = container.querySelectorAll<HTMLButtonElement>('[aria-label="Фиолетовый"]');
+    act(() => {
+      purpleSwatch[1]?.click();
     });
 
     expect(onUpdate).toHaveBeenCalled();
     const calls = onUpdate.mock.calls.map((call) => call[1]);
     expect(calls.some((patch) => patch.fill_color === "green")).toBe(true);
+    expect(calls.some((patch) => patch.border_color === "purple")).toBe(true);
   });
 
   it("applies font size to description and persists in description_html", async () => {

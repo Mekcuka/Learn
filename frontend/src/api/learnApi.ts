@@ -40,7 +40,17 @@ export type DashboardResponse = {
 
 export type HotspotKind = "region" | "zoom" | "pin";
 
-export type HotspotFillColor = "yellow" | "blue" | "green" | "red" | "orange";
+export type HotspotFillColor =
+  | "yellow"
+  | "blue"
+  | "green"
+  | "red"
+  | "orange"
+  | "purple"
+  | "pink"
+  | "cyan"
+  | "gray"
+  | "lime";
 
 export type CalloutWidth = "compact" | "normal" | "wide";
 
@@ -59,6 +69,7 @@ export type HotspotItem = {
   pulse?: boolean;
   fill_enabled?: boolean;
   fill_color?: HotspotFillColor;
+  border_color?: HotspotFillColor;
   description_html?: string;
   callout_width?: CalloutWidth;
   callout_side?: CalloutSide;

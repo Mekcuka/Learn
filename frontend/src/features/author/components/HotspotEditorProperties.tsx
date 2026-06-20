@@ -16,10 +16,11 @@ import type { HotspotItem } from "../../../types/lesson";
 import {
   CALLOUT_SIDE_OPTIONS,
   CALLOUT_WIDTH_OPTIONS,
+  getHotspotBorderColor,
   getHotspotFillColor,
   getHotspotFillEnabled,
   getHotspotKind,
-  HOTSPOT_FILL_PALETTE,
+  HOTSPOT_COLOR_PALETTE,
   hotspotKindLabel,
   isPinHotspot,
   isRectHotspot,
@@ -33,6 +34,34 @@ type HotspotEditorPropertiesProps = {
   onRemove: (id: string) => void;
   onCoordChange: (patch: Partial<Pick<HotspotItem, "x_pct" | "y_pct" | "width_pct" | "height_pct">>) => void;
 };
+
+type HotspotColorSwatchesProps = {
+  ariaLabel: string;
+  selectedColorId: string;
+  onSelect: (colorId: HotspotItem["fill_color"]) => void;
+};
+
+function HotspotColorSwatches({ ariaLabel, selectedColorId, onSelect }: HotspotColorSwatchesProps) {
+  return (
+    <Box className="hotspot-fill-palette" role="radiogroup" aria-label={ariaLabel}>
+      {HOTSPOT_COLOR_PALETTE.map((entry) => (
+        <Tooltip key={entry.id} title={entry.label}>
+          <button
+            type="button"
+            role="radio"
+            aria-checked={selectedColorId === entry.id}
+            aria-label={entry.label}
+            className={`hotspot-fill-swatch${
+              selectedColorId === entry.id ? " hotspot-fill-swatch-active" : ""
+            }`}
+            style={{ backgroundColor: entry.border }}
+            onClick={() => onSelect(entry.id)}
+          />
+        </Tooltip>
+      ))}
+    </Box>
+  );
+}
 
 const HotspotEditorProperties = memo(function HotspotEditorProperties({
   hotspot,
@@ -152,36 +181,36 @@ const HotspotEditorProperties = memo(function HotspotEditorProperties({
 
         <div className="hotspot-editor-properties-actions">
           {isRectHotspot(hotspot) || selectedIsPin ? (
-            <div className="hotspot-editor-fill-controls">
-              <FormControlLabel
-                control={
-                  <Switch
-                    size="small"
-                    checked={getHotspotFillEnabled(hotspot)}
-                    onChange={(event) => onUpdate(hotspot.id, { fill_enabled: event.target.checked })}
+            <div className="hotspot-editor-color-controls">
+              <div className="hotspot-editor-fill-controls">
+                <FormControlLabel
+                  control={
+                    <Switch
+                      size="small"
+                      checked={getHotspotFillEnabled(hotspot)}
+                      onChange={(event) => onUpdate(hotspot.id, { fill_enabled: event.target.checked })}
+                    />
+                  }
+                  label="Заливка"
+                />
+                {getHotspotFillEnabled(hotspot) ? (
+                  <HotspotColorSwatches
+                    ariaLabel="Цвет заливки"
+                    selectedColorId={getHotspotFillColor(hotspot)}
+                    onSelect={(fill_color) => onUpdate(hotspot.id, { fill_color })}
                   />
-                }
-                label="Заливка"
-              />
-              {getHotspotFillEnabled(hotspot) ? (
-                <Box className="hotspot-fill-palette" role="radiogroup" aria-label="Цвет заливки">
-                  {HOTSPOT_FILL_PALETTE.map((entry) => (
-                    <Tooltip key={entry.id} title={entry.label}>
-                      <button
-                        type="button"
-                        role="radio"
-                        aria-checked={getHotspotFillColor(hotspot) === entry.id}
-                        aria-label={entry.label}
-                        className={`hotspot-fill-swatch${
-                          getHotspotFillColor(hotspot) === entry.id ? " hotspot-fill-swatch-active" : ""
-                        }`}
-                        style={{ backgroundColor: entry.border }}
-                        onClick={() => onUpdate(hotspot.id, { fill_color: entry.id })}
-                      />
-                    </Tooltip>
-                  ))}
-                </Box>
-              ) : null}
+                ) : null}
+              </div>
+              <div className="hotspot-editor-border-controls">
+                <Typography variant="body2" component="span" className="hotspot-editor-border-label">
+                  Рамка
+                </Typography>
+                <HotspotColorSwatches
+                  ariaLabel="Цвет рамки"
+                  selectedColorId={getHotspotBorderColor(hotspot)}
+                  onSelect={(border_color) => onUpdate(hotspot.id, { border_color })}
+                />
+              </div>
             </div>
           ) : null}
           {kind === "region" ? (

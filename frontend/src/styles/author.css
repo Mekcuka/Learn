@@ -1113,12 +1113,32 @@
   transform: translate(-50%, -50%);
 }
 
+.hotspot-editor-color-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  width: 100%;
+}
+
 .hotspot-editor-fill-controls {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem 0.75rem;
   width: 100%;
+}
+
+.hotspot-editor-border-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  width: 100%;
+}
+
+.hotspot-editor-border-label {
+  min-width: 3.5rem;
+  font-weight: 500;
 }
 
 .hotspot-fill-palette {

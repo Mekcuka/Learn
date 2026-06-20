@@ -278,14 +278,35 @@ def validate_hotspots(hotspots: list[dict]) -> list[dict]:
             entry_fill_enabled = True
 
         fill_color = item.get("fill_color")
+        border_color = item.get("border_color")
+        allowed_hotspot_colors = {
+            "yellow",
+            "blue",
+            "green",
+            "red",
+            "orange",
+            "purple",
+            "pink",
+            "cyan",
+            "gray",
+            "lime",
+        }
         if fill_color not in (None, ""):
-            allowed_fill_colors = {"yellow", "blue", "green", "red", "orange"}
-            if fill_color not in allowed_fill_colors:
+            if fill_color not in allowed_hotspot_colors:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                     detail={
                         "detail": "validation_error",
                         "message": "Недопустимый fill_color hotspot",
+                    },
+                )
+        if border_color not in (None, ""):
+            if border_color not in allowed_hotspot_colors:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail={
+                        "detail": "validation_error",
+                        "message": "Недопустимый border_color hotspot",
                     },
                 )
 
@@ -303,6 +324,8 @@ def validate_hotspots(hotspots: list[dict]) -> list[dict]:
             entry["kind"] = kind
         if fill_color not in (None, ""):
             entry["fill_color"] = str(fill_color)
+        if border_color not in (None, ""):
+            entry["border_color"] = str(border_color)
         if item.get("description_html") not in (None, ""):
             entry["description_html"] = str(item["description_html"])
         callout_width = item.get("callout_width")

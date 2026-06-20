@@ -55,7 +55,7 @@ export function resolveCalloutSide(
   return shouldFlipCallout(anchorXPct) ? "left" : "right";
 }
 
-export const HOTSPOT_FILL_PALETTE: ReadonlyArray<{
+export const HOTSPOT_COLOR_PALETTE: ReadonlyArray<{
   id: HotspotFillColor;
   label: string;
   border: string;
@@ -103,9 +103,52 @@ export const HOTSPOT_FILL_PALETTE: ReadonlyArray<{
     fillActive: "rgb(249 115 22 / 30%)",
     ring: "rgb(234 88 12 / 70%)",
   },
+  {
+    id: "purple",
+    label: "Фиолетовый",
+    border: "#a855f7",
+    fill: "rgb(168 85 247 / 18%)",
+    fillActive: "rgb(168 85 247 / 30%)",
+    ring: "rgb(124 58 237 / 70%)",
+  },
+  {
+    id: "pink",
+    label: "Розовый",
+    border: "#ec4899",
+    fill: "rgb(236 72 153 / 18%)",
+    fillActive: "rgb(236 72 153 / 30%)",
+    ring: "rgb(219 39 119 / 70%)",
+  },
+  {
+    id: "cyan",
+    label: "Бирюзовый",
+    border: "#06b6d4",
+    fill: "rgb(6 182 212 / 18%)",
+    fillActive: "rgb(6 182 212 / 30%)",
+    ring: "rgb(8 145 178 / 70%)",
+  },
+  {
+    id: "gray",
+    label: "Серый",
+    border: "#64748b",
+    fill: "rgb(100 116 139 / 18%)",
+    fillActive: "rgb(100 116 139 / 30%)",
+    ring: "rgb(71 85 105 / 70%)",
+  },
+  {
+    id: "lime",
+    label: "Лаймовый",
+    border: "#84cc16",
+    fill: "rgb(132 204 22 / 18%)",
+    fillActive: "rgb(132 204 22 / 30%)",
+    ring: "rgb(101 163 13 / 70%)",
+  },
 ];
 
-const HOTSPOT_FILL_COLOR_IDS = new Set(HOTSPOT_FILL_PALETTE.map((entry) => entry.id));
+/** @deprecated Use HOTSPOT_COLOR_PALETTE */
+export const HOTSPOT_FILL_PALETTE = HOTSPOT_COLOR_PALETTE;
+
+const HOTSPOT_COLOR_IDS = new Set(HOTSPOT_COLOR_PALETTE.map((entry) => entry.id));
 
 export function clampPercent(value: number, min = 0, max = 100) {
   return Math.min(max, Math.max(min, value));
@@ -214,28 +257,43 @@ export function getHotspotFillEnabled(hotspot: Pick<HotspotItem, "fill_enabled">
 }
 
 export function getHotspotFillColor(hotspot: Pick<HotspotItem, "fill_color" | "kind">): HotspotFillColor {
-  if (hotspot.fill_color && HOTSPOT_FILL_COLOR_IDS.has(hotspot.fill_color)) {
+  if (hotspot.fill_color && HOTSPOT_COLOR_IDS.has(hotspot.fill_color)) {
     return hotspot.fill_color;
   }
   return defaultHotspotFillColor(getHotspotKind(hotspot));
 }
 
+export function getHotspotBorderColor(
+  hotspot: Pick<HotspotItem, "border_color" | "fill_color" | "kind">,
+): HotspotFillColor {
+  if (hotspot.border_color && HOTSPOT_COLOR_IDS.has(hotspot.border_color)) {
+    return hotspot.border_color;
+  }
+  return getHotspotFillColor(hotspot);
+}
+
+export function getHotspotColorPaletteEntry(colorId: HotspotFillColor) {
+  return HOTSPOT_COLOR_PALETTE.find((entry) => entry.id === colorId) ?? HOTSPOT_COLOR_PALETTE[0];
+}
+
+/** @deprecated Use getHotspotColorPaletteEntry */
 export function getHotspotFillPaletteEntry(colorId: HotspotFillColor) {
-  return HOTSPOT_FILL_PALETTE.find((entry) => entry.id === colorId) ?? HOTSPOT_FILL_PALETTE[0];
+  return getHotspotColorPaletteEntry(colorId);
 }
 
 /** Pin fill: accent on dot, connector and callout via CSS vars on the parent (.hotspot-pin-filled). */
 export function hotspotPinFillProps(
-  hotspot: Pick<HotspotItem, "fill_enabled" | "fill_color" | "kind">,
+  hotspot: Pick<HotspotItem, "fill_enabled" | "fill_color" | "border_color" | "kind">,
 ): { className: string; style: CSSProperties } {
-  if (!getHotspotFillEnabled(hotspot)) {
+  const hasExplicitBorder = Boolean(hotspot.border_color && HOTSPOT_COLOR_IDS.has(hotspot.border_color));
+  if (!getHotspotFillEnabled(hotspot) && !hasExplicitBorder) {
     return { className: "", style: {} };
   }
 
-  const entry = getHotspotFillPaletteEntry(getHotspotFillColor(hotspot));
+  const accentEntry = getHotspotColorPaletteEntry(getHotspotBorderColor(hotspot));
   return {
     className: "hotspot-pin-filled",
-    style: { "--hotspot-pin-accent": entry.border } as CSSProperties,
+    style: { "--hotspot-pin-accent": accentEntry.border } as CSSProperties,
   };
 }
 
@@ -245,15 +303,16 @@ export function hotspotRectVisualStyle(hotspot: HotspotItem, active = false): CS
     return {};
   }
 
-  const entry = getHotspotFillPaletteEntry(getHotspotFillColor(hotspot));
+  const borderEntry = getHotspotColorPaletteEntry(getHotspotBorderColor(hotspot));
+  const fillEntry = getHotspotColorPaletteEntry(getHotspotFillColor(hotspot));
   const fillEnabled = getHotspotFillEnabled(hotspot);
   const style: CSSProperties = {
-    borderColor: entry.border,
-    background: fillEnabled ? (active ? entry.fillActive : entry.fill) : "transparent",
+    borderColor: borderEntry.border,
+    background: fillEnabled ? (active ? fillEntry.fillActive : fillEntry.fill) : "transparent",
   };
 
   if (active) {
-    style.boxShadow = `0 0 0 2px #fff, 0 0 0 4px ${entry.ring}`;
+    style.boxShadow = `0 0 0 2px #fff, 0 0 0 4px ${borderEntry.ring}`;
   }
 
   return style;

@@ -5,7 +5,9 @@ from pydantic import BaseModel
 from app.schemas.quiz import QuizModuleResponse
 
 HotspotKind = Literal["region", "zoom", "pin"]
-HotspotFillColor = Literal["yellow", "blue", "green", "red", "orange"]
+HotspotFillColor = Literal[
+    "yellow", "blue", "green", "red", "orange", "purple", "pink", "cyan", "gray", "lime"
+]
 CalloutWidth = Literal["compact", "normal", "wide"]
 CalloutSide = Literal["auto", "left", "right", "top", "bottom"]
 
@@ -21,6 +23,7 @@ class HotspotItem(BaseModel):
     pulse: bool = True
     fill_enabled: bool = True
     fill_color: HotspotFillColor | None = None
+    border_color: HotspotFillColor | None = None
     description_html: str | None = None
     callout_width: CalloutWidth | None = None
     callout_side: CalloutSide | None = None

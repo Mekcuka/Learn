@@ -224,7 +224,7 @@ def test_author_lesson_crud_and_slides(client, author_headers):
                     "y_pct": 10,
                     "width_pct": 20,
                     "height_pct": 10,
-                    "fill_color": "purple",
+                    "fill_color": "magenta",
                 }
             ]
         },

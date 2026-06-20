@@ -4,6 +4,7 @@ import {
   clampPercent,
   defaultHotspotFillColor,
   defaultHotspotLabel,
+  getHotspotBorderColor,
   getHotspotFillColor,
   getHotspotFillEnabled,
   getHotspotKind,
@@ -113,7 +114,7 @@ describe("hotspot utils", () => {
     expect(disabled.style).toEqual({});
   });
 
-  it("builds rect visual style with fill toggle and palette", () => {
+  it("builds rect visual style with fill toggle, fill and border palette", () => {
     const hotspot = {
       id: "zone-1",
       label: "Зона",
@@ -122,11 +123,33 @@ describe("hotspot utils", () => {
       width_pct: 20,
       height_pct: 10,
       fill_color: "green" as const,
+      border_color: "purple" as const,
     };
 
     expect(hotspotRectVisualStyle(hotspot).background).toBe("rgb(34 197 94 / 18%)");
+    expect(hotspotRectVisualStyle(hotspot).borderColor).toBe("#a855f7");
     expect(hotspotRectVisualStyle({ ...hotspot, fill_enabled: false }).background).toBe("transparent");
     expect(hotspotRectVisualStyle(hotspot, true).background).toBe("rgb(34 197 94 / 30%)");
+    expect(getHotspotBorderColor({ kind: "region", fill_color: "green" })).toBe("green");
+    expect(getHotspotBorderColor({ kind: "region", fill_color: "green", border_color: "red" })).toBe("red");
+  });
+
+  it("applies pin accent from border_color when fill is disabled", () => {
+    const hotspot = {
+      id: "pin-1",
+      label: "Метка",
+      kind: "pin" as const,
+      x_pct: 10,
+      y_pct: 10,
+      width_pct: 2,
+      height_pct: 2,
+      fill_enabled: false,
+      border_color: "purple" as const,
+    };
+
+    const props = hotspotPinFillProps(hotspot);
+    expect(props.className).toBe("hotspot-pin-filled");
+    expect((props.style as Record<string, string>)["--hotspot-pin-accent"]).toBe("#a855f7");
   });
 
   it("resolves callout max width presets", () => {
