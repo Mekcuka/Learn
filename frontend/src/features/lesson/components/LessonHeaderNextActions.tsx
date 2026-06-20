@@ -1,5 +1,4 @@
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
 
 import type { NextLessonNavigation } from "../../../utils/lessonUi";
 import LessonCompleteButton from "./LessonCompleteButton";
@@ -48,9 +47,6 @@ function LessonHeaderSplitButton({
           title={nextEnabled ? undefined : "Завершите текущий урок, чтобы перейти дальше"}
         >
           <span className={styles.btnLabel}>Следующий урок</span>
-          <Typography component="span" variant="body2" className={styles.btnTitle}>
-            {navigation.title}
-          </Typography>
         </Button>
         <div className={styles.divider} role="separator" aria-orientation="vertical" />
         {showCompleteHalf ? (

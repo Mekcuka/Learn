@@ -63,7 +63,9 @@ describe("LessonHeaderNextActions", () => {
     const buttons = splitGroup?.querySelectorAll("button");
     expect(buttons?.length).toBe(2);
     expect(buttons?.[0]?.disabled).toBe(true);
-    expect(buttons?.[0]?.textContent).toContain("Создание проекта");
+    expect(buttons?.[0]?.textContent).toContain("Следующий урок");
+    expect(buttons?.[0]?.textContent).not.toContain("Создание проекта");
+    expect(buttons?.[0]?.getAttribute("aria-label")).toBe("Следующий урок: Создание проекта");
     expect(buttons?.[1]?.textContent).toBe("Завершить урок");
   });
 
@@ -96,7 +98,7 @@ describe("LessonHeaderNextActions", () => {
     const buttons = splitGroup?.querySelectorAll("button");
     expect(buttons?.length).toBe(2);
     expect(buttons?.[0]?.textContent).toContain("Следующий урок");
-    expect(buttons?.[0]?.textContent).toContain("Создание проекта");
+    expect(buttons?.[0]?.textContent).not.toContain("Создание проекта");
     expect(buttons?.[1]?.textContent).toBe("Завершить урок");
   });
 
@@ -130,7 +132,8 @@ describe("LessonHeaderNextActions", () => {
 
     const buttons = container.querySelectorAll('[role="group"] button');
     expect(buttons.length).toBe(2);
-    expect(buttons[0]?.textContent).toContain("Создание проекта");
+    expect(buttons[0]?.textContent).toContain("Следующий урок");
+    expect(buttons[0]?.textContent).not.toContain("Создание проекта");
     expect(buttons[1]?.textContent).toBe("Выполнен");
   });
 
