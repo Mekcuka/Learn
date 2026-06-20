@@ -38,7 +38,8 @@ import RichTextEditor from "../components/RichTextEditor";
 import LessonScreenshotHintsPanel from "../../lesson/components/LessonScreenshotHintsPanel";
 import LessonSlideView from "../../lesson/components/LessonSlideView";
 import type { HotspotItem, LessonSlide } from "../../../types/lesson";
-import { PageError, PageLoading } from "../../../components/mui/PageStatus";
+import { PageLoading } from "../../../components/mui/PageStatus";
+import { AppToast } from "../../../components/mui/AppToast";
 import { ConfirmModal } from "../../../components/mui/ConfirmModal";
 import { useAuthorSlideAutosave } from "../hooks/useAuthorSlideAutosave";
 import { draftSaveMessage } from "../../../utils/authorPreview";
@@ -73,7 +74,7 @@ export default function AuthorLessonPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [toolbarAction, setToolbarAction] = useState<ToolbarAction>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [errorToast, setErrorToast] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [pendingConfirm, setPendingConfirm] = useState<PendingConfirm>(null);
   const [selectedVerifyType, setSelectedVerifyType] = useState<VerifyTypeItem | null>(null);
@@ -121,7 +122,7 @@ export default function AuthorLessonPage() {
     loadLesson()
       .catch((err: unknown) => {
         if (!cancelled) {
-          setError(err instanceof LearnApiError ? err.message : "Не удалось загрузить урок");
+          setErrorToast(err instanceof LearnApiError ? err.message : "Не удалось загрузить урок");
         }
       })
       .finally(() => {
@@ -170,7 +171,7 @@ export default function AuthorLessonPage() {
       mergeSavedSlide(savedSlide, hasUnpublishedChanges);
       setMessage(draftSaveMessage("Слайд автосохранён", hasUnpublishedChanges));
     },
-    onError: (autosaveError) => setError(autosaveError),
+    onError: (autosaveError) => setErrorToast(autosaveError),
   });
 
   const persistLessonMeta = useCallback(async () => {
@@ -206,19 +207,19 @@ export default function AuthorLessonPage() {
       return;
     }
     if (validationHint) {
-      setError(validationHint);
+      setErrorToast(validationHint);
       return;
     }
     setToolbarAction("publish");
     setBusy(true);
-    setError(null);
+    setErrorToast(null);
     try {
       const synced = await persistLessonMeta();
       const published = await publishAuthorLesson(synced.id);
       setLesson(published);
       setMessage("Урок опубликован");
     } catch (err) {
-      setError(err instanceof LearnApiError ? err.message : "Не удалось опубликовать урок");
+      setErrorToast(err instanceof LearnApiError ? err.message : "Не удалось опубликовать урок");
     } finally {
       setToolbarAction(null);
       setBusy(false);
@@ -267,13 +268,13 @@ export default function AuthorLessonPage() {
     }
     setToolbarAction("lesson");
     setBusy(true);
-    setError(null);
+    setErrorToast(null);
     try {
       const updated = await persistLessonMeta();
       setLesson(updated);
       setMessage(draftSaveMessage("Урок сохранён", updated.has_unpublished_changes));
     } catch (err) {
-      setError(err instanceof LearnApiError ? err.message : "Не удалось сохранить урок");
+      setErrorToast(err instanceof LearnApiError ? err.message : "Не удалось сохранить урок");
     } finally {
       setToolbarAction(null);
       setBusy(false);
@@ -286,7 +287,7 @@ export default function AuthorLessonPage() {
     }
     setToolbarAction("slide");
     setBusy(true);
-    setError(null);
+    setErrorToast(null);
     try {
       const updated = await updateAuthorSlide(activeSlide.id, {
         title: activeSlide.title,
@@ -299,7 +300,7 @@ export default function AuthorLessonPage() {
       autosave.markClean(updated.slide);
       setMessage(draftSaveMessage("Слайд сохранён", updated.has_unpublished_changes));
     } catch (err) {
-      setError(err instanceof LearnApiError ? err.message : "Не удалось сохранить слайд");
+      setErrorToast(err instanceof LearnApiError ? err.message : "Не удалось сохранить слайд");
     } finally {
       setToolbarAction(null);
       setBusy(false);
@@ -318,7 +319,7 @@ export default function AuthorLessonPage() {
       setLesson(updated);
       setActiveSlideId(updated.slides[updated.slides.length - 1]?.id ?? null);
     } catch (err) {
-      setError(err instanceof LearnApiError ? err.message : "Не удалось добавить слайд");
+      setErrorToast(err instanceof LearnApiError ? err.message : "Не удалось добавить слайд");
     } finally {
       setBusy(false);
     }
@@ -334,7 +335,7 @@ export default function AuthorLessonPage() {
       setLesson(updated);
       setActiveSlideId(updated.slides[0]?.id ?? null);
     } catch (err) {
-      setError(err instanceof LearnApiError ? err.message : "Не удалось удалить слайд");
+      setErrorToast(err instanceof LearnApiError ? err.message : "Не удалось удалить слайд");
     } finally {
       setBusy(false);
       setPendingConfirm(null);
@@ -350,7 +351,7 @@ export default function AuthorLessonPage() {
       await deleteAuthorLesson(lesson.id);
       navigate("/author");
     } catch (err) {
-      setError(err instanceof LearnApiError ? err.message : "Не удалось удалить урок");
+      setErrorToast(err instanceof LearnApiError ? err.message : "Не удалось удалить урок");
     } finally {
       setBusy(false);
       setPendingConfirm(null);
@@ -362,7 +363,7 @@ export default function AuthorLessonPage() {
       return;
     }
     setBusy(true);
-    setError(null);
+    setErrorToast(null);
     try {
       const stamp = Date.now();
       const updated = await createAuthorSlide(lesson.id, {
@@ -380,7 +381,7 @@ export default function AuthorLessonPage() {
       setActiveSlideId(newSlide?.id ?? null);
       setMessage("Слайд скопирован");
     } catch (err) {
-      setError(err instanceof LearnApiError ? err.message : "Не удалось скопировать слайд");
+      setErrorToast(err instanceof LearnApiError ? err.message : "Не удалось скопировать слайд");
     } finally {
       setBusy(false);
     }
@@ -395,7 +396,7 @@ export default function AuthorLessonPage() {
       const updated = await reorderAuthorSlides(lesson.id, slideIds);
       setLesson(updated);
     } catch (err) {
-      setError(err instanceof LearnApiError ? err.message : "Не удалось изменить порядок");
+      setErrorToast(err instanceof LearnApiError ? err.message : "Не удалось изменить порядок");
     } finally {
       setBusy(false);
     }
@@ -420,7 +421,7 @@ export default function AuthorLessonPage() {
       autosave.markClean(updated.slide);
       setMessage(draftSaveMessage("Изображение загружено", updated.has_unpublished_changes));
     } catch (err) {
-      setError(err instanceof LearnApiError ? err.message : "Не удалось загрузить файл");
+      setErrorToast(err instanceof LearnApiError ? err.message : "Не удалось загрузить файл");
     } finally {
       setBusy(false);
       event.target.value = "";
@@ -447,7 +448,7 @@ export default function AuthorLessonPage() {
       return;
     }
     setBusy(true);
-    setError(null);
+    setErrorToast(null);
     try {
       const text = await file.text();
       const payload = JSON.parse(text) as Record<string, unknown>;
@@ -462,7 +463,7 @@ export default function AuthorLessonPage() {
       }
       setMessage("Урок импортирован из JSON");
     } catch (err) {
-      setError(err instanceof LearnApiError ? err.message : "Не удалось импортировать JSON");
+      setErrorToast(err instanceof LearnApiError ? err.message : "Не удалось импортировать JSON");
     } finally {
       setBusy(false);
       event.target.value = "";
@@ -521,6 +522,11 @@ export default function AuthorLessonPage() {
     return (
       <AuthorConstructorLayout>
         {loading ? <PageLoading /> : <Typography color="text.secondary">Урок не найден</Typography>}
+        <AppToast
+          open={Boolean(errorToast)}
+          message={errorToast ?? ""}
+          onClose={() => setErrorToast(null)}
+        />
       </AuthorConstructorLayout>
     );
   }
@@ -554,8 +560,6 @@ export default function AuthorLessonPage() {
             {message}
           </Typography>
         )}
-        {error && <PageError message={error} />}
-
         <div className="author-constructor-body">
           <div className="author-constructor-meta">
             <AuthorLessonMetaPanel
@@ -574,7 +578,7 @@ export default function AuthorLessonPage() {
               onMetaExpandedChange={setMetaExpanded}
               onQuizExpandedChange={setQuizExpanded}
               onQuizMessage={setMessage}
-              onQuizError={setError}
+              onQuizError={setErrorToast}
             />
           </div>
 
@@ -751,6 +755,11 @@ export default function AuthorLessonPage() {
         loading={busy}
         onConfirm={confirmDeleteLesson}
         onCancel={() => setPendingConfirm(null)}
+      />
+      <AppToast
+        open={Boolean(errorToast)}
+        message={errorToast ?? ""}
+        onClose={() => setErrorToast(null)}
       />
     </AuthorConstructorLayout>
   );

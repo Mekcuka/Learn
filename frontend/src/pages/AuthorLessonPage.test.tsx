@@ -24,7 +24,13 @@ vi.mock("../api/authorApi", async () => {
 vi.mock("../features/author/components/AuthorConstructorLayout", () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
-vi.mock("../features/author/components/AuthorLessonToolbar", () => ({ default: () => null }));
+vi.mock("../features/author/components/AuthorLessonToolbar", () => ({
+  default: ({ onPublish }: { onPublish: () => void }) => (
+    <button type="button" onClick={onPublish}>
+      Опубликовать
+    </button>
+  ),
+}));
 vi.mock("../features/author/components/AuthorLessonMetaPanel", () => ({ default: () => null }));
 vi.mock("../features/author/components/AuthorStoryboardView", () => ({ default: () => null }));
 vi.mock("../features/author/components/HotspotEditor", () => ({ default: () => null }));
@@ -152,6 +158,38 @@ describe("AuthorLessonPage", () => {
 
     expect(container.querySelector(".author-constructor-main")).not.toBeNull();
     expect(container.querySelector(".author-constructor-hotspots")).toBeNull();
+  });
+
+  it("shows validation errors as bottom-right toast instead of inline page error", async () => {
+    getAuthorLesson.mockResolvedValue({ ...lessonFixture, slides: [] });
+
+    await act(async () => {
+      root.render(
+        <AppTheme>
+          <MemoryRouter initialEntries={["/author/lessons/lesson-01"]}>
+            <Routes>
+              <Route path="/author/lessons/:lessonId" element={<AuthorLessonPage />} />
+            </Routes>
+          </MemoryRouter>
+        </AppTheme>,
+      );
+    });
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    const publishButton = container.querySelector("button");
+    expect(publishButton?.textContent).toContain("Опубликовать");
+
+    await act(async () => {
+      publishButton?.click();
+    });
+
+    const alert = document.body.querySelector('[role="alert"]');
+    expect(alert).not.toBeNull();
+    expect(alert?.textContent).toContain("Добавьте хотя бы один слайд");
+    expect(container.querySelector(".page-status-error")).toBeNull();
   });
 
   it("does not enable rich text preview in slide editor fields", async () => {
