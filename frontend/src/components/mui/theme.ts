@@ -1,46 +1,51 @@
+/**
+ * MUI theme — palette/radius values sourced from src/theme/tokens.ts.
+ */
 import { createTheme } from "@mui/material/styles";
 import { ruRU } from "@mui/material/locale";
+
+import { designColors, designRadius, designTypography } from "../../theme/tokens";
 
 export const appTheme = createTheme(
   {
     palette: {
       mode: "light",
       primary: {
-        main: "#0078d2",
-        light: "#e8f4fd",
-        dark: "#005a9e",
+        main: designColors.accent,
+        light: designColors.accentSoft,
+        dark: designColors.accentDark,
       },
       secondary: {
-        main: "#7b61ff",
+        main: designColors.secondary,
       },
       success: {
-        main: "#22a06b",
-        light: "#f0fdf4",
+        main: designColors.success,
+        light: designColors.bgSuccess,
       },
       warning: {
-        main: "#f5a623",
+        main: designColors.warning,
       },
       error: {
-        main: "#e5484d",
+        main: designColors.error,
       },
       background: {
-        default: "#ffffff",
-        paper: "#ffffff",
+        default: designColors.bgDefault,
+        paper: designColors.bgDefault,
       },
       text: {
-        primary: "#1a1a1a",
-        secondary: "#6b7280",
+        primary: designColors.textPrimary,
+        secondary: designColors.textSecondary,
       },
-      divider: "#e8e8e8",
+      divider: designColors.border,
     },
     typography: {
-      fontFamily: '"Manrope", system-ui, sans-serif',
+      fontFamily: designTypography.fontFamily,
       button: {
         textTransform: "none",
       },
     },
     shape: {
-      borderRadius: 12,
+      borderRadius: designRadius.control,
     },
     components: {
       MuiButton: {

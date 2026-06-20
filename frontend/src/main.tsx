@@ -18,7 +18,9 @@ import "./index.css";
 
 import "./mui-overrides.css";
 
+import { injectDesignTokenCssVariables } from "./theme/tokens";
 
+injectDesignTokenCssVariables();
 
 createRoot(document.getElementById("root")!).render(
 

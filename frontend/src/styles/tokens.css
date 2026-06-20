@@ -1,45 +1,23 @@
+/**
+ * Layout and alias CSS variables for Learn Portal.
+ * Color, radius, and typography tokens are injected from src/theme/tokens.ts (see main.tsx).
+ * Keep alias names stable — used across stylesheets.
+ */
 :root {
-  font-family: "Manrope", system-ui, sans-serif;
-  line-height: 1.5;
-  color: #1a1a1a;
-  background: #fff;
-  --accent: #0078d2;
-  --accent-soft: #e8f4fd;
-  --border: #e8e8e8;
-  --text-muted: #6b7280;
+  color: var(--color-typo-primary);
+  background: var(--color-bg-default);
+  font-family: var(--font-family-base);
+  line-height: var(--line-height-base);
   --surface: var(--color-bg-default);
   --surface-muted: var(--color-bg-secondary);
   --page-bg: var(--color-bg-default);
-  --radius-sm: 6px;
   --primary: var(--accent);
-  --radius-pill: 999px;
-  --radius-card: 16px;
-  --color-bg-default: #fff;
-  --color-bg-secondary: #f9fafb;
-  --color-bg-border: #e8e8e8;
-  --color-typo-primary: #1a1a1a;
-  --color-typo-secondary: #6b7280;
-  --color-typo-brand: #0078d2;
-  --color-bg-brand: #e8f4fd;
-  --color-bg-soft: #f3f4f6;
-  --color-bg-success: #f0fdf4;
-  --color-bg-alert: #fef2f2;
-  --color-bg-link: #eff6ff;
-  --color-bg-warning: #fffbeb;
-  --color-typo-success: #22a06b;
-  --color-typo-alert: #e5484d;
-  --color-typo-link: #0078d2;
-  --color-typo-warning: #f5a623;
-  --color-typo-caution: #d97706;
-  --color-typo-ghost: #9ca3af;
-  --control-radius: 12px;
   --page-padding: clamp(1rem, 3vw, 2rem);
   --sidebar-width: clamp(220px, 18vw, 260px);
   --catalog-topbar-height: 4rem;
   --catalog-grid-gap: clamp(0.75rem, 1.5vw, 1rem);
   --catalog-module-inner-padding: clamp(1rem, 2vw, 1.5rem);
   --catalog-module-grid-gap: 1rem;
-  --catalog-stack-breakpoint: 900px;
   --lesson-ref-width: clamp(260px, 22vw, 320px);
   --lesson-hints-width: clamp(240px, 18vw, 280px);
 }
