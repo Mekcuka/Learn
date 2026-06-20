@@ -19,6 +19,7 @@ type LessonPageHeaderProps = {
   isPreview: boolean;
   isDraftPreview: boolean;
   showHintsColumn: boolean;
+  showNextStep: boolean;
   nextLessonNavigation: NextLessonNavigation | null;
   showCompleteButton: boolean;
   completeHint?: string | null;
@@ -37,6 +38,7 @@ export default function LessonPageHeader({
   isPreview,
   isDraftPreview,
   showHintsColumn,
+  showNextStep,
   nextLessonNavigation,
   showCompleteButton,
   completeHint,
@@ -47,11 +49,10 @@ export default function LessonPageHeader({
   roadmapLinkTo,
 }: LessonPageHeaderProps) {
   const { headerGrid } = lessonLayoutGridClasses(
-    showHintsColumn || showCompleteButton || nextLessonNavigation != null,
+    showHintsColumn || showCompleteButton || showNextStep,
   );
   const lessonStatus = lessonState?.status;
-  const showNextStepCard = showHintsColumn && nextLessonNavigation != null;
-  const showNextColumn = showNextStepCard || showCompleteButton;
+  const showNextColumn = showNextStep || showCompleteButton;
   const statusChip =
     lessonStatus === "completed"
       ? { color: "success" as const, label: "Выполнен" }
@@ -114,7 +115,7 @@ export default function LessonPageHeader({
         {showNextColumn && (
           <div className="lesson-page-header__next">
             <LessonHeaderNextActions
-              showNextStep={showNextStepCard}
+              showNextStep={showNextStep}
               showComplete={showCompleteButton}
               nextLessonNavigation={nextLessonNavigation}
               completeHint={completeHint}

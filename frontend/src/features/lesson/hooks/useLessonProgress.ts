@@ -230,6 +230,7 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
         return;
       case "reload":
         await loadLesson();
+        setQuizResult(null);
         return;
       case "verify":
         await startVerify();
@@ -278,11 +279,6 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
 
       const result = await submitQuiz(lesson.module_id, payload, lessonId);
       setQuizResult(result);
-
-      if (result.lesson_completed) {
-        setLesson((prev) => (prev && lessonId ? patchLessonCompleted(prev, lessonId) : prev));
-        await loadLesson();
-      }
     } catch (err) {
       setFeedback({
         status: "failed",

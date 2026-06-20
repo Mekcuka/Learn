@@ -55,6 +55,7 @@ export type CompleteLessonButtonContext = {
   lessonStatus?: string;
   isPreview: boolean;
   isOnQuizStep: boolean;
+  quizPassed?: boolean;
 };
 
 /** Whether the learner reached the last navigable step of the lesson. */
@@ -89,12 +90,19 @@ export function shouldShowCompleteLessonButton({
   lessonStatus,
   isPreview,
   isOnQuizStep,
+  quizPassed = false,
 }: CompleteLessonButtonContext): boolean {
-  if (isPreview || lessonStatus === "completed" || lessonStatus === "locked") {
+  if (isPreview || lessonStatus === "locked") {
     return false;
   }
 
-  return isOnFinalLessonStep(lesson, slideIndex, isOnQuizStep);
+  const onFinalStep = isOnFinalLessonStep(lesson, slideIndex, isOnQuizStep);
+
+  if (lessonStatus === "completed") {
+    return quizPassed && onFinalStep;
+  }
+
+  return onFinalStep;
 }
 
 export type CompleteLessonAction =
@@ -121,6 +129,11 @@ export function resolveCompleteLessonAction({
   quizPassed,
 }: CompleteLessonContext): CompleteLessonAction {
   if (lessonStatus === "completed") {
+    const mixed = isMixedQuizLesson(lesson);
+    const quizOnly = isQuizOnlyLesson(lesson);
+    if ((mixed || quizOnly) && quizPassed) {
+      return { type: "reload" };
+    }
     return { type: "noop" };
   }
 

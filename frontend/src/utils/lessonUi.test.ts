@@ -276,6 +276,29 @@ describe("shouldShowCompleteLessonButton", () => {
       }),
     ).toBe(true);
   });
+
+  it("shows complete button on quiz step after quiz passed even when lesson status is completed", () => {
+    expect(
+      shouldShowCompleteLessonButton({
+        lesson: mixedWithQuiz,
+        slideIndex: 2,
+        lessonStatus: "completed",
+        isPreview: false,
+        isOnQuizStep: true,
+        quizPassed: true,
+      }),
+    ).toBe(true);
+    expect(
+      shouldShowCompleteLessonButton({
+        lesson: mixedWithQuiz,
+        slideIndex: 2,
+        lessonStatus: "completed",
+        isPreview: false,
+        isOnQuizStep: true,
+        quizPassed: false,
+      }),
+    ).toBe(false);
+  });
 });
 
 describe("isOnFinalLessonStep", () => {
@@ -382,6 +405,16 @@ describe("resolveCompleteLessonAction", () => {
         slideIndex: 2,
         isOnQuizStep: true,
         lessonStatus: "active",
+        quizPassed: true,
+      }),
+    ).toEqual({ type: "reload" });
+
+    expect(
+      resolveCompleteLessonAction({
+        lesson: mixedWithQuiz,
+        slideIndex: 2,
+        isOnQuizStep: true,
+        lessonStatus: "completed",
         quizPassed: true,
       }),
     ).toEqual({ type: "reload" });

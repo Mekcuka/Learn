@@ -70,6 +70,7 @@ describe("LessonPageHeader", () => {
               isPreview={false}
               isDraftPreview={false}
               showHintsColumn
+              showNextStep={false}
               nextLessonNavigation={null}
               showCompleteButton={false}
               verifyBusy={false}
@@ -97,6 +98,7 @@ describe("LessonPageHeader", () => {
 
   it("renders unified split button when next step and complete are both visible", () => {
     renderHeader({
+      showNextStep: true,
       showCompleteButton: true,
       nextLessonNavigation: { kind: "lesson", lessonId: "lesson-02", title: "Создание проекта" },
     });
@@ -114,6 +116,7 @@ describe("LessonPageHeader", () => {
   it("calls onComplete when complete half of split button is clicked", () => {
     const onComplete = vi.fn();
     renderHeader({
+      showNextStep: true,
       showCompleteButton: true,
       nextLessonNavigation: { kind: "lesson", lessonId: "lesson-02", title: "Создание проекта" },
       onComplete,
@@ -133,6 +136,17 @@ describe("LessonPageHeader", () => {
     act(() => completeButton?.click());
 
     expect(onComplete).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows next step in header on quiz step after lesson is completed", () => {
+    renderHeader({
+      showNextStep: true,
+      showCompleteButton: false,
+      nextLessonNavigation: { kind: "lesson", lessonId: "lesson-02", title: "Создание проекта" },
+    });
+
+    expect(container.querySelector(".lesson-page-header__next")).not.toBeNull();
+    expect(container.querySelector('[aria-label="Следующий урок"]')).not.toBeNull();
   });
 
   it("does not render header next column when neither next step nor complete button is shown", () => {

@@ -83,6 +83,10 @@ export default function LessonPage() {
     !isPreview && lessonId
       ? resolveNextLessonNavigation(lessonId, lessonStatus, lesson.module_lessons)
       : null;
+  const showNextStep =
+    !isPreview &&
+    nextLessonNavigation != null &&
+    (!isOnQuizStep || lessonStatus === "completed");
   const showHintsColumn =
     ((!isQuizLesson || isMixedLesson) || nextLessonNavigation != null) && !isOnQuizStep;
   const { body: bodyClass } = lessonLayoutGridClasses(showHintsColumn);
@@ -92,6 +96,7 @@ export default function LessonPage() {
     lessonStatus,
     isPreview,
     isOnQuizStep,
+    quizPassed: Boolean(quizResult?.passed),
   });
   const completeHint =
     feedback?.status === "failed" && showCompleteButton ? feedback.message : null;
@@ -123,6 +128,7 @@ export default function LessonPage() {
         isPreview={isPreview}
         isDraftPreview={isDraftPreview}
         showHintsColumn={showHintsColumn}
+        showNextStep={showNextStep}
         nextLessonNavigation={nextLessonNavigation}
         showCompleteButton={showCompleteButton}
         completeHint={completeHint}

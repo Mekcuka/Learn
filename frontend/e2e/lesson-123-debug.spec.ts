@@ -230,5 +230,6 @@ test.describe("lesson-123 mixed lesson diagnostics", () => {
 
     expect((await submitResponse).ok()).toBeTruthy();
     await expect(page.locator(".quiz-result")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("button", { name: "Завершить урок" })).toBeVisible({ timeout: 10_000 });
   });
 });
