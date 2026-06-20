@@ -1,3 +1,4 @@
+import time
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
@@ -26,6 +27,7 @@ from app.services.authoring import (
     validate_upload,
     write_content_file,
 )
+from app.services.authoring.files import delete_lesson_content_file
 
 from .helpers import get_lesson_or_404, lesson_to_detail
 
@@ -181,8 +183,11 @@ async def upload_slide_image(
 
     ext_map = {"image/png": "png", "image/webp": "webp", "image/svg+xml": "svg"}
     ext = ext_map.get(file.content_type or "", "bin")
-    filename = f"slide-{slide_data['sort_order']:02d}.{ext}"
+    previous_image_path = slide_data.get("image_path")
+    filename = f"slide-{slide_data['sort_order']:02d}-{int(time.time() * 1000)}.{ext}"
     image_path = write_content_file(module.id, lesson.id, filename, data)
+    if previous_image_path and previous_image_path != image_path:
+        delete_lesson_content_file(previous_image_path, module.id, lesson.id)
     update_slide_in_snapshot(snapshot, slide_id, {"image_path": image_path})
     persist_draft(db, lesson, snapshot)
     db.commit()

@@ -97,11 +97,9 @@ def persist_draft(db: Session, lesson: Lesson, snapshot: dict) -> None:
 
 
 def _content_path_from_url(image_path: str) -> Path | None:
-    if not image_path.startswith("/content/"):
-        return None
-    relative = image_path.removeprefix("/content/").replace("/", "\\")
-    settings = get_settings()
-    return Path(settings.content_root).resolve() / Path(relative.replace("\\", "/"))
+    from .files import content_path_from_url
+
+    return content_path_from_url(image_path)
 
 
 def copy_content_file(src_path: str, module_id: str, lesson_id: str, filename: str) -> str:
