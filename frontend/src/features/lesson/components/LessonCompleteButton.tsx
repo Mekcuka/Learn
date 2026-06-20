@@ -8,7 +8,14 @@ type LessonCompleteButtonProps = {
 export default function LessonCompleteButton({ busy, onComplete }: LessonCompleteButtonProps) {
   return (
     <div className="lesson-complete-button" aria-live="polite">
-      <Button variant="contained" color="primary" size="medium" disabled={busy} onClick={onComplete}>
+      <Button
+        variant="contained"
+        color="primary"
+        size="medium"
+        fullWidth
+        disabled={busy}
+        onClick={onComplete}
+      >
         {busy ? "Завершение…" : "Завершить урок"}
       </Button>
     </div>

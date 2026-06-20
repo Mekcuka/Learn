@@ -7,8 +7,7 @@ import type { LessonDetail, LessonStateItem } from "../../../types/lesson";
 import { lessonLayoutGridClasses } from "../../../constants/lessonLayout";
 import { moduleProgressLabel } from "../../../utils/lessonUi";
 import HashtagList from "../../../shared/content/HashtagList";
-import LessonCompleteButton from "./LessonCompleteButton";
-import LessonNextStepCard from "./LessonNextStepCard";
+import LessonHeaderNextActions from "./LessonHeaderNextActions";
 import LessonRoadmap from "./LessonRoadmap";
 import type { NextLessonNavigation } from "../../../utils/lessonUi";
 
@@ -112,12 +111,14 @@ export default function LessonPageHeader({
         </div>
         {showNextColumn && (
           <div className="lesson-page-header__next">
-            {showNextStepCard && (
-              <LessonNextStepCard navigation={nextLessonNavigation} onNavigate={onNavigate} />
-            )}
-            {showCompleteButton && (
-              <LessonCompleteButton busy={verifyBusy} onComplete={onComplete} />
-            )}
+            <LessonHeaderNextActions
+              showNextStep={showNextStepCard}
+              showComplete={showCompleteButton}
+              nextLessonNavigation={nextLessonNavigation}
+              verifyBusy={verifyBusy}
+              onNavigate={onNavigate}
+              onComplete={onComplete}
+            />
           </div>
         )}
       </div>

@@ -85,33 +85,47 @@ describe("LessonPageHeader", () => {
     });
   }
 
-  it("renders complete button in header next column when visible without next step card", () => {
+  it("renders full-width complete button in header next column when visible without next step", () => {
     renderHeader({ showCompleteButton: true });
 
     const nextColumn = container.querySelector(".lesson-page-header__next");
     expect(nextColumn).not.toBeNull();
     expect(nextColumn?.querySelector(".lesson-complete-button")).not.toBeNull();
-    expect(nextColumn?.querySelector("section")).toBeNull();
+    expect(nextColumn?.querySelector('[role="group"]')).toBeNull();
     expect(nextColumn?.textContent).toContain("Завершить урок");
   });
 
-  it("renders next step card and complete button in the same header next row", () => {
+  it("renders unified split button when next step and complete are both visible", () => {
     renderHeader({
       showCompleteButton: true,
       nextLessonNavigation: { kind: "lesson", lessonId: "lesson-02", title: "Создание проекта" },
     });
 
     const nextColumn = container.querySelector(".lesson-page-header__next");
-    expect(nextColumn?.querySelector("section")?.getAttribute("aria-label")).toBe("Следующий урок");
-    expect(nextColumn?.querySelector(".lesson-complete-button")).not.toBeNull();
-
-    const children = nextColumn?.children;
-    expect(children?.length).toBe(2);
-    expect(children?.[0]?.tagName).toBe("SECTION");
-    expect(children?.[1]?.classList.contains("lesson-complete-button")).toBe(true);
+    const splitGroup = nextColumn?.querySelector('[role="group"][aria-label="Следующий урок и завершение"]');
+    expect(splitGroup).not.toBeNull();
+    expect(nextColumn?.querySelector(".lesson-complete-button")).toBeNull();
+    expect(nextColumn?.textContent).toContain("Следующий урок");
+    expect(nextColumn?.textContent).toContain("Завершить урок");
+    expect(nextColumn?.textContent).toContain("Создание проекта");
+    expect(nextColumn?.children.length).toBe(1);
   });
 
-  it("calls onComplete when complete button is clicked", () => {
+  it("calls onComplete when complete half of split button is clicked", () => {
+    const onComplete = vi.fn();
+    renderHeader({
+      showCompleteButton: true,
+      nextLessonNavigation: { kind: "lesson", lessonId: "lesson-02", title: "Создание проекта" },
+      onComplete,
+    });
+
+    const buttons = container.querySelectorAll('[role="group"] button');
+    act(() => buttons[1]?.click());
+
+    expect(onComplete).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls onComplete when standalone complete button is clicked", () => {
     const onComplete = vi.fn();
     renderHeader({ showCompleteButton: true, onComplete });
 
