@@ -754,6 +754,7 @@
 }
 
 .lesson-hints-btn {
+  display: block;
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -763,18 +764,10 @@
   text-align: left;
   white-space: normal !important;
   overflow: visible;
-  padding: 0.55rem 0.75rem !important;
-}
-
-.lesson-hints-btn {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  white-space: normal;
   overflow-wrap: anywhere;
   word-break: break-word;
   line-height: 1.35;
-  text-align: left;
+  padding: 0.55rem 0.75rem !important;
 }
 
 .lesson-hints-item--active .lesson-hints-btn:focus-visible {
@@ -850,7 +843,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
-  color: #666;
+  color: var(--text-muted);
   font-size: 0.95rem;
 }
 

@@ -12,7 +12,8 @@
   box-sizing: border-box;
 }
 
-.author-wiki-header {
+.author-wiki-header,
+.wiki-header-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -62,14 +63,6 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   margin-top: 1rem;
-}
-
-.wiki-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
 }
 
 .author-section {

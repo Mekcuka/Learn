@@ -714,25 +714,6 @@ button.hotspot {
   }
 }
 
-.expected-result {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 8px;
-  padding: 0.85rem 1rem;
-}
-
-.expected-result h3 {
-  margin: 0 0 0.5rem;
-  font-size: 0.95rem;
-  color: #166534;
-}
-
-.expected-result p {
-  margin: 0;
-  color: #14532d;
-  font-size: 0.9rem;
-}
-
 .hotspot:hover .hotspot-label,
 .hotspot:focus-visible .hotspot-label,
 .hotspot-active .hotspot-label {
@@ -923,7 +904,7 @@ button.hotspot {
 .slide-empty {
   padding: 1.5rem;
   text-align: center;
-  color: #666;
+  color: var(--text-muted);
   border: 1px dashed #cbd5e1;
   border-radius: 8px;
 }

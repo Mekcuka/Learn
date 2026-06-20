@@ -7,6 +7,11 @@
   --accent-soft: #e8f4fd;
   --border: #e8e8e8;
   --text-muted: #6b7280;
+  --surface: var(--color-bg-default);
+  --surface-muted: var(--color-bg-secondary);
+  --page-bg: var(--color-bg-default);
+  --radius-sm: 6px;
+  --primary: var(--accent);
   --radius-pill: 999px;
   --radius-card: 16px;
   --color-bg-default: #fff;
