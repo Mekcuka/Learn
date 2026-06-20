@@ -91,6 +91,12 @@
 .rich-text-editor-compact .rich-text-toolbar {
   flex-wrap: wrap;
   gap: 0.25rem;
+  padding: 0.25rem;
+}
+
+.rich-text-editor-compact .rich-text-toolbar .MuiButton-root,
+.rich-text-editor-compact .rich-text-toolbar .MuiToggleButton-root {
+  flex-shrink: 0;
 }
 
 .rich-text-editor-compact .rich-text-content {

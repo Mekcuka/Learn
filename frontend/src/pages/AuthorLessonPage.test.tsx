@@ -179,6 +179,8 @@ describe("AuthorLessonPage", () => {
     expect(slideFieldCalls).toHaveLength(2);
     for (const [props] of slideFieldCalls) {
       expect(props.showPreview).toBeFalsy();
+      expect(props.toolbarMode).toBe("full");
+      expect(props.compact).toBe(true);
     }
   });
 });

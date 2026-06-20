@@ -655,6 +655,7 @@ export default function AuthorLessonPage() {
                             rows={2}
                             editorMode="lesson"
                             compact
+                            toolbarMode="full"
                           />
                           <RichTextEditor
                             label="Ожидаемый результат"
@@ -663,6 +664,7 @@ export default function AuthorLessonPage() {
                             rows={2}
                             editorMode="lesson"
                             compact
+                            toolbarMode="full"
                           />
                         </div>
                       )}
