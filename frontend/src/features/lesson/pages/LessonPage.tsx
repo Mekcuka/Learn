@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import "../../../styles/lesson-page.css";
+import "../../../styles/quiz-editor.css";
 import "../../../styles/screenshot.css";
 
 import LessonPageHeader from "../components/LessonPageHeader";
@@ -134,6 +135,7 @@ export default function LessonPage() {
             busy={verifyBusy}
             quizResult={quizResult}
             isPreview={isPreview}
+            submitError={isOnQuizStep && feedback?.status === "failed" ? feedback.message : null}
             onQuizSubmit={handleQuizSubmit}
           />
         </div>

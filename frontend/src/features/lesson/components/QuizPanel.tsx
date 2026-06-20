@@ -15,6 +15,7 @@ type QuizPanelProps = {
   busy: boolean;
   result: QuizSubmitResult | null;
   isPreview?: boolean;
+  submitError?: string | null;
   onSubmit: (answers: Record<string, string[]>) => void;
 };
 
@@ -23,11 +24,11 @@ type QuizOptionItem = {
   label: string;
 };
 
-export default function QuizPanel({ quiz, busy, result, isPreview = false, onSubmit }: QuizPanelProps) {
+export default function QuizPanel({ quiz, busy, result, isPreview = false, submitError = null, onSubmit }: QuizPanelProps) {
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
 
   const unanswered = useMemo(
-    () => quiz.questions.filter((question) => !(answers[question.id]?.length > 0)).length,
+    () => (quiz.questions ?? []).filter((question) => !(answers[question.id]?.length > 0)).length,
     [answers, quiz.questions],
   );
 
@@ -42,14 +43,14 @@ export default function QuizPanel({ quiz, busy, result, isPreview = false, onSub
           Мини-квиз
         </Typography>
         <Typography variant="body2" color="text.secondary" className="quiz-panel-meta">
-          Порог прохождения: {quiz.pass_threshold_percent}% · вопросов: {quiz.questions.length}
+          Порог прохождения: {quiz.pass_threshold_percent}% · вопросов: {quiz.questions?.length ?? 0}
         </Typography>
       </header>
 
       <ol className="quiz-questions">
-        {quiz.questions.map((question) => {
+        {(quiz.questions ?? []).map((question) => {
           const questionResult = result?.results.find((item) => item.question_id === question.id);
-          const optionItems: QuizOptionItem[] = question.options.map((option) => ({
+          const optionItems: QuizOptionItem[] = (question.options ?? []).map((option) => ({
             id: option.id,
             label: option.text,
           }));
@@ -116,6 +117,12 @@ export default function QuizPanel({ quiz, busy, result, isPreview = false, onSub
           {result.passed
             ? `Квиз пройден: ${result.score_percent}%`
             : `Нужно набрать ${result.pass_threshold_percent}%. Сейчас: ${result.score_percent}%`}
+        </Typography>
+      )}
+
+      {submitError && (
+        <Typography color="error.main" className="quiz-submit-error" role="alert">
+          {submitError}
         </Typography>
       )}
 

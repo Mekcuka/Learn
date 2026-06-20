@@ -3,7 +3,7 @@ import Typography from "@mui/material/Typography";
 import type { AuthorLessonDetail } from "../../../api/authorApi";
 import type { LessonDetail } from "../../../types/lesson";
 import type { QuizSubmitResult } from "../../../types/lesson";
-import { isMixedQuizLesson, isQuizOnlyLesson } from "../../../utils/lessonUi";
+import { isMixedQuizLesson, isQuizOnlyLesson, hasLoadedQuiz } from "../../../utils/lessonUi";
 import QuizPanel from "./QuizPanel";
 import SlideCarousel from "./SlideCarousel";
 
@@ -20,6 +20,7 @@ type LessonSlideViewProps = {
   busy?: boolean;
   quizResult?: QuizSubmitResult | null;
   isPreview?: boolean;
+  submitError?: string | null;
   onQuizSubmit?: (answers: Record<string, string[]>) => void;
 };
 
@@ -34,6 +35,7 @@ export default function LessonSlideView({
   busy = false,
   quizResult = null,
   isPreview = false,
+  submitError = null,
   onQuizSubmit,
 }: LessonSlideViewProps) {
   const showStudentActions = mode === "student" || mode === "preview";
@@ -44,7 +46,9 @@ export default function LessonSlideView({
   const isQuizOnly = isQuizOnlyLesson(lesson);
   const isOnQuizStep = isMixedLesson && slideIndex >= lesson.slides.length;
   const showQuizPanel =
-    showStudentActions && Boolean(quiz) && (isQuizOnly || isOnQuizStep);
+    showStudentActions && hasLoadedQuiz(studentLesson) && (isQuizOnly || isOnQuizStep);
+  const showQuizUnavailable =
+    showStudentActions && isOnQuizStep && isMixedLesson && !hasLoadedQuiz(studentLesson);
 
   return (
     <div className={`lesson-slide-view lesson-slide-view--${mode}`}>
@@ -64,8 +68,15 @@ export default function LessonSlideView({
           busy={busy}
           result={quizResult}
           isPreview={isPreview || mode === "preview"}
+          submitError={submitError}
           onSubmit={onQuizSubmit ?? (() => undefined)}
         />
+      ) : showQuizUnavailable ? (
+        <div className="slide-empty quiz-unavailable">
+          <Typography color="text.secondary">
+            Вопросы квиза не загрузились. Обновите страницу или вернитесь к слайдам.
+          </Typography>
+        </div>
       ) : hasSlides ? (
         <SlideCarousel
           slides={lesson.slides}
@@ -73,7 +84,7 @@ export default function LessonSlideView({
           onChange={onSlideIndexChange}
           activeHotspotId={activeHotspotId}
           onHotspotSelect={onHotspotSelect}
-          hasTrailingQuiz={isMixedLesson && Boolean(quiz)}
+          hasTrailingQuiz={isMixedLesson && hasLoadedQuiz(studentLesson)}
         />
       ) : (
         <div className="slide-empty">

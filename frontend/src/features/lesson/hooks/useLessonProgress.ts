@@ -28,6 +28,7 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
   const [lesson, setLesson] = useState<LessonDetail | null>(null);
   const [slideIndex, setSlideIndex] = useState(0);
   const slideStorageHydratedRef = useRef(false);
+  const slideHydrationKeyRef = useRef<string | null>(null);
   const [activeHotspotId, setActiveHotspotId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -109,11 +110,17 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
 
   useEffect(() => {
     slideStorageHydratedRef.current = false;
+    slideHydrationKeyRef.current = null;
     setSlideIndex(0);
   }, [lessonId]);
 
   useEffect(() => {
     if (!lessonId || !lesson?.slides.length) {
+      return;
+    }
+
+    const hydrationKey = `${lessonId}:${lesson.slides.length}:${lesson.verify.type}:${lesson.quiz?.questions.length ?? 0}`;
+    if (slideHydrationKeyRef.current === hydrationKey) {
       return;
     }
 
@@ -125,6 +132,7 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
     });
     setSlideIndex(clamped);
     slideStorageHydratedRef.current = true;
+    slideHydrationKeyRef.current = hydrationKey;
   }, [lessonId, lesson]);
 
   useEffect(() => {
@@ -139,7 +147,7 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
       }
       return clamped;
     });
-  }, [lessonId, lesson?.slides.length, lesson?.verify.type]);
+  }, [lessonId, lesson?.slides.length, lesson?.verify.type, lesson?.quiz?.questions.length]);
 
   useEffect(() => {
     if (!lessonId || !slideStorageHydratedRef.current) {
@@ -203,6 +211,7 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
 
     setBusy(true);
     setQuizResult(null);
+    setFeedback(null);
 
     try {
       await startLesson(lessonId);

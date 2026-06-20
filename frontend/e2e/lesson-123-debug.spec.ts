@@ -123,4 +123,101 @@ test.describe("lesson-123 mixed lesson diagnostics", () => {
     expect(measurements.hasQuizPanel).toBe(false);
     expect(measurements.referenceText).toContain("Слайд 1/2");
   });
+
+  test("quiz step shows QuizPanel with visible questions in main area", async ({ page }) => {
+    await page.goto("/lessons/lesson-123");
+    await expect(page.getByRole("region", { name: "Слайды урока" })).toBeVisible({ timeout: 15_000 });
+
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowRight");
+
+    const quizPanel = page.locator(".quiz-panel");
+    await expect(quizPanel).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole("heading", { name: "Мини-квиз" })).toBeVisible();
+    await expect(page.locator(".quiz-question")).toHaveCount(5);
+
+    const reference = page.getByLabel("Справка по уроку");
+    await expect(reference).toContainText("Квиз");
+    await expect(reference).toContainText("Ответьте на 5 вопросов");
+
+    const measurements = await page.evaluate(() => {
+      const rect = (el: Element | null) => {
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return { width: r.width, height: r.height };
+      };
+
+      return {
+        sessionStorage: sessionStorage.getItem("learn:slide:lesson-123"),
+        quizPanel: rect(document.querySelector(".quiz-panel")),
+        main: rect(document.querySelector(".lesson-main")),
+        hasCarousel: Boolean(document.querySelector(".slide-carousel")),
+      };
+    });
+
+    console.log("MEASUREMENTS_QUIZ_STEP", JSON.stringify(measurements, null, 2));
+
+    expect(measurements.sessionStorage).toBe("2");
+    expect(measurements.hasCarousel).toBe(false);
+    expect(measurements.quizPanel?.height ?? 0).toBeGreaterThan(120);
+    expect(measurements.main?.height ?? 0).toBeGreaterThan(120);
+  });
+
+  test("quiz step stays visible on narrow viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 900, height: 700 });
+    await page.goto("/lessons/lesson-123");
+    await expect(page.getByRole("region", { name: "Слайды урока" })).toBeVisible({ timeout: 15_000 });
+
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowRight");
+
+    await expect(page.locator(".quiz-panel")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator(".quiz-question")).toHaveCount(5);
+
+    const measurements = await page.evaluate(() => ({
+      mainH: document.querySelector(".lesson-main")?.getBoundingClientRect().height ?? 0,
+      quizH: document.querySelector(".quiz-panel")?.getBoundingClientRect().height ?? 0,
+      bodyClass: document.querySelector(".lesson-body")?.className ?? "",
+    }));
+
+    console.log("MEASUREMENTS_QUIZ_NARROW", JSON.stringify(measurements, null, 2));
+
+    expect(measurements.bodyClass).toContain("lesson-body--no-hints");
+    expect(measurements.mainH).toBeGreaterThan(120);
+    expect(measurements.quizH).toBeGreaterThan(120);
+  });
+
+  test("quiz submit sends answers and shows result", async ({ page }) => {
+    await page.goto("/lessons/lesson-123");
+    await expect(page.getByRole("region", { name: "Слайды урока" })).toBeVisible({ timeout: 15_000 });
+
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator(".quiz-panel")).toBeVisible({ timeout: 15_000 });
+
+    const questionCount = await page.locator(".quiz-question").count();
+    for (let i = 0; i < questionCount; i += 1) {
+      const question = page.locator(".quiz-question").nth(i);
+      const radio = question.locator('input[type="radio"]').first();
+      const checkbox = question.locator('input[type="checkbox"]').first();
+      if (await radio.count()) {
+        await radio.check({ force: true });
+      } else if (await checkbox.count()) {
+        await checkbox.check({ force: true });
+      }
+    }
+
+    const submitButton = page.getByRole("button", { name: "Отправить ответы" });
+    await expect(submitButton).toBeEnabled();
+
+    const submitResponse = page.waitForResponse(
+      (response) => response.url().includes("/quiz/submit") && response.request().method() === "POST",
+      { timeout: 15_000 },
+    );
+
+    await submitButton.click();
+
+    expect((await submitResponse).ok()).toBeTruthy();
+    await expect(page.locator(".quiz-result")).toBeVisible({ timeout: 10_000 });
+  });
 });

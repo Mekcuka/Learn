@@ -63,32 +63,85 @@ def get_or_create_progress_map(
     return progress_map
 
 
-def _ensure_lesson_states(db: Session, progress: UserProgress, module_id: str) -> None:
-    existing = (
-        db.query(LessonState)
-        .filter(LessonState.user_progress_id == progress.id)
-        .count()
-    )
-    if existing:
-        return
+def _initial_status_for_lesson(
+    lesson: Lesson,
+    lessons: list[Lesson],
+    states: dict[str, LessonState],
+) -> str:
+    prior = [item for item in lessons if item.sort_order < lesson.sort_order]
+    if not prior:
+        return "active"
+    if not all(states.get(item.id) and states[item.id].status == "completed" for item in prior):
+        return "locked"
+    has_active = any(state.status == "active" for state in states.values())
+    return "locked" if has_active else "active"
 
+
+def _resolve_current_lesson_id(lessons: list[Lesson], states: dict[str, LessonState]) -> str:
+    for lesson in lessons:
+        state = states.get(lesson.id)
+        if state and state.status == "active":
+            return lesson.id
+    for lesson in lessons:
+        state = states.get(lesson.id)
+        if not state or state.status != "completed":
+            return lesson.id
+    return lessons[-1].id
+
+
+def _ensure_lesson_states(db: Session, progress: UserProgress, module_id: str) -> None:
     lessons = db.query(Lesson).filter(Lesson.module_id == module_id).order_by(Lesson.sort_order).all()
     if not lessons:
         return
 
-    if not progress.current_lesson_id:
-        progress.current_lesson_id = lessons[0].id
+    lesson_ids = {lesson.id for lesson in lessons}
+    existing_states: dict[str, LessonState] = {
+        state.lesson_id: state
+        for state in db.query(LessonState)
+        .filter(LessonState.user_progress_id == progress.id)
+        .all()
+    }
 
-    for index, lesson in enumerate(lessons):
-        status = "active" if index == 0 else "locked"
-        db.add(
-            LessonState(
-                user_progress_id=progress.id,
-                lesson_id=lesson.id,
-                status=status,
+    if not existing_states:
+        if not progress.current_lesson_id:
+            progress.current_lesson_id = lessons[0].id
+        for index, lesson in enumerate(lessons):
+            status = "active" if index == 0 else "locked"
+            db.add(
+                LessonState(
+                    user_progress_id=progress.id,
+                    lesson_id=lesson.id,
+                    status=status,
+                )
             )
+        db.commit()
+        return
+
+    missing_lessons = [lesson for lesson in lessons if lesson.id not in existing_states]
+    if not missing_lessons:
+        return
+
+    changed = False
+    if not progress.current_lesson_id or progress.current_lesson_id not in lesson_ids:
+        progress.current_lesson_id = _resolve_current_lesson_id(lessons, existing_states)
+        changed = True
+
+    for lesson in missing_lessons:
+        status = _initial_status_for_lesson(lesson, lessons, existing_states)
+        new_state = LessonState(
+            user_progress_id=progress.id,
+            lesson_id=lesson.id,
+            status=status,
         )
-    db.commit()
+        db.add(new_state)
+        existing_states[lesson.id] = new_state
+        changed = True
+        if status == "active":
+            progress.current_lesson_id = lesson.id
+            changed = True
+
+    if changed:
+        db.commit()
 
 
 def count_completed_lessons(db: Session, progress_id: UUID) -> int:
