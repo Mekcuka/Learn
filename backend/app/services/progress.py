@@ -167,6 +167,21 @@ def get_project_id_from_progress(db: Session, progress_id: UUID) -> str | None:
     return None
 
 
+def reset_user_lesson_progress(db: Session, user_id: UUID) -> int:
+    progress_records = db.query(UserProgress).filter(UserProgress.user_id == user_id).all()
+    if not progress_records:
+        return 0
+
+    progress_ids = [progress.id for progress in progress_records]
+    db.query(LessonState).filter(LessonState.user_progress_id.in_(progress_ids)).delete(
+        synchronize_session=False
+    )
+    modules_reset = len(progress_records)
+    db.query(UserProgress).filter(UserProgress.user_id == user_id).delete(synchronize_session=False)
+    db.commit()
+    return modules_reset
+
+
 def refresh_progress_percent(db: Session, progress: UserProgress) -> None:
     total = (
         db.query(Lesson)

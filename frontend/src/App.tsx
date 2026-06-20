@@ -14,6 +14,7 @@ const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const LessonPage = lazy(() => import("./pages/LessonPage"));
 const SelfStudyAssignmentPage = lazy(() => import("./pages/SelfStudyAssignmentPage"));
 const SelfStudyPage = lazy(() => import("./pages/SelfStudyPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const WikiArticlePage = lazy(() => import("./pages/WikiArticlePage"));
 const WikiPage = lazy(() => import("./pages/WikiPage"));
 
@@ -70,6 +71,14 @@ export default function App() {
         element={
           <LazyPage>
             <SelfStudyAssignmentPage />
+          </LazyPage>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <LazyPage>
+            <ProfilePage />
           </LazyPage>
         }
       />

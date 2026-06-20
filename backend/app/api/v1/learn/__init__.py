@@ -5,6 +5,7 @@ from app.api.v1.learn.author import router as author_router
 from app.api.v1.learn.author_wiki import router as author_wiki_router
 from app.api.v1.learn.lessons import router as lessons_router
 from app.api.v1.learn.modules import router as modules_router
+from app.api.v1.learn.profile import router as profile_router
 from app.api.v1.learn.self_study import router as self_study_router
 from app.api.v1.learn.wiki import router as wiki_router
 
@@ -14,5 +15,6 @@ router.include_router(author_router)
 router.include_router(author_wiki_router)
 router.include_router(modules_router)
 router.include_router(lessons_router)
+router.include_router(profile_router)
 router.include_router(self_study_router)
 router.include_router(wiki_router)

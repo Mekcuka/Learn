@@ -4,6 +4,7 @@ import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import ButtonBase from "@mui/material/ButtonBase";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
@@ -71,16 +72,29 @@ export default function PortalTopbar({ active }: PortalTopbarProps) {
   }
 
   const userBlock = (
-    <Box
+    <ButtonBase
       className="portal-user-block"
+      onClick={() => navigate("/profile")}
+      aria-label={`${user.display_name}, ${roleLabel(user.role)}. Открыть профиль`}
       sx={{
         display: "flex",
         alignItems: "center",
         gap: 1,
         minWidth: 0,
         maxWidth: { xs: "8rem", sm: "12rem" },
+        borderRadius: 1,
+        px: 0.5,
+        py: 0.25,
+        textAlign: "left",
+        "&:hover": {
+          bgcolor: "action.hover",
+        },
+        "&:focus-visible": {
+          outline: "2px solid",
+          outlineColor: "primary.main",
+          outlineOffset: 2,
+        },
       }}
-      aria-label={`${user.display_name}, ${roleLabel(user.role)}`}
     >
       <Avatar
         sx={{
@@ -103,7 +117,7 @@ export default function PortalTopbar({ active }: PortalTopbarProps) {
           {roleLabel(user.role)}
         </Typography>
       </Box>
-    </Box>
+    </ButtonBase>
   );
 
   const authorButton = isAuthor ? (

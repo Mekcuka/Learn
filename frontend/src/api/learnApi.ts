@@ -221,3 +221,16 @@ export async function submitQuiz(
     body: JSON.stringify({ answers, lesson_id: lessonId }),
   });
 }
+
+export type ResetProgressResponse = {
+  message: string;
+  modules_reset: number;
+};
+
+export async function resetProgress() {
+  invalidateApiCache("learn:dashboard");
+  return httpRequest<ResetProgressResponse>("/api/v1/learn/profile/reset-progress", {
+    method: "POST",
+    body: "{}",
+  });
+}
