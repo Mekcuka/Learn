@@ -26,6 +26,8 @@ type ScreenshotGuideProps = {
   activeHotspotId?: string | null;
   onHotspotSelect?: (hotspotId: string | null) => void;
   hideToolbar?: boolean;
+  /** When false, skips fullscreen API wiring (student slide toolbar has no fullscreen). Default: true. */
+  enableToolbarFullscreen?: boolean;
   onToolbarPropsChange?: (props: ScreenshotToolbarProps) => void;
 };
 
@@ -37,12 +39,14 @@ export default function ScreenshotGuide({
   activeHotspotId,
   onHotspotSelect,
   hideToolbar = false,
+  enableToolbarFullscreen = true,
   onToolbarPropsChange,
 }: ScreenshotGuideProps) {
   const [showHotspots, setShowHotspots] = useState(true);
   const [hoveredHotspotId, setHoveredHotspotId] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const shellRef = useRef<HTMLDivElement>(null);
+  const trackFullscreen = enableToolbarFullscreen && !hideToolbar;
 
   const viewport = useScreenshotViewport({ resetKey: viewportResetKey });
 
@@ -56,14 +60,20 @@ export default function ScreenshotGuide({
   }, [onHotspotSelect]);
 
   useEffect(() => {
+    if (!trackFullscreen) {
+      return;
+    }
     function onFullscreenChange() {
       setIsFullscreen(document.fullscreenElement === shellRef.current);
     }
     document.addEventListener("fullscreenchange", onFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
-  }, []);
+  }, [trackFullscreen]);
 
   const toggleFullscreen = useCallback(async () => {
+    if (!trackFullscreen) {
+      return;
+    }
     const node = shellRef.current;
     if (!node) {
       return;
@@ -73,7 +83,7 @@ export default function ScreenshotGuide({
       return;
     }
     await node.requestFullscreen();
-  }, []);
+  }, [trackFullscreen]);
 
   const handleHotspotClick = useCallback(
     (hotspotId: string, _event: ReactMouseEvent<HTMLButtonElement>) => {

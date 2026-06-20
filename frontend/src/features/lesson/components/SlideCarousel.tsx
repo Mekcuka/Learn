@@ -134,12 +134,15 @@ export default function SlideCarousel({
         activeHotspotId={activeHotspotId}
         onHotspotSelect={onHotspotSelect}
         hideToolbar
+        enableToolbarFullscreen={false}
         onToolbarPropsChange={handleToolbarPropsChange}
       />
 
       <nav className="slide-nav" aria-label="Навигация по слайдам и просмотр">
         <div className="slide-nav-toolbar">
-          {toolbarProps ? <ScreenshotToolbar {...toolbarProps} /> : null}
+          {toolbarProps ? (
+            <ScreenshotToolbar {...toolbarProps} showZoomControls={false} showFullscreen={false} />
+          ) : null}
         </div>
 
         {total > 1 || hasTrailingQuiz ? (

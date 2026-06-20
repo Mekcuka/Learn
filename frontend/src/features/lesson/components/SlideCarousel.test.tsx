@@ -4,7 +4,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { act } from "react";
+import { act, useEffect } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -13,7 +13,27 @@ import AppTheme from "../../../components/mui/AppTheme";
 import SlideCarousel from "./SlideCarousel";
 
 vi.mock("./ScreenshotGuide", () => ({
-  default: () => <div data-testid="screenshot-guide" />,
+  default: ({
+    onToolbarPropsChange,
+  }: {
+    onToolbarPropsChange?: (props: Record<string, unknown>) => void;
+  }) => {
+    useEffect(() => {
+      onToolbarPropsChange?.({
+        zoom: 1,
+        canZoomIn: true,
+        canZoomOut: false,
+        showHotspots: true,
+        isFullscreen: false,
+        onZoomIn: vi.fn(),
+        onZoomOut: vi.fn(),
+        onReset: vi.fn(),
+        onToggleHotspots: vi.fn(),
+        onToggleFullscreen: vi.fn(),
+      });
+    }, [onToolbarPropsChange]);
+    return <div data-testid="screenshot-guide" />;
+  },
 }));
 
 function makeSlide(id: string, order: number, title: string): LessonSlide {
@@ -91,7 +111,7 @@ describe("SlideCarousel navigation", () => {
     expect(nextButton?.disabled).toBe(true);
   });
 
-  it("renders screenshot toolbar inside slide-nav", () => {
+  it("renders hotspot-only screenshot toolbar inside slide-nav", () => {
     act(() => {
       root.render(
         <AppTheme>
@@ -102,7 +122,11 @@ describe("SlideCarousel navigation", () => {
 
     const nav = container.querySelector("nav.slide-nav");
     expect(nav).not.toBeNull();
-    expect(nav?.querySelector(".slide-nav-toolbar")).not.toBeNull();
+    expect(nav?.querySelector(".slide-nav-toolbar .screenshot-toolbar")).not.toBeNull();
     expect(container.querySelector(".screenshot-guide .screenshot-toolbar")).toBeNull();
+    expect(container.textContent).toContain("Метки");
+    expect(container.textContent).not.toContain("На весь экран");
+    expect(container.textContent).not.toContain("Сброс");
+    expect(container.querySelector('button[aria-label="Уменьшить"]')).toBeNull();
   });
 });
