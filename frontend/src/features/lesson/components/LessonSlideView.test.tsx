@@ -89,6 +89,8 @@ describe("LessonSlideView", () => {
 
     expect(container.textContent).toContain("Режим конструктора");
     expect(container.querySelector(".slide-carousel")).not.toBeNull();
+    expect(container.querySelector(".slide-carousel-header")).toBeNull();
+    expect(container.querySelector(".slide-context-strip")).toBeNull();
   });
 
   it("renders carousel only in student mode (assignment lives in reference panel)", () => {
@@ -108,6 +110,8 @@ describe("LessonSlideView", () => {
     const slideView = container.querySelector(".lesson-slide-view");
     const carousel = slideView?.querySelector(".slide-carousel");
     expect(carousel).not.toBeNull();
+    expect(carousel?.querySelector(".slide-carousel-header")).not.toBeNull();
+    expect(carousel?.querySelector(".slide-context-strip")).not.toBeNull();
     expect(slideView?.querySelector(".lesson-actions")).toBeNull();
     expect(container.textContent).not.toContain("Задание");
   });

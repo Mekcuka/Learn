@@ -88,6 +88,7 @@ export default function LessonSlideView({
           currentIndex={slideIndex}
           onChange={onSlideIndexChange}
           hasTrailingQuiz={trailingQuiz}
+          hideSlideLabels={mode === "author"}
         >
           {quizContent}
         </SlideCarousel>
@@ -114,6 +115,7 @@ export default function LessonSlideView({
           activeHotspotId={activeHotspotId}
           onHotspotSelect={onHotspotSelect}
           hasTrailingQuiz={isMixedLesson && hasLoadedQuiz(studentLesson)}
+          hideSlideLabels={mode === "author"}
         />
       ) : (
         <div className="slide-empty">

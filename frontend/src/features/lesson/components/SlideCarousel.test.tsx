@@ -130,6 +130,36 @@ describe("SlideCarousel navigation", () => {
     expect(container.querySelector('button[aria-label="Уменьшить"]')).toBeNull();
   });
 
+  it("hides slide label headers when hideSlideLabels is true", () => {
+    act(() => {
+      root.render(
+        <AppTheme>
+          <SlideCarousel slides={slides} currentIndex={0} onChange={vi.fn()} hideSlideLabels />
+        </AppTheme>,
+      );
+    });
+
+    expect(container.querySelector(".slide-carousel-header")).toBeNull();
+    expect(container.querySelector(".slide-context-strip")).toBeNull();
+    expect(container.querySelector("nav.slide-nav")).not.toBeNull();
+    expect(container.textContent).toContain("1 / 3");
+  });
+
+  it("keeps slide label headers in default student carousel", () => {
+    act(() => {
+      root.render(
+        <AppTheme>
+          <SlideCarousel slides={slides} currentIndex={0} onChange={vi.fn()} />
+        </AppTheme>,
+      );
+    });
+
+    expect(container.querySelector(".slide-carousel-header")).not.toBeNull();
+    expect(container.querySelector(".slide-context-strip")).not.toBeNull();
+    expect(container.textContent).toContain("Слайд 1 из 3");
+    expect(container.textContent).toContain("Первый");
+  });
+
   it("keeps slide-nav visible on trailing quiz step with children content", () => {
     act(() => {
       root.render(

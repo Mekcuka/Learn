@@ -17,6 +17,8 @@ type SlideCarouselProps = {
   hasTrailingQuiz?: boolean;
   /** Replaces slide screenshot when on the trailing quiz step. */
   children?: ReactNode;
+  /** Hides duplicate progress/title headers (author constructor). */
+  hideSlideLabels?: boolean;
 };
 
 export default function SlideCarousel({
@@ -27,6 +29,7 @@ export default function SlideCarousel({
   onHotspotSelect,
   hasTrailingQuiz = false,
   children,
+  hideSlideLabels = false,
 }: SlideCarouselProps) {
   const total = slides.length;
   const maxIndex = hasTrailingQuiz ? total : total - 1;
@@ -113,28 +116,32 @@ export default function SlideCarousel({
 
   return (
     <section className="slide-carousel" aria-label="Слайды урока">
-      <div className="slide-context-strip">
-        <Typography
-          variant="overline"
-          color="primary"
-          fontWeight="bold"
-          className="slide-context-progress"
-        >
-          {progressLabel}
-        </Typography>
-        <Typography variant="body2" fontWeight={600} className="slide-context-title">
-          {titleLabel}
-        </Typography>
-      </div>
+      {!hideSlideLabels ? (
+        <>
+          <div className="slide-context-strip">
+            <Typography
+              variant="overline"
+              color="primary"
+              fontWeight="bold"
+              className="slide-context-progress"
+            >
+              {progressLabel}
+            </Typography>
+            <Typography variant="body2" fontWeight={600} className="slide-context-title">
+              {titleLabel}
+            </Typography>
+          </div>
 
-      <div className="slide-carousel-header">
-        <Typography variant="body2" color="text.secondary">
-          {progressLabel}
-        </Typography>
-        <Typography variant="body2" fontWeight={600}>
-          {titleLabel}
-        </Typography>
-      </div>
+          <div className="slide-carousel-header">
+            <Typography variant="body2" color="text.secondary">
+              {progressLabel}
+            </Typography>
+            <Typography variant="body2" fontWeight={600}>
+              {titleLabel}
+            </Typography>
+          </div>
+        </>
+      ) : null}
 
       {isOnQuizStep ? (
         children ?? (
