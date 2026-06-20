@@ -12,6 +12,7 @@ import {
   readStoredSlideIndex,
   resolveNextLessonNavigation,
   sanitizeStoredSlideIndex,
+  shouldShowCompleteLessonButton,
   slideStorageKey,
 } from "../utils/lessonUi";
 
@@ -172,5 +173,77 @@ describe("moduleProgressLabel", () => {
 
   it("handles empty module", () => {
     expect(moduleProgressLabel(0, 0)).toBe("Нет уроков");
+  });
+});
+
+describe("shouldShowCompleteLessonButton", () => {
+  const manualMultiSlide = {
+    verify: { type: "manual" as const },
+    slides: [{ id: "s1" }, { id: "s2" }],
+  };
+
+  const mixedWithQuiz = {
+    verify: { type: "quiz_passed" as const },
+    slides: [{ id: "s1" }, { id: "s2" }],
+    quiz: { questions: [{ id: "q1" }] },
+  };
+
+  it("shows on last slide for active manual lessons", () => {
+    expect(
+      shouldShowCompleteLessonButton({
+        lesson: manualMultiSlide,
+        slideIndex: 0,
+        lessonStatus: "active",
+        isPreview: false,
+        isOnQuizStep: false,
+      }),
+    ).toBe(false);
+    expect(
+      shouldShowCompleteLessonButton({
+        lesson: manualMultiSlide,
+        slideIndex: 1,
+        lessonStatus: "active",
+        isPreview: false,
+        isOnQuizStep: false,
+      }),
+    ).toBe(true);
+  });
+
+  it("hides for completed, locked, and preview modes", () => {
+    const base = {
+      lesson: manualMultiSlide,
+      slideIndex: 1,
+      isOnQuizStep: false,
+    };
+    expect(shouldShowCompleteLessonButton({ ...base, lessonStatus: "completed", isPreview: false })).toBe(
+      false,
+    );
+    expect(shouldShowCompleteLessonButton({ ...base, lessonStatus: "locked", isPreview: false })).toBe(
+      false,
+    );
+    expect(shouldShowCompleteLessonButton({ ...base, lessonStatus: "active", isPreview: true })).toBe(
+      false,
+    );
+  });
+
+  it("hides for quiz and mixed quiz lessons", () => {
+    expect(
+      shouldShowCompleteLessonButton({
+        lesson: mixedWithQuiz,
+        slideIndex: 2,
+        lessonStatus: "active",
+        isPreview: false,
+        isOnQuizStep: true,
+      }),
+    ).toBe(false);
+    expect(
+      shouldShowCompleteLessonButton({
+        lesson: mixedWithQuiz,
+        slideIndex: 1,
+        lessonStatus: "active",
+        isPreview: false,
+        isOnQuizStep: false,
+      }),
+    ).toBe(false);
   });
 });

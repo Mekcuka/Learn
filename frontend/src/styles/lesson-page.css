@@ -189,6 +189,20 @@
   padding: 0.65rem clamp(0.75rem, 1.25vw, 1rem) 0.65rem;
   padding-left: max(clamp(0.75rem, 1.25vw, 1rem), env(safe-area-inset-left, 0px));
   padding-right: max(clamp(0.75rem, 1.25vw, 1rem), env(safe-area-inset-right, 0px));
+  position: relative;
+}
+
+.lesson-complete-button {
+  position: fixed;
+  right: max(clamp(0.75rem, 1.25vw, 1rem), env(safe-area-inset-right, 0px));
+  bottom: max(0.85rem, env(safe-area-inset-bottom, 0px));
+  z-index: 1200;
+  pointer-events: none;
+}
+
+.lesson-complete-button button {
+  pointer-events: auto;
+  box-shadow: 0 4px 14px rgb(15 23 42 / 18%);
 }
 
 .catalog-layout--lesson .preview-banner {

@@ -43,6 +43,40 @@ export function isQuizOnlyLesson(lesson: {
   return lesson.verify.type === "quiz_passed" && lesson.slides.length === 0;
 }
 
+const LEGACY_MANUAL_VERIFY_TYPES = new Set(["resource_exists", "navigation", "job_completed"]);
+
+export function isManualVerifyLesson(verifyType: string): boolean {
+  return verifyType === "manual" || LEGACY_MANUAL_VERIFY_TYPES.has(verifyType);
+}
+
+export type CompleteLessonButtonContext = {
+  lesson: LessonSlideNavLesson;
+  slideIndex: number;
+  lessonStatus?: string;
+  isPreview: boolean;
+  isOnQuizStep: boolean;
+};
+
+/** Whether the floating «Завершить урок» action should appear. */
+export function shouldShowCompleteLessonButton({
+  lesson,
+  slideIndex,
+  lessonStatus,
+  isPreview,
+  isOnQuizStep,
+}: CompleteLessonButtonContext): boolean {
+  if (isPreview || lessonStatus === "completed" || lessonStatus === "locked") {
+    return false;
+  }
+
+  if (!isManualVerifyLesson(lesson.verify.type)) {
+    return false;
+  }
+
+  const onFinalStep = slideIndex >= maxLessonSlideIndex(lesson);
+  return onFinalStep && !isOnQuizStep;
+}
+
 export type LessonSlideNavLesson = {
   verify: { type: string };
   slides: unknown[];

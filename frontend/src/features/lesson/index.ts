@@ -1,6 +1,7 @@
 export { default as ExpectedResult } from "./components/ExpectedResult";
 export { default as HotspotZoneLabel } from "./components/HotspotZoneLabel";
 export { default as LessonActions } from "./components/LessonActions";
+export { default as LessonCompleteButton } from "./components/LessonCompleteButton";
 export { default as LessonNextStepCard } from "./components/LessonNextStepCard";
 export { default as LessonPageHeader } from "./components/LessonPageHeader";
 export { default as LessonPreviewBanner } from "./components/LessonPreviewBanner";

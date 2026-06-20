@@ -7,6 +7,7 @@ import "../../../styles/lesson-page.css";
 import "../../../styles/quiz-editor.css";
 import "../../../styles/screenshot.css";
 
+import LessonCompleteButton from "../components/LessonCompleteButton";
 import LessonPageHeader from "../components/LessonPageHeader";
 import LessonPreviewBanner from "../components/LessonPreviewBanner";
 import LessonReferencePanel from "../components/LessonReferencePanel";
@@ -14,7 +15,11 @@ import LessonScreenshotHintsPanel from "../components/LessonScreenshotHintsPanel
 import LessonShell from "../components/LessonShell";
 import LessonSlideView from "../components/LessonSlideView";
 import { useLessonProgress } from "../hooks/useLessonProgress";
-import { isMixedQuizLesson, resolveNextLessonNavigation } from "../../../utils/lessonUi";
+import {
+  isMixedQuizLesson,
+  resolveNextLessonNavigation,
+  shouldShowCompleteLessonButton,
+} from "../../../utils/lessonUi";
 import { lessonLayoutGridClasses } from "../../../constants/lessonLayout";
 import { PageError, PageLoading } from "../../../components/mui/PageStatus";
 
@@ -80,6 +85,13 @@ export default function LessonPage() {
   const showHintsColumn =
     ((!isQuizLesson || isMixedLesson) || nextLessonNavigation != null) && !isOnQuizStep;
   const { body: bodyClass } = lessonLayoutGridClasses(showHintsColumn);
+  const showCompleteButton = shouldShowCompleteLessonButton({
+    lesson,
+    slideIndex,
+    lessonStatus,
+    isPreview,
+    isOnQuizStep,
+  });
 
   function roadmapLinkTo(targetLessonId: string): string {
     if (!isPreview) {
@@ -152,6 +164,10 @@ export default function LessonPage() {
           </div>
         )}
       </div>
+
+      {showCompleteButton && (
+        <LessonCompleteButton busy={verifyBusy} onComplete={() => void startVerify()} />
+      )}
     </LessonShell>
   );
 }
