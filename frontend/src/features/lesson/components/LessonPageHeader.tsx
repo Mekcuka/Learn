@@ -1,11 +1,9 @@
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
-import LinearProgress from "@mui/material/LinearProgress";
 import Typography from "@mui/material/Typography";
 
 import type { LessonDetail, LessonStateItem } from "../../../types/lesson";
 import { lessonLayoutGridClasses } from "../../../constants/lessonLayout";
-import { moduleProgressLabel } from "../../../utils/lessonUi";
 import HashtagList from "../../../shared/content/HashtagList";
 import LessonHeaderNextActions from "./LessonHeaderNextActions";
 import LessonRoadmap from "./LessonRoadmap";
@@ -15,7 +13,6 @@ type LessonPageHeaderProps = {
   lesson: LessonDetail;
   lessonState: LessonStateItem | undefined;
   totalLessons: number;
-  completedLessons: number;
   isPreview: boolean;
   isDraftPreview: boolean;
   showHintsColumn: boolean;
@@ -35,7 +32,6 @@ export default function LessonPageHeader({
   lesson,
   lessonState,
   totalLessons,
-  completedLessons,
   isPreview,
   isDraftPreview,
   showHintsColumn,
@@ -89,19 +85,6 @@ export default function LessonPageHeader({
           </Typography>
           {(lesson.tags?.length ?? 0) > 0 && (
             <HashtagList tags={lesson.tags ?? []} linkBase="/dashboard" className="lesson-page-tags" />
-          )}
-          {!isPreview && (
-            <div className="lesson-page-progress-block" aria-label="Прогресс модуля">
-              <div className="lesson-page-progress-meta">
-                <Typography variant="caption" color="text.secondary">
-                  {moduleProgressLabel(completedLessons, totalLessons)}
-                </Typography>
-                <Typography variant="caption" fontWeight={600} className="lesson-page-progress-value">
-                  {lesson.progress_percent}%
-                </Typography>
-              </div>
-              <LinearProgress variant="determinate" value={lesson.progress_percent} />
-            </div>
           )}
         </div>
         <div className="lesson-page-header__roadmap">

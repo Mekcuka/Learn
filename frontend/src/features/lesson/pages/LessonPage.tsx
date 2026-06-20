@@ -78,7 +78,6 @@ export default function LessonPage() {
   const isOnQuizStep = isMixedLesson && slideIndex >= lesson.slides.length;
   const activeSlide = isOnQuizStep ? null : (lesson.slides[slideIndex] ?? null);
   const totalLessons = lesson.module_lessons.length;
-  const completedLessons = lesson.module_lessons.filter((item) => item.status === "completed").length;
   const lessonStatus = lessonState?.status;
   const nextLessonNavigation =
     !isPreview && lessonId
@@ -129,7 +128,6 @@ export default function LessonPage() {
         lesson={lesson}
         lessonState={lessonState}
         totalLessons={totalLessons}
-        completedLessons={completedLessons}
         isPreview={isPreview}
         isDraftPreview={isDraftPreview}
         showHintsColumn={showHintsColumn}

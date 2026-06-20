@@ -70,7 +70,6 @@ describe("LessonPageHeader", () => {
               lesson={baseLesson}
               lessonState={{ lesson_id: "lesson-01", status: "active" }}
               totalLessons={2}
-              completedLessons={0}
               isPreview={false}
               isDraftPreview={false}
               showHintsColumn
@@ -90,6 +89,14 @@ describe("LessonPageHeader", () => {
       );
     });
   }
+
+  it("does not render module progress block in header intro", () => {
+    renderHeader();
+
+    expect(container.querySelector(".lesson-page-progress-block")).toBeNull();
+    expect(container.querySelector('[aria-label="Прогресс модуля"]')).toBeNull();
+    expect(container.querySelector(".lesson-page-header__roadmap nav[aria-label='Прогресс по модулю']")).not.toBeNull();
+  });
 
   it("renders full-width complete button in header next column when visible without upcoming lesson", () => {
     renderHeader({

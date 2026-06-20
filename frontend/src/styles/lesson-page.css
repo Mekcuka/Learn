@@ -36,25 +36,6 @@
   flex-shrink: 0;
 }
 
-.lesson-page-progress-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  margin-top: 0.65rem;
-  max-width: 20rem;
-}
-
-.lesson-page-progress-meta {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.lesson-page-progress-value {
-  color: var(--color-typo-primary, #1a1a1a);
-}
-
 .lesson-page-header-grid,
 .lesson-page-header-grid--no-hints {
   display: grid;
@@ -92,10 +73,6 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.2;
-}
-
-.lesson-page-header__intro .lesson-page-progress-block {
-  margin-top: 0.35rem;
 }
 
 .lesson-page-header__roadmap,
@@ -248,12 +225,6 @@
 
 .catalog-layout--lesson .lesson-page-header__intro h1 {
   font-size: clamp(1.1rem, 2.2vw, 1.45rem);
-}
-
-
-.catalog-layout--lesson .lesson-page-header__intro .lesson-page-progress-block {
-  margin-top: 0.25rem;
-  max-width: min(100%, 18rem);
 }
 
 .catalog-layout--lesson .lesson-page-tags {
