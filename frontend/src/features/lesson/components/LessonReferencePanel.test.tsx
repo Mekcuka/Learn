@@ -132,6 +132,91 @@ describe("LessonReferencePanel", () => {
     });
 
     expect(container.querySelector(".lesson-actions")).toBeNull();
+    expect(container.textContent).not.toContain("Квиз");
+  });
+
+  it("shows quiz reference only on quiz step for mixed lessons", () => {
+    const mixedLesson: LessonDetail = {
+      ...baseLesson,
+      verify: { type: "quiz_passed", config: {} },
+      quiz: {
+        module_id: "orientation-v1",
+        pass_threshold_percent: 80,
+        questions: [{ id: "q1", order: 1, prompt_html: "?", options: [{ id: "o1", text: "A" }], allow_multiple: false }],
+      },
+      slides: [
+        baseLesson.slides[0],
+        { ...baseLesson.slides[0], id: "s2", order: 2, title: "Слайд 2" },
+      ],
+    };
+
+    act(() => {
+      root.render(
+        <AppTheme>
+          <MemoryRouter>
+            <LessonReferencePanel
+              lesson={mixedLesson}
+              slide={mixedLesson.slides[0]}
+              slideIndex={0}
+              slideTotal={2}
+              isOnQuizStep={false}
+              onVerify={() => undefined}
+            />
+          </MemoryRouter>
+        </AppTheme>,
+      );
+    });
+
+    expect(container.textContent).toContain("Слайд 1/2");
+    expect(container.textContent).not.toContain("Квиз");
+
+    act(() => {
+      root.render(
+        <AppTheme>
+          <MemoryRouter>
+            <LessonReferencePanel
+              lesson={mixedLesson}
+              slide={null}
+              slideIndex={2}
+              slideTotal={2}
+              isOnQuizStep
+              onVerify={() => undefined}
+            />
+          </MemoryRouter>
+        </AppTheme>,
+      );
+    });
+
+    expect(container.textContent).toContain("Квиз");
+    expect(container.textContent).toContain("80%");
+  });
+
+  it("shows quiz reference for quiz-only lessons", () => {
+    act(() => {
+      root.render(
+        <AppTheme>
+          <MemoryRouter>
+            <LessonReferencePanel
+              lesson={{
+                ...baseLesson,
+                slides: [],
+                verify: { type: "quiz_passed", config: {} },
+                quiz: {
+                  module_id: "orientation-v1",
+                  pass_threshold_percent: 80,
+                  questions: [{ id: "q1", order: 1, prompt_html: "?", options: [{ id: "o1", text: "A" }], allow_multiple: false }],
+                },
+              }}
+              slide={null}
+              slideIndex={0}
+              slideTotal={0}
+              onVerify={() => undefined}
+            />
+          </MemoryRouter>
+        </AppTheme>,
+      );
+    });
+
     expect(container.textContent).toContain("Квиз");
   });
 });

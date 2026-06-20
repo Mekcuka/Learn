@@ -4,7 +4,6 @@ import Typography from "@mui/material/Typography";
 import { useCallback, useEffect, useState } from "react";
 
 import type { LessonSlide } from "../../../types/lesson";
-import { clampSlideIndex } from "../../../utils/lessonUi";
 import ScreenshotGuide from "./ScreenshotGuide";
 import ScreenshotToolbar, { type ScreenshotToolbarProps } from "../../author/components/ScreenshotToolbar";
 
@@ -14,6 +13,8 @@ type SlideCarouselProps = {
   onChange: (index: number) => void;
   activeHotspotId?: string | null;
   onHotspotSelect?: (hotspotId: string | null) => void;
+  /** When true, «Далее» on the last slide opens the quiz step. */
+  hasTrailingQuiz?: boolean;
 };
 
 export default function SlideCarousel({
@@ -22,8 +23,10 @@ export default function SlideCarousel({
   onChange,
   activeHotspotId,
   onHotspotSelect,
+  hasTrailingQuiz = false,
 }: SlideCarouselProps) {
   const total = slides.length;
+  const maxIndex = hasTrailingQuiz ? total : total - 1;
   const [toolbarProps, setToolbarProps] = useState<ScreenshotToolbarProps | null>(null);
 
   const handleToolbarPropsChange = useCallback((props: ScreenshotToolbarProps) => {
@@ -32,9 +35,9 @@ export default function SlideCarousel({
 
   const goTo = useCallback(
     (index: number) => {
-      onChange(clampSlideIndex(index, total));
+      onChange(Math.max(0, Math.min(index, maxIndex)));
     },
-    [onChange, total],
+    [maxIndex, onChange],
   );
 
   useEffect(() => {
@@ -62,7 +65,7 @@ export default function SlideCarousel({
     }
 
     function onKeyDown(event: KeyboardEvent) {
-      if (isEditableTarget(event.target) || total <= 1) {
+      if (isEditableTarget(event.target) || (total <= 1 && !hasTrailingQuiz)) {
         return;
       }
       if (event.key === "ArrowLeft") {
@@ -77,7 +80,7 @@ export default function SlideCarousel({
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [currentIndex, goTo, total]);
+  }, [currentIndex, goTo, hasTrailingQuiz, total]);
 
   if (slides.length === 0) {
     return (
@@ -90,6 +93,13 @@ export default function SlideCarousel({
   }
 
   const slide = slides[currentIndex];
+  if (!slide) {
+    return (
+      <div className="slide-empty">
+        <Typography color="text.secondary">Слайд не найден.</Typography>
+      </div>
+    );
+  }
 
   return (
     <section className="slide-carousel" aria-label="Слайды урока">
@@ -132,7 +142,7 @@ export default function SlideCarousel({
           {toolbarProps ? <ScreenshotToolbar {...toolbarProps} /> : null}
         </div>
 
-        {total > 1 ? (
+        {total > 1 || hasTrailingQuiz ? (
           <div className="slide-nav-controls">
             <Button
               type="button"
@@ -148,7 +158,9 @@ export default function SlideCarousel({
             <div className="slide-nav-center">
               <div className="slide-dots-pill">
                 <Typography variant="caption" color="text.secondary" className="slide-nav-counter">
-                  {currentIndex + 1} / {total}
+                  {hasTrailingQuiz && currentIndex >= total
+                    ? "Квиз"
+                    : `${currentIndex + 1} / ${total}${hasTrailingQuiz ? "+" : ""}`}
                 </Typography>
                 <div
                   className={`slide-dots${total <= 6 ? " slide-dots--connected" : ""}`}
@@ -170,6 +182,20 @@ export default function SlideCarousel({
                       <span className="slide-dot-sr">{index + 1}</span>
                     </IconButton>
                   ))}
+                  {hasTrailingQuiz && (
+                    <IconButton
+                      type="button"
+                      size="small"
+                      disableRipple
+                      className={`slide-dot slide-dot--quiz ${currentIndex >= total ? "active" : ""}`}
+                      aria-label="Квиз"
+                      aria-selected={currentIndex >= total}
+                      role="tab"
+                      onClick={() => goTo(total)}
+                    >
+                      <span className="slide-dot-sr">К</span>
+                    </IconButton>
+                  )}
                 </div>
               </div>
             </div>
@@ -178,11 +204,11 @@ export default function SlideCarousel({
               className="slide-nav-btn"
               variant="outlined"
               size="small"
-              disabled={currentIndex >= total - 1}
-              aria-label="Следующий слайд"
+              disabled={currentIndex >= maxIndex}
+              aria-label={currentIndex >= total - 1 && hasTrailingQuiz ? "Перейти к квизу" : "Следующий слайд"}
               onClick={() => goTo(currentIndex + 1)}
             >
-              Далее
+              {currentIndex >= total - 1 && hasTrailingQuiz ? "К квизу" : "Далее"}
             </Button>
           </div>
         ) : (

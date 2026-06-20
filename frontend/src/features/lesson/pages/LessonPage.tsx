@@ -13,7 +13,7 @@ import LessonScreenshotHintsPanel from "../components/LessonScreenshotHintsPanel
 import LessonShell from "../components/LessonShell";
 import LessonSlideView from "../components/LessonSlideView";
 import { useLessonProgress } from "../hooks/useLessonProgress";
-import { resolveNextLessonNavigation } from "../../../utils/lessonUi";
+import { isMixedQuizLesson, resolveNextLessonNavigation } from "../../../utils/lessonUi";
 import { lessonLayoutGridClasses } from "../../../constants/lessonLayout";
 import { PageError, PageLoading } from "../../../components/mui/PageStatus";
 
@@ -66,6 +66,9 @@ export default function LessonPage() {
   }
 
   const isQuizLesson = lesson.verify.type === "quiz_passed";
+  const isMixedLesson = isMixedQuizLesson(lesson);
+  const isOnQuizStep = isMixedLesson && slideIndex >= lesson.slides.length;
+  const activeSlide = isOnQuizStep ? null : (lesson.slides[slideIndex] ?? null);
   const totalLessons = lesson.module_lessons.length;
   const completedLessons = lesson.module_lessons.filter((item) => item.status === "completed").length;
   const lessonStatus = lessonState?.status;
@@ -73,7 +76,8 @@ export default function LessonPage() {
     !isPreview && lessonId
       ? resolveNextLessonNavigation(lessonId, lessonStatus, lesson.module_lessons)
       : null;
-  const showHintsColumn = !isQuizLesson || nextLessonNavigation != null;
+  const showHintsColumn =
+    ((!isQuizLesson || isMixedLesson) || nextLessonNavigation != null) && !isOnQuizStep;
   const { body: bodyClass } = lessonLayoutGridClasses(showHintsColumn);
 
   function roadmapLinkTo(targetLessonId: string): string {
@@ -108,9 +112,10 @@ export default function LessonPage() {
       <div className={bodyClass}>
         <LessonReferencePanel
           lesson={lesson}
-          slide={lesson.slides[slideIndex] ?? null}
+          slide={activeSlide}
           slideIndex={slideIndex}
           slideTotal={lesson.slides.length}
+          isOnQuizStep={isOnQuizStep}
           lessonState={lessonState}
           busy={verifyBusy}
           feedback={feedback}
@@ -135,9 +140,9 @@ export default function LessonPage() {
 
         {showHintsColumn && (
           <div className="lesson-hints-column">
-            {!isQuizLesson && (
+            {(!isQuizLesson || isMixedLesson) && !isOnQuizStep && (
               <LessonScreenshotHintsPanel
-                slide={lesson.slides[slideIndex] ?? null}
+                slide={activeSlide}
                 activeHotspotId={activeHotspotId}
                 onHotspotSelect={selectHotspot}
               />

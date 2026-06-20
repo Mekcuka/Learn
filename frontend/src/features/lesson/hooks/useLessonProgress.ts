@@ -9,8 +9,8 @@ import {
 } from "../../../api/learnApi";
 import type { LessonDetail } from "../../../types/lesson";
 import {
-  clampSlideIndex,
-  readStoredSlideIndex,
+  clampLessonSlideIndex,
+  sanitizeStoredSlideIndex,
   slideStorageKey,
 } from "../../../utils/lessonUi";
 
@@ -47,12 +47,8 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
     const metaPromise = getLesson(lessonId, { fields: "meta" });
     const mediaPromise = getLesson(lessonId, { include: "slides,quiz" });
 
-    const meta = await metaPromise;
-    setLesson(meta);
-    setLoading(false);
-
-    const media = await mediaPromise;
-    setLesson((current) => (current ? { ...current, slides: media.slides, quiz: media.quiz } : media));
+    const [meta, media] = await Promise.all([metaPromise, mediaPromise]);
+    setLesson({ ...meta, slides: media.slides, quiz: media.quiz });
 
     if (isPreview) {
       return;
@@ -87,6 +83,7 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
 
     setLoading(true);
     setError(null);
+    setLesson(null);
 
     loadLesson()
       .catch((err: unknown) => {
@@ -120,10 +117,29 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
       return;
     }
 
-    const storedIndex = readStoredSlideIndex(lessonId);
-    setSlideIndex(clampSlideIndex(storedIndex ?? 0, lesson.slides.length));
+    const lessonState = lesson.lesson_states.find((item) => item.lesson_id === lessonId);
+    const outlineStatus = lesson.module_lessons.find((item) => item.id === lessonId)?.status;
+    const clamped = sanitizeStoredSlideIndex(lessonId, lesson, undefined, {
+      resetQuizStepForNotStarted: true,
+      lessonStatus: lessonState?.status ?? outlineStatus,
+    });
+    setSlideIndex(clamped);
     slideStorageHydratedRef.current = true;
-  }, [lessonId, lesson?.slides.length]);
+  }, [lessonId, lesson]);
+
+  useEffect(() => {
+    if (!lessonId || !lesson?.slides.length || !slideStorageHydratedRef.current) {
+      return;
+    }
+
+    setSlideIndex((current) => {
+      const clamped = clampLessonSlideIndex(current, lesson);
+      if (clamped !== current) {
+        sessionStorage.setItem(slideStorageKey(lessonId), String(clamped));
+      }
+      return clamped;
+    });
+  }, [lessonId, lesson?.slides.length, lesson?.verify.type]);
 
   useEffect(() => {
     if (!lessonId || !slideStorageHydratedRef.current) {
@@ -143,12 +159,12 @@ export function useLessonProgress({ lessonId, isPreview, isDraftPreview }: UseLe
 
   const goToSlide = useCallback(
     (index: number) => {
-      if (!lesson?.slides.length) {
+      if (!lesson || lesson.slides.length === 0) {
         return;
       }
-      setSlideIndex(clampSlideIndex(index, lesson.slides.length));
+      setSlideIndex(clampLessonSlideIndex(index, lesson));
     },
-    [lesson?.slides.length],
+    [lesson],
   );
 
   const nextSlide = useCallback(() => {

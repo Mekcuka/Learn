@@ -17,7 +17,7 @@ const backendEnv: NodeJS.ProcessEnv = {
   SEED_ON_STARTUP: "true",
   AUTH_ENABLED: "false",
   SECRET_KEY: process.env.SECRET_KEY ?? "e2e-test-secret",
-  AUTHORING_ENABLED: "false",
+  AUTHORING_ENABLED: "true",
 };
 
 export default defineConfig({

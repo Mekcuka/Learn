@@ -111,5 +111,77 @@ describe("LessonSlideView", () => {
     expect(slideView?.querySelector(".lesson-actions")).toBeNull();
     expect(container.textContent).not.toContain("Задание");
   });
+
+  it("shows slides before quiz for mixed quiz_passed lessons", () => {
+    const mixedLesson: LessonDetail = {
+      ...studentLesson,
+      verify: { type: "quiz_passed", config: { pass_threshold_percent: 80 } },
+      quiz: {
+        module_id: "orientation-v1",
+        pass_threshold_percent: 80,
+        questions: [
+          {
+            id: "q1",
+            prompt_html: "<p>Вопрос?</p>",
+            options: [{ id: "o1", label_html: "<p>Да</p>" }],
+            correct_option_ids: ["o1"],
+            allow_multiple: false,
+          },
+        ],
+      },
+    };
+
+    act(() => {
+      root.render(
+        <AppTheme>
+          <LessonSlideView
+            mode="student"
+            lesson={mixedLesson}
+            slideIndex={0}
+            onSlideIndexChange={() => undefined}
+          />
+        </AppTheme>,
+      );
+    });
+
+    expect(container.querySelector(".slide-carousel")).not.toBeNull();
+    expect(container.querySelector(".quiz-panel")).toBeNull();
+  });
+
+  it("shows quiz step after slides in mixed quiz_passed lessons", () => {
+    const mixedLesson: LessonDetail = {
+      ...studentLesson,
+      verify: { type: "quiz_passed", config: { pass_threshold_percent: 80 } },
+      quiz: {
+        module_id: "orientation-v1",
+        pass_threshold_percent: 80,
+        questions: [
+          {
+            id: "q1",
+            prompt_html: "<p>Вопрос?</p>",
+            options: [{ id: "o1", label_html: "<p>Да</p>" }],
+            correct_option_ids: ["o1"],
+            allow_multiple: false,
+          },
+        ],
+      },
+    };
+
+    act(() => {
+      root.render(
+        <AppTheme>
+          <LessonSlideView
+            mode="student"
+            lesson={mixedLesson}
+            slideIndex={mixedLesson.slides.length}
+            onSlideIndexChange={() => undefined}
+          />
+        </AppTheme>,
+      );
+    });
+
+    expect(container.querySelector(".quiz-panel")).not.toBeNull();
+    expect(container.querySelector(".slide-carousel")).toBeNull();
+  });
 });
 

@@ -29,11 +29,48 @@ export function resolveNextLessonNavigation(
   return { kind: "catalog" };
 }
 
+export function isMixedQuizLesson(lesson: {
+  verify: { type: string };
+  slides: unknown[];
+}): boolean {
+  return lesson.verify.type === "quiz_passed" && lesson.slides.length > 0;
+}
+
+export function isQuizOnlyLesson(lesson: {
+  verify: { type: string };
+  slides: unknown[];
+}): boolean {
+  return lesson.verify.type === "quiz_passed" && lesson.slides.length === 0;
+}
+
+/** Last navigable slide index (includes virtual quiz step for mixed lessons). */
+export function maxLessonSlideIndex(lesson: {
+  verify: { type: string };
+  slides: unknown[];
+}): number {
+  const slideCount = lesson.slides.length;
+  if (slideCount <= 0) {
+    return 0;
+  }
+  return isMixedQuizLesson(lesson) ? slideCount : slideCount - 1;
+}
+
 export function clampSlideIndex(index: number, total: number): number {
   if (total <= 0) {
     return 0;
   }
   return Math.max(0, Math.min(index, total - 1));
+}
+
+export function clampLessonSlideIndex(
+  index: number,
+  lesson: { verify: { type: string }; slides: unknown[] },
+): number {
+  const slideCount = lesson.slides.length;
+  if (slideCount <= 0) {
+    return 0;
+  }
+  return Math.max(0, Math.min(index, maxLessonSlideIndex(lesson)));
 }
 
 export function slideStorageKey(lessonId: string): string {
@@ -47,6 +84,32 @@ export function readStoredSlideIndex(lessonId: string): number | null {
   }
   const index = Number.parseInt(saved, 10);
   return Number.isNaN(index) ? null : index;
+}
+
+export function writeStoredSlideIndex(lessonId: string, index: number): void {
+  sessionStorage.setItem(slideStorageKey(lessonId), String(index));
+}
+
+/** Clamp and persist slide index; returns sanitized value. */
+export function sanitizeStoredSlideIndex(
+  lessonId: string,
+  lesson: { verify: { type: string }; slides: unknown[] },
+  preferredIndex?: number,
+  options?: { resetQuizStepForNotStarted?: boolean; lessonStatus?: string },
+): number {
+  const raw = preferredIndex ?? readStoredSlideIndex(lessonId) ?? 0;
+  let index = raw;
+  if (
+    options?.resetQuizStepForNotStarted &&
+    options.lessonStatus === "not_started" &&
+    isMixedQuizLesson(lesson) &&
+    index >= lesson.slides.length
+  ) {
+    index = 0;
+  }
+  const clamped = clampLessonSlideIndex(index, lesson);
+  writeStoredSlideIndex(lessonId, clamped);
+  return clamped;
 }
 
 export function moduleProgressLabel(completedLessons: number, totalLessons: number): string {

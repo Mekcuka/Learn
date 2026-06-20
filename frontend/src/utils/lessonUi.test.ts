@@ -2,7 +2,18 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it } from "vitest";
-import { clampSlideIndex, moduleProgressLabel, readStoredSlideIndex, resolveNextLessonNavigation, slideStorageKey } from "../utils/lessonUi";
+import {
+  clampLessonSlideIndex,
+  clampSlideIndex,
+  isMixedQuizLesson,
+  isQuizOnlyLesson,
+  maxLessonSlideIndex,
+  moduleProgressLabel,
+  readStoredSlideIndex,
+  resolveNextLessonNavigation,
+  sanitizeStoredSlideIndex,
+  slideStorageKey,
+} from "../utils/lessonUi";
 
 describe("hotspot coordinates", () => {
   it("uses percentage-based layout values", () => {
@@ -14,6 +25,31 @@ describe("hotspot coordinates", () => {
     };
     expect(hotspot.x_pct + hotspot.width_pct).toBeLessThanOrEqual(100);
     expect(hotspot.y_pct + hotspot.height_pct).toBeLessThanOrEqual(100);
+  });
+});
+
+const mixedLesson = {
+  verify: { type: "quiz_passed" as const },
+  slides: [{ id: "s1" }, { id: "s2" }],
+};
+
+const quizOnlyLesson = {
+  verify: { type: "quiz_passed" as const },
+  slides: [] as { id: string }[],
+};
+
+describe("mixed quiz lessons", () => {
+  it("detects mixed and quiz-only lessons", () => {
+    expect(isMixedQuizLesson(mixedLesson)).toBe(true);
+    expect(isQuizOnlyLesson(mixedLesson)).toBe(false);
+    expect(isMixedQuizLesson(quizOnlyLesson)).toBe(false);
+    expect(isQuizOnlyLesson(quizOnlyLesson)).toBe(true);
+  });
+
+  it("allows virtual quiz step index for mixed lessons", () => {
+    expect(maxLessonSlideIndex(mixedLesson)).toBe(2);
+    expect(clampLessonSlideIndex(5, mixedLesson)).toBe(2);
+    expect(clampLessonSlideIndex(1, mixedLesson)).toBe(1);
   });
 });
 
@@ -31,6 +67,27 @@ describe("slide navigation", () => {
     expect(readStoredSlideIndex(lessonId)).toBe(2);
     sessionStorage.removeItem(slideStorageKey(lessonId));
     expect(readStoredSlideIndex(lessonId)).toBeNull();
+  });
+
+  it("sanitizes out-of-bounds stored index for mixed lessons", () => {
+    const lessonId = "lesson-test-sanitize";
+    sessionStorage.setItem(slideStorageKey(lessonId), "99");
+    expect(sanitizeStoredSlideIndex(lessonId, mixedLesson)).toBe(2);
+    expect(sessionStorage.getItem(slideStorageKey(lessonId))).toBe("2");
+    sessionStorage.removeItem(slideStorageKey(lessonId));
+  });
+
+  it("resets quiz step to first slide for not_started mixed lessons", () => {
+    const lessonId = "lesson-test-reset";
+    sessionStorage.setItem(slideStorageKey(lessonId), "2");
+    expect(
+      sanitizeStoredSlideIndex(lessonId, mixedLesson, undefined, {
+        resetQuizStepForNotStarted: true,
+        lessonStatus: "not_started",
+      }),
+    ).toBe(0);
+    expect(sessionStorage.getItem(slideStorageKey(lessonId))).toBe("0");
+    sessionStorage.removeItem(slideStorageKey(lessonId));
   });
 });
 

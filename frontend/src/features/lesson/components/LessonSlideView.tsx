@@ -3,6 +3,7 @@ import Typography from "@mui/material/Typography";
 import type { AuthorLessonDetail } from "../../../api/authorApi";
 import type { LessonDetail } from "../../../types/lesson";
 import type { QuizSubmitResult } from "../../../types/lesson";
+import { isMixedQuizLesson, isQuizOnlyLesson } from "../../../utils/lessonUi";
 import QuizPanel from "./QuizPanel";
 import SlideCarousel from "./SlideCarousel";
 
@@ -35,10 +36,15 @@ export default function LessonSlideView({
   isPreview = false,
   onQuizSubmit,
 }: LessonSlideViewProps) {
-  const isQuizLesson = lesson.verify.type === "quiz_passed";
   const showStudentActions = mode === "student" || mode === "preview";
   const studentLesson = lesson as LessonDetail;
   const quiz = "quiz" in lesson ? studentLesson.quiz : null;
+  const hasSlides = lesson.slides.length > 0;
+  const isMixedLesson = isMixedQuizLesson(lesson);
+  const isQuizOnly = isQuizOnlyLesson(lesson);
+  const isOnQuizStep = isMixedLesson && slideIndex >= lesson.slides.length;
+  const showQuizPanel =
+    showStudentActions && Boolean(quiz) && (isQuizOnly || isOnQuizStep);
 
   return (
     <div className={`lesson-slide-view lesson-slide-view--${mode}`}>
@@ -52,22 +58,27 @@ export default function LessonSlideView({
         </div>
       )}
 
-      {isQuizLesson && quiz && showStudentActions ? (
+      {showQuizPanel ? (
         <QuizPanel
-          quiz={quiz}
+          quiz={quiz!}
           busy={busy}
           result={quizResult}
           isPreview={isPreview || mode === "preview"}
           onSubmit={onQuizSubmit ?? (() => undefined)}
         />
-      ) : (
+      ) : hasSlides ? (
         <SlideCarousel
           slides={lesson.slides}
           currentIndex={slideIndex}
           onChange={onSlideIndexChange}
           activeHotspotId={activeHotspotId}
           onHotspotSelect={onHotspotSelect}
+          hasTrailingQuiz={isMixedLesson && Boolean(quiz)}
         />
+      ) : (
+        <div className="slide-empty">
+          <Typography color="text.secondary">Для этого урока пока нет содержимого.</Typography>
+        </div>
       )}
     </div>
   );

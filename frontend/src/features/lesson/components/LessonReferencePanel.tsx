@@ -5,6 +5,7 @@ import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { type ReactNode, useState } from "react";
 import type { LessonDetail, LessonSlide, LessonStateItem, VerifyResult } from "../../../types/lesson";
+import { isQuizOnlyLesson } from "../../../utils/lessonUi";
 import LessonActions from "./LessonActions";
 import ContentHtml from "../../wiki/components/ContentHtml";
 
@@ -13,6 +14,7 @@ type LessonReferencePanelProps = {
   slide: LessonSlide | null;
   slideIndex: number;
   slideTotal: number;
+  isOnQuizStep?: boolean;
   lessonState?: LessonStateItem;
   busy?: boolean;
   feedback?: VerifyResult | null;
@@ -99,6 +101,7 @@ export default function LessonReferencePanel({
   slide,
   slideIndex,
   slideTotal,
+  isOnQuizStep = false,
   lessonState,
   busy = false,
   feedback = null,
@@ -108,8 +111,9 @@ export default function LessonReferencePanel({
   const isQuizLesson = lesson.verify.type === "quiz_passed";
   const showAssignment = !isQuizLesson && Boolean(onVerify);
   const hasCaption = Boolean(slide?.caption_html?.trim());
-  const hasQuizRef = isQuizLesson && Boolean(lesson.quiz);
-  const hasSlideContext = Boolean(slide && slideTotal > 0);
+  const hasQuizRef =
+    isQuizLesson && Boolean(lesson.quiz) && (isOnQuizStep || isQuizOnlyLesson(lesson));
+  const hasSlideContext = Boolean(slide && slideTotal > 0 && !isOnQuizStep);
   const hasPrimaryContent = showAssignment || hasCaption || hasQuizRef;
 
   return (
@@ -123,10 +127,16 @@ export default function LessonReferencePanel({
         >
           Справка
         </Typography>
-        {hasSlideContext && (
+        {isOnQuizStep ? (
           <Typography variant="overline" color="text.secondary" className="lesson-panel-header-meta">
-            Слайд {slideIndex + 1}/{slideTotal}
+            Квиз
           </Typography>
+        ) : (
+          hasSlideContext && (
+            <Typography variant="overline" color="text.secondary" className="lesson-panel-header-meta">
+              Слайд {slideIndex + 1}/{slideTotal}
+            </Typography>
+          )
         )}
       </div>
 

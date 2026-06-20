@@ -319,8 +319,8 @@
 }
 
 .catalog-layout--lesson .screenshot-frame {
-  flex: 1 1 0;
-  min-height: 0;
+  flex: 1 1 auto;
+  min-height: min(36vh, 320px);
   max-height: 100%;
   width: 100%;
   height: auto;
