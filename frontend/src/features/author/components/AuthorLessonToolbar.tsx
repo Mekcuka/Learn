@@ -77,9 +77,6 @@ export default function AuthorLessonToolbar({
             <Chip size="small" color="success" label="Опубликован" />
           )}
         </div>
-        <Typography variant="body2" color="text.secondary" className="meta">
-          {lesson.module_title}
-        </Typography>
       </div>
       <div className="author-toolbar">
         <div className="author-toolbar-primary">
