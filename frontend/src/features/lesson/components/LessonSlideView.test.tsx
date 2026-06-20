@@ -123,7 +123,7 @@ describe("LessonSlideView", () => {
           {
             id: "q1",
             prompt_html: "<p>Вопрос?</p>",
-            options: [{ id: "o1", label_html: "<p>Да</p>" }],
+            options: [{ id: "o1", text: "Да" }],
             correct_option_ids: ["o1"],
             allow_multiple: false,
           },
@@ -159,7 +159,7 @@ describe("LessonSlideView", () => {
           {
             id: "q1",
             prompt_html: "<p>Вопрос?</p>",
-            options: [{ id: "o1", label_html: "<p>Да</p>" }],
+            options: [{ id: "o1", text: "Да" }],
             correct_option_ids: ["o1"],
             allow_multiple: false,
           },
@@ -181,7 +181,56 @@ describe("LessonSlideView", () => {
     });
 
     expect(container.querySelector(".quiz-panel")).not.toBeNull();
-    expect(container.querySelector(".slide-carousel")).toBeNull();
+    expect(container.querySelector(".slide-carousel")).not.toBeNull();
+    expect(container.querySelector("nav.slide-nav")).not.toBeNull();
+    expect(container.textContent).toContain("Назад");
+    expect(container.querySelector(".slide-dot--quiz.active")).not.toBeNull();
+  });
+
+  it("navigates back from quiz step via Назад in slide-nav", () => {
+    const mixedLesson: LessonDetail = {
+      ...studentLesson,
+      verify: { type: "quiz_passed", config: { pass_threshold_percent: 80 } },
+      quiz: {
+        module_id: "orientation-v1",
+        pass_threshold_percent: 80,
+        questions: [
+          {
+            id: "q1",
+            prompt_html: "<p>Вопрос?</p>",
+            options: [{ id: "o1", text: "Да" }],
+            correct_option_ids: ["o1"],
+            allow_multiple: false,
+          },
+        ],
+      },
+    };
+    const onSlideIndexChange = vi.fn();
+
+    act(() => {
+      root.render(
+        <AppTheme>
+          <LessonSlideView
+            mode="student"
+            lesson={mixedLesson}
+            slideIndex={mixedLesson.slides.length}
+            onSlideIndexChange={onSlideIndexChange}
+          />
+        </AppTheme>,
+      );
+    });
+
+    const backButton = container.querySelector(
+      'button[aria-label="Предыдущий слайд"]',
+    ) as HTMLButtonElement | null;
+    expect(backButton).not.toBeNull();
+    expect(backButton?.disabled).toBe(false);
+
+    act(() => {
+      backButton?.click();
+    });
+
+    expect(onSlideIndexChange).toHaveBeenCalledWith(mixedLesson.slides.length - 1);
   });
 });
 

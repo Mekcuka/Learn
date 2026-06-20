@@ -1,7 +1,7 @@
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import type { LessonSlide } from "../../../types/lesson";
 import ScreenshotGuide from "./ScreenshotGuide";
@@ -15,6 +15,8 @@ type SlideCarouselProps = {
   onHotspotSelect?: (hotspotId: string | null) => void;
   /** When true, «Далее» on the last slide opens the quiz step. */
   hasTrailingQuiz?: boolean;
+  /** Replaces slide screenshot when on the trailing quiz step. */
+  children?: ReactNode;
 };
 
 export default function SlideCarousel({
@@ -24,9 +26,11 @@ export default function SlideCarousel({
   activeHotspotId,
   onHotspotSelect,
   hasTrailingQuiz = false,
+  children,
 }: SlideCarouselProps) {
   const total = slides.length;
   const maxIndex = hasTrailingQuiz ? total : total - 1;
+  const isOnQuizStep = hasTrailingQuiz && currentIndex >= total;
   const [toolbarProps, setToolbarProps] = useState<ScreenshotToolbarProps | null>(null);
 
   const handleToolbarPropsChange = useCallback((props: ScreenshotToolbarProps) => {
@@ -41,6 +45,9 @@ export default function SlideCarousel({
   );
 
   useEffect(() => {
+    if (isOnQuizStep) {
+      return;
+    }
     const nextSlide = slides[currentIndex + 1];
     if (!nextSlide?.image_path) {
       return;
@@ -53,7 +60,7 @@ export default function SlideCarousel({
     return () => {
       link.remove();
     };
-  }, [currentIndex, slides]);
+  }, [currentIndex, isOnQuizStep, slides]);
 
   useEffect(() => {
     function isEditableTarget(target: EventTarget | null): boolean {
@@ -92,14 +99,17 @@ export default function SlideCarousel({
     );
   }
 
-  const slide = slides[currentIndex];
-  if (!slide) {
+  const slide = isOnQuizStep ? null : slides[currentIndex];
+  if (!slide && !isOnQuizStep) {
     return (
       <div className="slide-empty">
         <Typography color="text.secondary">Слайд не найден.</Typography>
       </div>
     );
   }
+
+  const progressLabel = isOnQuizStep ? "Квиз" : `Слайд ${currentIndex + 1} из ${total}`;
+  const titleLabel = isOnQuizStep ? "Квиз" : slide!.title;
 
   return (
     <section className="slide-carousel" aria-label="Слайды урока">
@@ -110,37 +120,45 @@ export default function SlideCarousel({
           fontWeight="bold"
           className="slide-context-progress"
         >
-          Слайд {currentIndex + 1} из {total}
+          {progressLabel}
         </Typography>
         <Typography variant="body2" fontWeight={600} className="slide-context-title">
-          {slide.title}
+          {titleLabel}
         </Typography>
       </div>
 
       <div className="slide-carousel-header">
         <Typography variant="body2" color="text.secondary">
-          Слайд {currentIndex + 1} из {total}
+          {progressLabel}
         </Typography>
         <Typography variant="body2" fontWeight={600}>
-          {slide.title}
+          {titleLabel}
         </Typography>
       </div>
 
-      <ScreenshotGuide
-        imagePath={slide.image_path}
-        alt={slide.title}
-        hotspots={slide.hotspots}
-        viewportResetKey={slide.id}
-        activeHotspotId={activeHotspotId}
-        onHotspotSelect={onHotspotSelect}
-        hideToolbar
-        enableToolbarFullscreen={false}
-        onToolbarPropsChange={handleToolbarPropsChange}
-      />
+      {isOnQuizStep ? (
+        children ?? (
+          <div className="slide-empty">
+            <Typography color="text.secondary">Содержимое квиза недоступно.</Typography>
+          </div>
+        )
+      ) : (
+        <ScreenshotGuide
+          imagePath={slide!.image_path}
+          alt={slide!.title}
+          hotspots={slide!.hotspots}
+          viewportResetKey={slide!.id}
+          activeHotspotId={activeHotspotId}
+          onHotspotSelect={onHotspotSelect}
+          hideToolbar
+          enableToolbarFullscreen={false}
+          onToolbarPropsChange={handleToolbarPropsChange}
+        />
+      )}
 
       <nav className="slide-nav" aria-label="Навигация по слайдам и просмотр">
         <div className="slide-nav-toolbar">
-          {toolbarProps ? (
+          {!isOnQuizStep && toolbarProps ? (
             <ScreenshotToolbar {...toolbarProps} showZoomControls={false} showFullscreen={false} />
           ) : null}
         </div>

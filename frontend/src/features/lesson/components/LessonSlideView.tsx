@@ -49,6 +49,26 @@ export default function LessonSlideView({
     showStudentActions && hasLoadedQuiz(studentLesson) && (isQuizOnly || isOnQuizStep);
   const showQuizUnavailable =
     showStudentActions && isOnQuizStep && isMixedLesson && !hasLoadedQuiz(studentLesson);
+  const showCarouselWithQuizStep =
+    hasSlides && isMixedLesson && (showQuizPanel || showQuizUnavailable);
+  const trailingQuiz = isMixedLesson && (hasLoadedQuiz(studentLesson) || isOnQuizStep);
+
+  const quizContent = showQuizPanel ? (
+    <QuizPanel
+      quiz={quiz!}
+      busy={busy}
+      result={quizResult}
+      isPreview={isPreview || mode === "preview"}
+      submitError={submitError}
+      onSubmit={onQuizSubmit ?? (() => undefined)}
+    />
+  ) : showQuizUnavailable ? (
+    <div className="slide-empty quiz-unavailable">
+      <Typography color="text.secondary">
+        Вопросы квиза не загрузились. Обновите страницу или вернитесь к слайдам.
+      </Typography>
+    </div>
+  ) : null;
 
   return (
     <div className={`lesson-slide-view lesson-slide-view--${mode}`}>
@@ -62,7 +82,16 @@ export default function LessonSlideView({
         </div>
       )}
 
-      {showQuizPanel ? (
+      {showCarouselWithQuizStep ? (
+        <SlideCarousel
+          slides={lesson.slides}
+          currentIndex={slideIndex}
+          onChange={onSlideIndexChange}
+          hasTrailingQuiz={trailingQuiz}
+        >
+          {quizContent}
+        </SlideCarousel>
+      ) : showQuizPanel ? (
         <QuizPanel
           quiz={quiz!}
           busy={busy}

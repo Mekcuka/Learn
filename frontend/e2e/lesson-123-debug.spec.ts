@@ -157,10 +157,20 @@ test.describe("lesson-123 mixed lesson diagnostics", () => {
 
     console.log("MEASUREMENTS_QUIZ_STEP", JSON.stringify(measurements, null, 2));
 
-    expect(measurements.sessionStorage).toBe("2");
-    expect(measurements.hasCarousel).toBe(false);
+    const quizSlideIndex = await page.evaluate(() => {
+      const slideDots = document.querySelectorAll(".slide-dots .slide-dot:not(.slide-dot--quiz)");
+      return slideDots.length;
+    });
+
+    expect(measurements.sessionStorage).toBe(String(quizSlideIndex));
+    expect(measurements.hasCarousel).toBe(true);
     expect(measurements.quizPanel?.height ?? 0).toBeGreaterThan(120);
     expect(measurements.main?.height ?? 0).toBeGreaterThan(120);
+
+    const slideNav = page.locator("nav.slide-nav");
+    await expect(slideNav).toBeVisible();
+    await expect(slideNav.getByRole("button", { name: "Предыдущий слайд" })).toBeVisible();
+    await expect(slideNav.locator(".slide-dot--quiz.active")).toBeVisible();
   });
 
   test("quiz step stays visible on narrow viewport", async ({ page }) => {
@@ -173,6 +183,7 @@ test.describe("lesson-123 mixed lesson diagnostics", () => {
 
     await expect(page.locator(".quiz-panel")).toBeVisible({ timeout: 15_000 });
     await expect(page.locator(".quiz-question")).toHaveCount(5);
+    await expect(page.locator("nav.slide-nav")).toBeVisible();
 
     const measurements = await page.evaluate(() => ({
       mainH: document.querySelector(".lesson-main")?.getBoundingClientRect().height ?? 0,

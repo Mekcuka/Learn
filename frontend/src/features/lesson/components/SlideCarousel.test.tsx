@@ -129,4 +129,30 @@ describe("SlideCarousel navigation", () => {
     expect(container.textContent).not.toContain("Сброс");
     expect(container.querySelector('button[aria-label="Уменьшить"]')).toBeNull();
   });
+
+  it("keeps slide-nav visible on trailing quiz step with children content", () => {
+    act(() => {
+      root.render(
+        <AppTheme>
+          <SlideCarousel
+            slides={slides}
+            currentIndex={slides.length}
+            onChange={vi.fn()}
+            hasTrailingQuiz
+          >
+            <div className="quiz-panel" data-testid="quiz-content">
+              Quiz content
+            </div>
+          </SlideCarousel>
+        </AppTheme>,
+      );
+    });
+
+    expect(container.querySelector("nav.slide-nav")).not.toBeNull();
+    expect(container.querySelector(".quiz-panel")).not.toBeNull();
+    expect(container.querySelector(".screenshot-guide")).toBeNull();
+    expect(container.textContent).toContain("Назад");
+    expect(container.querySelector(".slide-dot--quiz.active")).not.toBeNull();
+    expect(container.textContent).toContain("Квиз");
+  });
 });
