@@ -44,21 +44,6 @@ class DuplicateLessonRequest(BaseModel):
     title_suffix: str = " (копия)"
 
 
-class CreateRevisionRequest(BaseModel):
-    label: str | None = None
-
-
-class LessonRevisionItem(BaseModel):
-    id: str
-    created_at: str
-    author_user_id: str | None
-    summary: str | None
-
-
-class LessonRevisionListResponse(BaseModel):
-    items: list[LessonRevisionItem]
-
-
 class CreateLessonRequest(BaseModel):
     id: str | None = None
     title: str

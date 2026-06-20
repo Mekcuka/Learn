@@ -11,7 +11,6 @@ import AppTheme from "../components/mui/AppTheme";
 
 const getAuthorLesson = vi.fn();
 const getAuthorQuiz = vi.fn();
-const getAuthorLessonRevisions = vi.fn();
 
 vi.mock("../api/authorApi", async () => {
   const actual = await vi.importActual<typeof import("../api/authorApi")>("../api/authorApi");
@@ -19,8 +18,6 @@ vi.mock("../api/authorApi", async () => {
     ...actual,
     getAuthorLesson: (...args: Parameters<typeof getAuthorLesson>) => getAuthorLesson(...args),
     getAuthorQuiz: (...args: Parameters<typeof getAuthorQuiz>) => getAuthorQuiz(...args),
-    getAuthorLessonRevisions: (...args: Parameters<typeof getAuthorLessonRevisions>) =>
-      getAuthorLessonRevisions(...args),
   };
 });
 
@@ -29,7 +26,6 @@ vi.mock("../features/author/components/AuthorConstructorLayout", () => ({
 }));
 vi.mock("../features/author/components/AuthorLessonToolbar", () => ({ default: () => null }));
 vi.mock("../features/author/components/AuthorLessonMetaPanel", () => ({ default: () => null }));
-vi.mock("../features/author/components/AuthorRevisionHistoryPanel", () => ({ default: () => null }));
 vi.mock("../features/author/components/AuthorStoryboardView", () => ({ default: () => null }));
 vi.mock("../features/author/components/HotspotEditor", () => ({ default: () => null }));
 vi.mock("../features/lesson/components/LessonScreenshotHintsPanel", () => ({ default: () => null }));
@@ -75,7 +71,6 @@ describe("AuthorLessonPage", () => {
     vi.clearAllMocks();
     getAuthorLesson.mockResolvedValue(lessonFixture);
     getAuthorQuiz.mockResolvedValue(null);
-    getAuthorLessonRevisions.mockResolvedValue({ items: [] });
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);
@@ -129,11 +124,15 @@ describe("AuthorLessonPage", () => {
     const slideToggle = container.querySelector(
       '.author-constructor-view-toggle button[value="slide"]',
     ) as HTMLButtonElement | null;
+    const editToggle = container.querySelector(
+      '.author-constructor-view-toggle button[value="quiz"]',
+    ) as HTMLButtonElement | null;
     const hotspotsToggle = container.querySelector(
       '.author-constructor-view-toggle button[value="hotspots"]',
     ) as HTMLButtonElement | null;
 
     expect(slideToggle).not.toBeNull();
+    expect(editToggle).toBeNull();
     expect(hotspotsToggle).not.toBeNull();
     expect(slideToggle?.textContent).toContain("Слайд");
     expect(hotspotsToggle?.textContent).toContain("Метки");

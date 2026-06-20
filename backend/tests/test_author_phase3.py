@@ -1,4 +1,4 @@
-"""Phase 3 author API: duplicate, revisions, draft/publish."""
+"""Phase 3 author API: duplicate, draft/publish."""
 
 
 def _create_test_lesson(client, headers, *, lesson_id: str = "lesson-phase3-test", module_id: str = "orientation-v1"):
@@ -132,42 +132,35 @@ def test_student_forbidden_draft_preview(client, author_headers, student_headers
     client.delete(f"/api/v1/learn/author/lessons/{lesson_id}", headers=author_headers)
 
 
-def test_revisions_list_and_rollback(client, author_headers):
-    lesson_id = _create_test_lesson(client, author_headers, lesson_id="lesson-phase3-rev")
+def test_publish_mixed_slides_and_quiz(client, author_headers, student_headers):
+    """Lesson with image slides + quiz_passed should expose both to students."""
+    lesson_id = _create_test_lesson(client, author_headers, lesson_id="lesson-phase3-mixed")
 
-    client.post(f"/api/v1/learn/author/lessons/{lesson_id}/publish", headers=author_headers)
+    client.post(
+        f"/api/v1/learn/author/lessons/{lesson_id}/slides",
+        headers=author_headers,
+        json={"id": f"{lesson_id}-slide-02", "title": "Слайд 2", "caption_html": "<p>Second</p>"},
+    )
     client.put(
-        f"/api/v1/learn/author/slides/{lesson_id}-slide-01",
+        f"/api/v1/learn/author/lessons/{lesson_id}",
         headers=author_headers,
-        json={"caption_html": "<p>Version B</p>"},
+        json={"verify_type": "quiz_passed", "verify_config": {"pass_threshold_percent": 80}},
     )
-    client.post(f"/api/v1/learn/author/lessons/{lesson_id}/publish", headers=author_headers)
+    publish = client.post(f"/api/v1/learn/author/lessons/{lesson_id}/publish", headers=author_headers)
+    assert publish.status_code == 200
+    assert publish.json()["verify"]["type"] == "quiz_passed"
+    assert len(publish.json()["slides"]) == 2
 
-    manual_revision = client.post(
-        f"/api/v1/learn/author/lessons/{lesson_id}/revisions",
-        headers=author_headers,
-        json={"label": "Ручной снимок"},
+    student_view = client.get(
+        f"/api/v1/learn/lessons/{lesson_id}",
+        headers=student_headers,
+        params={"include": "slides,quiz"},
     )
-    assert manual_revision.status_code == 201
-
-    revisions = client.get(f"/api/v1/learn/author/lessons/{lesson_id}/revisions", headers=author_headers)
-    assert revisions.status_code == 200
-    items = revisions.json()["items"]
-    assert len(items) >= 2
-    manual = next((item for item in items if item["summary"] == "Ручной снимок"), items[0])
-
-    client.put(
-        f"/api/v1/learn/author/slides/{lesson_id}-slide-01",
-        headers=author_headers,
-        json={"caption_html": "<p>Version C</p>"},
-    )
-    client.post(f"/api/v1/learn/author/lessons/{lesson_id}/publish", headers=author_headers)
-
-    rollback = client.post(
-        f"/api/v1/learn/author/lessons/{lesson_id}/revisions/{manual['id']}/rollback",
-        headers=author_headers,
-    )
-    assert rollback.status_code == 200
-    assert rollback.json()["slides"][0]["caption_html"] == "<p>Version B</p>"
+    assert student_view.status_code == 200
+    body = student_view.json()
+    assert body["verify"]["type"] == "quiz_passed"
+    assert len(body["slides"]) == 2
+    assert body["quiz"] is not None
+    assert len(body["quiz"]["questions"]) > 0
 
     client.delete(f"/api/v1/learn/author/lessons/{lesson_id}", headers=author_headers)

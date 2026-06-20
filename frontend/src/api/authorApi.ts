@@ -61,13 +61,6 @@ export type AuthorSlideUpdateResponse = {
   has_unpublished_changes: boolean;
 };
 
-export type LessonRevisionItem = {
-  id: string;
-  created_at: string;
-  author_user_id: string | null;
-  summary: string | null;
-};
-
 export async function getAuthorModules() {
   return httpRequest<AuthorModule[]>("/api/v1/learn/author/modules", { timeout: false });
 }
@@ -232,28 +225,6 @@ export async function duplicateAuthorLesson(
     body: JSON.stringify(body ?? {}),
     timeout: false,
   });
-}
-
-export async function getAuthorLessonRevisions(lessonId: string) {
-  return httpRequest<{ items: LessonRevisionItem[] }>(
-    `/api/v1/learn/author/lessons/${lessonId}/revisions`,
-    { timeout: false },
-  );
-}
-
-export async function createAuthorLessonRevision(lessonId: string, label?: string) {
-  return httpRequest<LessonRevisionItem>(`/api/v1/learn/author/lessons/${lessonId}/revisions`, {
-    method: "POST",
-    body: JSON.stringify({ label: label ?? null }),
-    timeout: false,
-  });
-}
-
-export async function rollbackAuthorLessonRevision(lessonId: string, revisionId: string) {
-  return httpRequest<AuthorLessonDetail>(
-    `/api/v1/learn/author/lessons/${lessonId}/revisions/${revisionId}/rollback`,
-    { method: "POST", timeout: false },
-  );
 }
 
 export async function publishAuthorLesson(lessonId: string) {

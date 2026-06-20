@@ -32,7 +32,6 @@ import { LearnApiError } from "../../../api/httpClient";
 import AuthorConstructorLayout from "../components/AuthorConstructorLayout";
 import AuthorLessonMetaPanel from "../components/AuthorLessonMetaPanel";
 import AuthorLessonToolbar from "../components/AuthorLessonToolbar";
-import AuthorRevisionHistoryPanel from "../components/AuthorRevisionHistoryPanel";
 import AuthorStoryboardView from "../components/AuthorStoryboardView";
 import HotspotEditor from "../components/HotspotEditor";
 import RichTextEditor from "../components/RichTextEditor";
@@ -559,12 +558,6 @@ export default function AuthorLessonPage() {
               onQuizExpandedChange={setQuizExpanded}
               onQuizMessage={setMessage}
               onQuizError={setError}
-            />
-            <AuthorRevisionHistoryPanel
-              lesson={lesson}
-              onLessonUpdated={setLesson}
-              onError={setError}
-              onMessage={setMessage}
             />
           </div>
 

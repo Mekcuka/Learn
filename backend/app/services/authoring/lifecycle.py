@@ -198,25 +198,6 @@ def publish_lesson(db: Session, lesson: Lesson, user: User) -> None:
     lesson.published_at = datetime.now(UTC)
 
 
-def rollback_revision(db: Session, lesson: Lesson, revision_id: uuid.UUID, user: User) -> None:
-    revision = (
-        db.query(LessonRevision)
-        .filter(LessonRevision.id == revision_id, LessonRevision.lesson_id == lesson.id)
-        .first()
-    )
-    if not revision:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"detail": "revision_not_found", "message": "Версия не найдена"},
-        )
-
-    create_revision_snapshot(db, lesson, user, label="Перед откатом")
-    apply_snapshot_to_published(db, lesson, revision.snapshot_json)
-    lesson.draft_payload = None
-    lesson.has_unpublished_changes = False
-    lesson.published_at = datetime.now(UTC)
-
-
 def duplicate_lesson(
     db: Session,
     source: Lesson,

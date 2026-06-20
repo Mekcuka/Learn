@@ -1,7 +1,6 @@
 export { default as AuthorConstructorLayout } from "./components/AuthorConstructorLayout";
 export { default as AuthorLessonMetaPanel } from "./components/AuthorLessonMetaPanel";
 export { default as AuthorLessonToolbar } from "./components/AuthorLessonToolbar";
-export { default as AuthorRevisionHistoryPanel } from "./components/AuthorRevisionHistoryPanel";
 export { default as AuthorStoryboardView } from "./components/AuthorStoryboardView";
 export { default as EditorBubbleMenu } from "./components/EditorBubbleMenu";
 export { default as HotspotEditor } from "./components/HotspotEditor";
