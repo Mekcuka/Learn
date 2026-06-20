@@ -55,16 +55,13 @@
   color: var(--color-typo-primary, #1a1a1a);
 }
 
-.lesson-page-header-grid {
+.lesson-page-header-grid,
+.lesson-page-header-grid--no-hints {
   display: grid;
-  grid-template-columns: var(--lesson-ref-width) minmax(0, 1fr) var(--lesson-hints-width);
+  grid-template-columns: var(--lesson-ref-width) repeat(var(--lesson-header-flex-columns, 1), minmax(0, 1fr));
   gap: clamp(1rem, 2vw, 1.75rem);
   align-items: center;
   margin-top: 0.35rem;
-}
-
-.lesson-page-header-grid--no-hints {
-  grid-template-columns: var(--lesson-ref-width) minmax(0, 1fr);
 }
 
 .lesson-page-header__intro,
@@ -100,16 +97,23 @@
 
 .lesson-page-header__roadmap {
   display: flex;
+  grid-column: 2 / span var(--lesson-header-roadmap-segments, 1);
   width: 100%;
+  min-width: 0;
   overflow: hidden;
   border-radius: var(--control-radius, 12px);
 }
 
+.lesson-page-header-grid:not(:has(.lesson-page-header__next)) .lesson-page-header__roadmap {
+  grid-column: 2 / -1;
+}
+
 .lesson-page-header__next {
   display: flex;
+  grid-column: calc(2 + var(--lesson-header-roadmap-segments, 1));
   align-items: stretch;
-  justify-content: flex-end;
-  width: 100%;
+  justify-content: stretch;
+  min-width: 0;
 }
 
 .lesson-page-header__next > section,
@@ -360,6 +364,11 @@
   .lesson-page-header-grid--no-hints {
     grid-template-columns: 1fr;
     align-items: stretch;
+  }
+
+  .lesson-page-header__roadmap,
+  .lesson-page-header__next {
+    grid-column: 1;
   }
 
   .catalog-layout--lesson .lesson-body {

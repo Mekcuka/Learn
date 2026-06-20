@@ -4,7 +4,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Typography from "@mui/material/Typography";
 
 import type { LessonDetail, LessonStateItem } from "../../../types/lesson";
-import { lessonLayoutGridClasses } from "../../../constants/lessonLayout";
+import { lessonHeaderGridStyle, lessonLayoutGridClasses } from "../../../constants/lessonLayout";
 import { moduleProgressLabel } from "../../../utils/lessonUi";
 import HashtagList from "../../../shared/content/HashtagList";
 import LessonHeaderNextActions from "./LessonHeaderNextActions";
@@ -82,7 +82,7 @@ export default function LessonPageHeader({
           <Chip size="small" color={statusChip.color} label={statusChip.label} className="lesson-page-status" />
         )}
       </div>
-      <div className={headerGrid}>
+      <div className={headerGrid} style={lessonHeaderGridStyle(totalLessons, showNextColumn)}>
         <div className="lesson-page-header__intro">
           <Typography variant="h4" fontWeight="bold" component="h1" className="lesson-page-title">
             {lesson.title}
