@@ -19,11 +19,13 @@ export default function LessonCompleteButton({ busy, hint, onComplete }: LessonC
       >
         {busy ? "Завершение…" : "Завершить урок"}
       </Button>
-      {hint ? (
-        <p className="lesson-complete-button__hint" role="alert">
-          {hint}
-        </p>
-      ) : null}
+      <div className="lesson-complete-button__hint-slot" aria-hidden={!hint}>
+        {hint ? (
+          <p className="lesson-complete-button__hint" role="alert">
+            {hint}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }

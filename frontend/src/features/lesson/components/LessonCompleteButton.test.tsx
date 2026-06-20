@@ -77,7 +77,57 @@ describe("LessonCompleteButton", () => {
       );
     });
 
+    const hintSlot = container.querySelector(".lesson-complete-button__hint-slot");
+    expect(hintSlot).not.toBeNull();
+    expect(hintSlot?.getAttribute("aria-hidden")).toBe("false");
+
     const hint = container.querySelector(".lesson-complete-button__hint");
     expect(hint?.textContent).toBe("Сначала отправьте ответы на квиз.");
+  });
+
+  it("reserves hint slot without shifting button when hint is absent", () => {
+    act(() => {
+      root.render(
+        <AppTheme>
+          <LessonCompleteButton busy={false} onComplete={() => undefined} />
+        </AppTheme>,
+      );
+    });
+
+    const hintSlot = container.querySelector(".lesson-complete-button__hint-slot");
+    expect(hintSlot).not.toBeNull();
+    expect(hintSlot?.getAttribute("aria-hidden")).toBe("true");
+    expect(container.querySelector(".lesson-complete-button__hint")).toBeNull();
+    expect(getComputedStyle(hintSlot!).minHeight).not.toBe("0px");
+  });
+
+  it("keeps button offset stable when hint appears", () => {
+    const onComplete = vi.fn();
+
+    act(() => {
+      root.render(
+        <AppTheme>
+          <LessonCompleteButton busy={false} onComplete={onComplete} />
+        </AppTheme>,
+      );
+    });
+
+    const button = container.querySelector(".lesson-complete-button button");
+    const topWithoutHint = button?.offsetTop;
+
+    act(() => {
+      root.render(
+        <AppTheme>
+          <LessonCompleteButton
+            busy={false}
+            hint="Сначала отправьте ответы на квиз."
+            onComplete={onComplete}
+          />
+        </AppTheme>,
+      );
+    });
+
+    const buttonWithHint = container.querySelector(".lesson-complete-button button");
+    expect(buttonWithHint?.offsetTop).toBe(topWithoutHint);
   });
 });

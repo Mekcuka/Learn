@@ -1,4 +1,6 @@
 .root {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   min-width: 0;
 }
@@ -49,6 +51,11 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   opacity: 0.9;
+}
+
+.completeHintSlot {
+  flex-shrink: 0;
+  min-height: var(--lesson-complete-hint-slot-height);
 }
 
 .completeHint {

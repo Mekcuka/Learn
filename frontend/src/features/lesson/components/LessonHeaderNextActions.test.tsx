@@ -146,4 +146,28 @@ describe("LessonHeaderNextActions", () => {
     expect(container.textContent).toContain("К каталогу уроков");
     expect(container.querySelector('[role="group"]')).toBeNull();
   });
+
+  it("reserves complete hint slot in split bar without shifting buttons", () => {
+    renderActions({
+      showComplete: true,
+      upcomingLessonNavigation: { kind: "lesson", lessonId: "lesson-02", title: "Создание проекта" },
+    });
+
+    const splitGroup = container.querySelector('[role="group"]');
+    const topWithoutHint = splitGroup?.getBoundingClientRect().top;
+
+    const hintSlot = container.querySelector('[class*="completeHintSlot"]');
+    expect(hintSlot).not.toBeNull();
+    expect(hintSlot?.getAttribute("aria-hidden")).toBe("true");
+
+    renderActions({
+      showComplete: true,
+      completeHint: "Сначала отправьте ответы на квиз.",
+      upcomingLessonNavigation: { kind: "lesson", lessonId: "lesson-02", title: "Создание проекта" },
+    });
+
+    const splitGroupWithHint = container.querySelector('[role="group"]');
+    expect(splitGroupWithHint?.getBoundingClientRect().top).toBe(topWithoutHint);
+    expect(container.textContent).toContain("Сначала отправьте ответы на квиз.");
+  });
 });

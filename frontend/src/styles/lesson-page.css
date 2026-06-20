@@ -131,6 +131,17 @@
   width: 100%;
 }
 
+.lesson-complete-button {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.lesson-complete-button__hint-slot {
+  flex-shrink: 0;
+  min-height: var(--lesson-complete-hint-slot-height);
+}
+
 .lesson-complete-button__hint {
   margin: 0.45rem 0 0;
   color: var(--mui-palette-error-main, #d32f2f);
