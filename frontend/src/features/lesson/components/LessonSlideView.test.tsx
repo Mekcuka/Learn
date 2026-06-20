@@ -278,7 +278,7 @@ describe("LessonSlideView", () => {
     });
 
     expect(container.querySelector(".slide-nav-verify-btn")).not.toBeNull();
-    expect(container.textContent).toContain("Я выполнил");
+    expect(container.textContent).toContain("Выполнено");
   });
 
   it("does not show manual verify in author or preview mode", () => {

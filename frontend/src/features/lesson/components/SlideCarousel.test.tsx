@@ -209,7 +209,7 @@ describe("SlideCarousel navigation", () => {
 
     const verifyButton = container.querySelector(".slide-nav-verify-btn") as HTMLButtonElement | null;
     expect(verifyButton).not.toBeNull();
-    expect(verifyButton?.textContent).toContain("Я выполнил");
+    expect(verifyButton?.textContent).toContain("Выполнено");
     expect(container.querySelector(".slide-nav-end")?.getAttribute("aria-hidden")).toBeNull();
 
     act(() => {

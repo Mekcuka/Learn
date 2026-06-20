@@ -23,7 +23,7 @@ test("manual lesson verify completes", async ({ page }) => {
   await expect(activeLesson).toBeVisible({ timeout: 15_000 });
   await activeLesson.click();
 
-  const verifyButton = page.getByRole("button", { name: "Я выполнил" });
+  const verifyButton = page.getByRole("button", { name: "Выполнено" });
   await expect(verifyButton).toBeVisible({ timeout: 15_000 });
   await verifyButton.click();
   await expect(page.getByText("Выполнен", { exact: true })).toBeVisible({ timeout: 10_000 });

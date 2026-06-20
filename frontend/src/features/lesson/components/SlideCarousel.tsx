@@ -262,10 +262,10 @@ export default function SlideCarousel({
               variant="contained"
               size="small"
               disabled={manualVerify.busy || manualVerify.disabled}
-              aria-label="Я выполнил"
+              aria-label={manualVerify.busy ? "Проверка…" : "Выполнено"}
               onClick={manualVerify.onVerify}
             >
-              {manualVerify.busy ? "Проверка…" : "Я выполнил"}
+              {manualVerify.busy ? "Проверка…" : "Выполнено"}
             </Button>
           ) : null}
         </div>
