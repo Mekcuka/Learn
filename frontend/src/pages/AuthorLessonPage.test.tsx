@@ -172,7 +172,7 @@ describe("AuthorLessonPage", () => {
     });
 
     const slideFieldCalls = RichTextEditorMock.mock.calls.filter(([props]) =>
-      ["Подпись", "Ожидаемый результат"].includes(props.label),
+      ["Подсказка", "Ожидаемый результат"].includes(props.label),
     );
 
     expect(slideFieldCalls).toHaveLength(2);

@@ -642,7 +642,7 @@ export default function AuthorLessonPage() {
                             </Button>
                           </div>
                           <RichTextEditor
-                            label="Подпись"
+                            label="Подсказка"
                             value={activeSlide.caption_html}
                             onChange={(caption_html) => patchActiveSlide({ caption_html })}
                             rows={2}
