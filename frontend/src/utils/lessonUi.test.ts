@@ -46,10 +46,19 @@ describe("mixed quiz lessons", () => {
     expect(isQuizOnlyLesson(quizOnlyLesson)).toBe(true);
   });
 
-  it("allows virtual quiz step index for mixed lessons", () => {
-    expect(maxLessonSlideIndex(mixedLesson)).toBe(2);
-    expect(clampLessonSlideIndex(5, mixedLesson)).toBe(2);
-    expect(clampLessonSlideIndex(1, mixedLesson)).toBe(1);
+  it("allows virtual quiz step index for mixed lessons with loaded quiz", () => {
+    const mixedWithQuiz = {
+      ...mixedLesson,
+      quiz: { questions: [{ id: "q1" }] },
+    };
+    expect(maxLessonSlideIndex(mixedWithQuiz)).toBe(2);
+    expect(clampLessonSlideIndex(5, mixedWithQuiz)).toBe(2);
+    expect(clampLessonSlideIndex(1, mixedWithQuiz)).toBe(1);
+  });
+
+  it("keeps navigation on last slide when mixed lesson quiz is not loaded yet", () => {
+    expect(maxLessonSlideIndex(mixedLesson)).toBe(1);
+    expect(clampLessonSlideIndex(2, mixedLesson)).toBe(1);
   });
 });
 
@@ -71,8 +80,9 @@ describe("slide navigation", () => {
 
   it("sanitizes out-of-bounds stored index for mixed lessons", () => {
     const lessonId = "lesson-test-sanitize";
+    const mixedWithQuiz = { ...mixedLesson, quiz: { questions: [{ id: "q1" }] } };
     sessionStorage.setItem(slideStorageKey(lessonId), "99");
-    expect(sanitizeStoredSlideIndex(lessonId, mixedLesson)).toBe(2);
+    expect(sanitizeStoredSlideIndex(lessonId, mixedWithQuiz)).toBe(2);
     expect(sessionStorage.getItem(slideStorageKey(lessonId))).toBe("2");
     sessionStorage.removeItem(slideStorageKey(lessonId));
   });
@@ -87,6 +97,32 @@ describe("slide navigation", () => {
       }),
     ).toBe(0);
     expect(sessionStorage.getItem(slideStorageKey(lessonId))).toBe("0");
+    sessionStorage.removeItem(slideStorageKey(lessonId));
+  });
+
+  it("resets quiz step to first slide for active mixed lessons", () => {
+    const lessonId = "lesson-test-reset-active";
+    sessionStorage.setItem(slideStorageKey(lessonId), "2");
+    expect(
+      sanitizeStoredSlideIndex(lessonId, mixedLesson, undefined, {
+        resetQuizStepForNotStarted: true,
+        lessonStatus: "active",
+      }),
+    ).toBe(0);
+    expect(sessionStorage.getItem(slideStorageKey(lessonId))).toBe("0");
+    sessionStorage.removeItem(slideStorageKey(lessonId));
+  });
+
+  it("keeps quiz step for completed mixed lessons", () => {
+    const lessonId = "lesson-test-reset-completed";
+    const mixedWithQuiz = { ...mixedLesson, quiz: { questions: [{ id: "q1" }] } };
+    sessionStorage.setItem(slideStorageKey(lessonId), "2");
+    expect(
+      sanitizeStoredSlideIndex(lessonId, mixedWithQuiz, undefined, {
+        resetQuizStepForNotStarted: true,
+        lessonStatus: "completed",
+      }),
+    ).toBe(2);
     sessionStorage.removeItem(slideStorageKey(lessonId));
   });
 });

@@ -74,7 +74,7 @@ test("lesson-123 mixed slides+quiz shows carousel on first slide", async ({ page
   expect(box?.height ?? 0).toBeGreaterThan(80);
 
   const reference = page.getByLabel("Справка по уроку");
-  await expect(reference).toContainText("Слайд 1/2");
+  await expect(reference).toContainText(/Слайд 1\/\d+/);
   await expect(reference).not.toContainText("Квиз");
 });
 

@@ -7,7 +7,7 @@ test.describe("lesson-123 mixed lesson diagnostics", () => {
     await expect(page.getByRole("region", { name: "Слайды урока" })).toBeVisible({ timeout: 15_000 });
 
     const reference = page.getByLabel("Справка по уроку");
-    await expect(reference).toContainText("Слайд 1/2");
+    await expect(reference).toContainText(/Слайд 1\/\d+/);
     await expect(reference).not.toContainText("Квиз");
 
     const carousel = page.locator(".slide-carousel");
@@ -61,7 +61,7 @@ test.describe("lesson-123 mixed lesson diagnostics", () => {
     });
   });
 
-  test("stuck sessionStorage on quiz index resets to first slide for not_started lesson", async ({ page }) => {
+  test("stuck sessionStorage on quiz index resets to first slide for in-progress lesson", async ({ page }) => {
     await page.addInitScript(() => {
       sessionStorage.setItem("learn:slide:lesson-123", "2");
     });
@@ -97,7 +97,7 @@ test.describe("lesson-123 mixed lesson diagnostics", () => {
     expect(measurements.hasQuizPanel).toBe(false);
     expect(measurements.hasCarousel).toBe(true);
     expect(measurements.sessionStorage).toBe("0");
-    expect(measurements.referenceText).toContain("Слайд 1/2");
+    expect(measurements.referenceText).toMatch(/Слайд 1\/\d+/);
     expect(measurements.referenceText).not.toContain("Квиз");
   });
 
@@ -121,7 +121,7 @@ test.describe("lesson-123 mixed lesson diagnostics", () => {
     expect(measurements.sessionStorage).toBe("0");
     expect(measurements.hasCarousel).toBe(true);
     expect(measurements.hasQuizPanel).toBe(false);
-    expect(measurements.referenceText).toContain("Слайд 1/2");
+    expect(measurements.referenceText).toMatch(/Слайд 1\/\d+/);
   });
 
   test("quiz step shows QuizPanel with visible questions in main area", async ({ page }) => {

@@ -43,16 +43,26 @@ export function isQuizOnlyLesson(lesson: {
   return lesson.verify.type === "quiz_passed" && lesson.slides.length === 0;
 }
 
-/** Last navigable slide index (includes virtual quiz step for mixed lessons). */
-export function maxLessonSlideIndex(lesson: {
+export type LessonSlideNavLesson = {
   verify: { type: string };
   slides: unknown[];
-}): number {
+  quiz?: { questions: unknown[] } | null;
+};
+
+export function hasLoadedQuiz(lesson: LessonSlideNavLesson): boolean {
+  return Boolean(lesson.quiz && lesson.quiz.questions.length > 0);
+}
+
+/** Last navigable slide index (includes virtual quiz step for mixed lessons). */
+export function maxLessonSlideIndex(lesson: LessonSlideNavLesson): number {
   const slideCount = lesson.slides.length;
   if (slideCount <= 0) {
     return 0;
   }
-  return isMixedQuizLesson(lesson) ? slideCount : slideCount - 1;
+  if (!isMixedQuizLesson(lesson)) {
+    return slideCount - 1;
+  }
+  return hasLoadedQuiz(lesson) ? slideCount : slideCount - 1;
 }
 
 export function clampSlideIndex(index: number, total: number): number {
@@ -62,10 +72,7 @@ export function clampSlideIndex(index: number, total: number): number {
   return Math.max(0, Math.min(index, total - 1));
 }
 
-export function clampLessonSlideIndex(
-  index: number,
-  lesson: { verify: { type: string }; slides: unknown[] },
-): number {
+export function clampLessonSlideIndex(index: number, lesson: LessonSlideNavLesson): number {
   const slideCount = lesson.slides.length;
   if (slideCount <= 0) {
     return 0;
@@ -93,18 +100,18 @@ export function writeStoredSlideIndex(lessonId: string, index: number): void {
 /** Clamp and persist slide index; returns sanitized value. */
 export function sanitizeStoredSlideIndex(
   lessonId: string,
-  lesson: { verify: { type: string }; slides: unknown[] },
+  lesson: LessonSlideNavLesson,
   preferredIndex?: number,
   options?: { resetQuizStepForNotStarted?: boolean; lessonStatus?: string },
 ): number {
   const raw = preferredIndex ?? readStoredSlideIndex(lessonId) ?? 0;
   let index = raw;
-  if (
+  const shouldResetStoredQuizStep =
     options?.resetQuizStepForNotStarted &&
-    options.lessonStatus === "not_started" &&
+    options.lessonStatus !== "completed" &&
     isMixedQuizLesson(lesson) &&
-    index >= lesson.slides.length
-  ) {
+    index >= lesson.slides.length;
+  if (shouldResetStoredQuizStep) {
     index = 0;
   }
   const clamped = clampLessonSlideIndex(index, lesson);
