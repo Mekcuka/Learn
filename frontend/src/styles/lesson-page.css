@@ -79,6 +79,7 @@
 }
 
 .lesson-page-header__intro {
+  grid-column: 1;
   align-self: start;
   display: flex;
   flex-direction: column;
@@ -107,12 +108,9 @@
   grid-column: 2;
   width: 100%;
   min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   border-radius: var(--control-radius, 12px);
-}
-
-.lesson-page-header-grid:not(:has(.lesson-page-header__next)) .lesson-page-header__roadmap {
-  grid-column: 2 / -1;
 }
 
 .lesson-page-header__next {

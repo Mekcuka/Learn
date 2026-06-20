@@ -1,6 +1,10 @@
 /**
  * @vitest-environment jsdom
  */
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
@@ -175,5 +179,26 @@ describe("LessonPageHeader", () => {
     renderHeader({ showCompleteButton: false, nextLessonNavigation: null });
 
     expect(container.querySelector(".lesson-page-header__next")).toBeNull();
+  });
+
+  it("keeps roadmap in middle grid column when hints are shown without next actions", () => {
+    renderHeader({
+      showHintsColumn: true,
+      showCompleteButton: false,
+      showNextStep: false,
+      nextLessonNavigation: null,
+    });
+
+    expect(container.querySelector(".lesson-page-header-grid")).not.toBeNull();
+    expect(container.querySelector(".lesson-page-header__next")).toBeNull();
+    expect(container.querySelector(".lesson-page-header__roadmap nav[aria-label='Прогресс по модулю']")).not.toBeNull();
+
+    const cssPath = path.resolve(
+      path.dirname(fileURLToPath(import.meta.url)),
+      "../../../styles/lesson-page.css",
+    );
+    const lessonPageCss = readFileSync(cssPath, "utf8");
+    expect(lessonPageCss).toMatch(/\.lesson-page-header__roadmap\s*\{[^}]*grid-column:\s*2;/s);
+    expect(lessonPageCss).not.toMatch(/lesson-page-header__roadmap[^}]*grid-column:\s*2\s*\/\s*-1/s);
   });
 });
