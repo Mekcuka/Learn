@@ -7,7 +7,6 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LessonDetail } from "../../../types/lesson";
-import { LESSON_HEADER_GRID_VARS } from "../../../constants/lessonLayout";
 import AppTheme from "../../../components/mui/AppTheme";
 import LessonPageHeader from "./LessonPageHeader";
 
@@ -113,7 +112,7 @@ describe("LessonPageHeader", () => {
     expect(nextColumn?.querySelector(".lesson-complete-button")).toBeNull();
     expect(nextColumn?.textContent).toContain("Следующий урок");
     expect(nextColumn?.textContent).toContain("Завершить урок");
-    expect(nextColumn?.textContent).toContain("Создание проекта");
+    expect(nextColumn?.querySelector('[aria-label*="Создание проекта"]')).not.toBeNull();
   });
 
   it("renders unified split button when next step and complete are both visible", () => {
@@ -130,7 +129,7 @@ describe("LessonPageHeader", () => {
     expect(nextColumn?.querySelector(".lesson-complete-button")).toBeNull();
     expect(nextColumn?.textContent).toContain("Следующий урок");
     expect(nextColumn?.textContent).toContain("Завершить урок");
-    expect(nextColumn?.textContent).toContain("Создание проекта");
+    expect(nextColumn?.querySelector('[aria-label*="Создание проекта"]')).not.toBeNull();
     expect(nextColumn?.children.length).toBe(1);
   });
 
@@ -176,16 +175,5 @@ describe("LessonPageHeader", () => {
     renderHeader({ showCompleteButton: false, nextLessonNavigation: null });
 
     expect(container.querySelector(".lesson-page-header__next")).toBeNull();
-  });
-
-  it("sets header grid flex columns to roadmap segments plus next slot", () => {
-    renderHeader({
-      showCompleteButton: true,
-      upcomingLessonNavigation: { kind: "lesson", lessonId: "lesson-02", title: "Создание проекта" },
-    });
-
-    const grid = container.querySelector(".lesson-page-header-grid") as HTMLElement | null;
-    expect(grid?.style.getPropertyValue(LESSON_HEADER_GRID_VARS.roadmapSegments)).toBe("2");
-    expect(grid?.style.getPropertyValue(LESSON_HEADER_GRID_VARS.flexColumns)).toBe("3");
   });
 });

@@ -1,15 +1,7 @@
-import type { CSSProperties } from "react";
-
 /** Shared CSS custom properties and class names for the 3-column lesson grid. */
 export const LESSON_LAYOUT_VARS = {
   refWidth: "--lesson-ref-width",
   hintsWidth: "--lesson-hints-width",
-} as const;
-
-/** Header grid: roadmap segment count and total flexible columns (roadmap + optional next). */
-export const LESSON_HEADER_GRID_VARS = {
-  roadmapSegments: "--lesson-header-roadmap-segments",
-  flexColumns: "--lesson-header-flex-columns",
 } as const;
 
 export const LESSON_HEADER_GRID = {
@@ -33,12 +25,3 @@ export function lessonLayoutGridClasses(showHintsColumn: boolean) {
   };
 }
 
-export function lessonHeaderGridStyle(totalLessons: number, showNextColumn: boolean): CSSProperties {
-  const segments = Math.max(totalLessons, 1);
-  const flexColumns = showNextColumn ? segments + 1 : segments;
-
-  return {
-    [LESSON_HEADER_GRID_VARS.roadmapSegments]: segments,
-    [LESSON_HEADER_GRID_VARS.flexColumns]: flexColumns,
-  } as CSSProperties;
-}
