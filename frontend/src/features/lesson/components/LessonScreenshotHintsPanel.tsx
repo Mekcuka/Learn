@@ -1,7 +1,8 @@
 import Badge from "@mui/material/Badge";
 import Button from "@mui/material/Button";
+import Collapse from "@mui/material/Collapse";
 import Typography from "@mui/material/Typography";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type KeyboardEvent } from "react";
 
 import type { HotspotItem, LessonSlide } from "../../../types/lesson";
 import { scrollIntoOverflowParent } from "../../../utils/scrollContainer";
@@ -38,6 +39,17 @@ export default function LessonScreenshotHintsPanel({
       scrollIntoOverflowParent(item);
     }
   }, [activeHotspotId, scrollActiveItem]);
+
+  const handleHotspotActivate = (hotspotId: string) => {
+    onHotspotSelect?.(toggleHotspotSelection(activeHotspotId ?? null, hotspotId));
+  };
+
+  const handleHotspotKeyDown = (event: KeyboardEvent<HTMLButtonElement>, hotspotId: string) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleHotspotActivate(hotspotId);
+    }
+  };
 
   return (
     <aside className="lesson-screenshot-hints-panel" aria-label="Подсказки по экрану">
@@ -83,6 +95,7 @@ export default function LessonScreenshotHintsPanel({
               {hotspots.map((hotspot, index) => {
                 const isActive = activeHotspotId === hotspot.id;
                 const hasDescription = Boolean(hotspot.description_html?.trim());
+                const descriptionId = `lesson-hint-desc-${hotspot.id}`;
 
                 return (
                   <li
@@ -98,23 +111,48 @@ export default function LessonScreenshotHintsPanel({
                       fullWidth
                       className={`lesson-hints-btn${hotspot.pulse !== false ? " lesson-hints-btn--pulse" : ""}`}
                       aria-label={`Метка ${index + 1}: ${hotspot.label}`}
-                      onClick={() =>
-                        onHotspotSelect?.(toggleHotspotSelection(activeHotspotId ?? null, hotspot.id))
-                      }
+                      aria-expanded={isActive}
+                      aria-controls={descriptionId}
+                      onClick={() => handleHotspotActivate(hotspot.id)}
+                      onKeyDown={(event) => handleHotspotKeyDown(event, hotspot.id)}
                     >
-                      {index + 1}. {hotspot.label}
+                      <span className="lesson-hints-btn-label">
+                        {index + 1}. {hotspot.label}
+                      </span>
                     </Button>
-                    {hasDescription ? (
-                      <SafeHtml
-                        html={hotspot.description_html ?? ""}
-                        className="lesson-hints-description"
-                        tag="div"
-                      />
-                    ) : isActive ? (
-                      <Typography variant="overline" color="text.disabled" className="lesson-hints-description-placeholder">
-                        Область выделена на скриншоте
-                      </Typography>
+                    {!isActive && hasDescription ? (
+                      <div aria-hidden="true">
+                        <SafeHtml
+                          html={hotspot.description_html ?? ""}
+                          className="lesson-hints-description lesson-hints-description--collapsed"
+                          tag="div"
+                        />
+                      </div>
                     ) : null}
+                    <Collapse
+                      in={isActive}
+                      timeout="auto"
+                      unmountOnExit
+                      className="lesson-hints-item-collapse"
+                    >
+                      <div id={descriptionId} role="region" aria-label={`Описание метки ${index + 1}`}>
+                        {hasDescription ? (
+                          <SafeHtml
+                            html={hotspot.description_html ?? ""}
+                            className="lesson-hints-description"
+                            tag="div"
+                          />
+                        ) : (
+                          <Typography
+                            variant="overline"
+                            color="text.disabled"
+                            className="lesson-hints-description-placeholder"
+                          >
+                            Область выделена на скриншоте
+                          </Typography>
+                        )}
+                      </div>
+                    </Collapse>
                   </li>
                 );
               })}
