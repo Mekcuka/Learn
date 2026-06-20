@@ -822,7 +822,6 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
   background: var(--color-bg-secondary, #fafafa);
-  overflow: hidden;
 }
 
 .hotspot-editor-properties {
@@ -831,7 +830,6 @@
   flex: 1 1 auto;
   min-width: 0;
   min-height: 14rem;
-  overflow: hidden;
 }
 
 .hotspot-editor-properties--empty {
@@ -853,9 +851,6 @@
 .hotspot-editor-properties-body {
   flex: 1 1 auto;
   min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-gutter: stable;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -883,6 +878,7 @@
   min-height: 4rem;
   max-height: 10rem;
   overflow-y: auto;
+  overscroll-behavior: auto;
 }
 
 .hotspot-editor-properties-actions {
@@ -1197,7 +1193,6 @@
   flex: 0 0 clamp(9.5rem, 28%, 15rem);
   min-height: 0;
   min-width: 0;
-  overflow: hidden;
   border-right: 1px solid var(--border);
   background: var(--page-bg, #fff);
 }
@@ -1223,7 +1218,7 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior: auto;
   scrollbar-gutter: stable;
 }
 

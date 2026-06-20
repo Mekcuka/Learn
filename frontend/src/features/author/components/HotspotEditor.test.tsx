@@ -78,6 +78,30 @@ describe("HotspotEditor layout", () => {
     expect(getComputedStyle(workspace!).overflowY).not.toBe("scroll");
   });
 
+  it("does not trap page scroll in panel when hotspot is selected", () => {
+    act(() => {
+      root.render(
+        <AppTheme>
+          <HotspotEditor
+            imagePath="/content/test.png"
+            hotspots={[regionHotspot]}
+            onChange={onChange}
+            selectedId={regionHotspot.id}
+            onSelectedIdChange={vi.fn()}
+          />
+        </AppTheme>,
+      );
+    });
+
+    const panel = container.querySelector<HTMLElement>(".hotspot-editor-panel");
+    const propertiesBody = container.querySelector<HTMLElement>(".hotspot-editor-properties-body");
+    expect(panel).not.toBeNull();
+    expect(propertiesBody).not.toBeNull();
+    expect(getComputedStyle(panel!).overflowY).not.toBe("hidden");
+    expect(getComputedStyle(propertiesBody!).overflowY).not.toBe("auto");
+    expect(getComputedStyle(propertiesBody!).overscrollBehavior).not.toContain("contain");
+  });
+
   it("places hotspot panel below the screenshot canvas", () => {
     renderEditor();
 

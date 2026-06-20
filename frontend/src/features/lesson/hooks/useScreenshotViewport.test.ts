@@ -17,6 +17,22 @@ function WheelProbe() {
   });
 }
 
+function WheelProbeWithOuterFrame() {
+  const viewport = useScreenshotViewport();
+  return createElement(
+    "div",
+    {
+      "data-testid": "frame",
+      onWheel: viewport.handleWheel,
+    },
+    createElement("div", {
+      ref: viewport.containerRef,
+      "data-testid": "viewport",
+      onWheel: viewport.handleWheel,
+    }),
+  );
+}
+
 describe("useScreenshotViewport handleWheel", () => {
   let container: HTMLDivElement;
   let root: Root;
@@ -57,11 +73,31 @@ describe("useScreenshotViewport handleWheel", () => {
 
     const event = new WheelEvent("wheel", { deltaY: -100, bubbles: true, cancelable: true, ctrlKey: true });
     const preventDefault = vi.spyOn(event, "preventDefault");
+    const stopPropagation = vi.spyOn(event, "stopPropagation");
 
     act(() => {
       target!.dispatchEvent(event);
     });
 
     expect(preventDefault).toHaveBeenCalled();
+    expect(stopPropagation).toHaveBeenCalled();
+  });
+
+  it("does not preventDefault on Ctrl+wheel when handler is on a non-viewport ancestor", () => {
+    act(() => {
+      root.render(createElement(WheelProbeWithOuterFrame));
+    });
+
+    const frame = container.querySelector<HTMLDivElement>("[data-testid='frame']");
+    expect(frame).not.toBeNull();
+
+    const event = new WheelEvent("wheel", { deltaY: -100, bubbles: true, cancelable: true, ctrlKey: true });
+    const preventDefault = vi.spyOn(event, "preventDefault");
+
+    act(() => {
+      frame!.dispatchEvent(event);
+    });
+
+    expect(preventDefault).not.toHaveBeenCalled();
   });
 });

@@ -56,9 +56,8 @@ const HotspotEditorFrame = memo(function HotspotEditorFrame({
       ref={frameRef}
       className={`hotspot-editor-frame screenshot-frame${spacePanActive ? " hotspot-editor-frame--pan" : ""}`}
       onMouseDown={onFrameMouseDown}
-      onWheel={onWheel}
     >
-      <div ref={containerRef} className="screenshot-viewport-clip">
+      <div ref={containerRef} className="screenshot-viewport-clip" onWheel={onWheel}>
         <div className="screenshot-viewport" style={{ transform: viewportTransform }}>
           <ScreenshotHotspotOverlay containerRef={containerRef} imagePath={imagePath} lazy={false}>
             {hotspots.map((hotspot) => {

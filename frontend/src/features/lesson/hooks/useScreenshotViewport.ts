@@ -165,7 +165,12 @@ export function useScreenshotViewport({ resetKey }: UseScreenshotViewportOptions
       if (!event.ctrlKey && !event.metaKey) {
         return;
       }
+      const viewport = containerRef.current;
+      if (!viewport || event.currentTarget !== viewport) {
+        return;
+      }
       event.preventDefault();
+      event.stopPropagation();
       const focal = getFocalFromClient(event.clientX, event.clientY);
       const delta = event.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
       applyZoomDelta(delta, focal.x, focal.y);
