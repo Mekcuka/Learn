@@ -48,8 +48,6 @@ type HotspotEditorProps = {
 
   onSelectedIdChange?: (id: string | null) => void;
 
-  showNumericFields?: boolean;
-
   viewportResetKey?: string;
 
 };
@@ -67,8 +65,6 @@ export default function HotspotEditor({
   selectedId: controlledSelectedId,
 
   onSelectedIdChange,
-
-  showNumericFields = true,
 
   viewportResetKey,
 
@@ -447,10 +443,8 @@ export default function HotspotEditor({
           <HotspotEditorList hotspots={hotspots} selectedId={selectedId} onSelect={handleSelectHotspot} />
           <HotspotEditorProperties
             hotspot={selectedHotspot}
-            showNumericFields={showNumericFields}
             onUpdate={updateHotspot}
             onRemove={removeHotspot}
-            onCoordChange={nudgeSelectedHotspot}
           />
         </div>
       </div>

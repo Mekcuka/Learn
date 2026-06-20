@@ -29,10 +29,8 @@ import RichTextEditor from "./RichTextEditor";
 
 type HotspotEditorPropertiesProps = {
   hotspot: HotspotItem | null;
-  showNumericFields?: boolean;
   onUpdate: (id: string, patch: Partial<HotspotItem>) => void;
   onRemove: (id: string) => void;
-  onCoordChange: (patch: Partial<Pick<HotspotItem, "x_pct" | "y_pct" | "width_pct" | "height_pct">>) => void;
 };
 
 type HotspotColorSwatchesProps = {
@@ -65,10 +63,8 @@ function HotspotColorSwatches({ ariaLabel, selectedColorId, onSelect }: HotspotC
 
 const HotspotEditorProperties = memo(function HotspotEditorProperties({
   hotspot,
-  showNumericFields = true,
   onUpdate,
   onRemove,
-  onCoordChange,
 }: HotspotEditorPropertiesProps) {
   if (!hotspot) {
     return (
@@ -82,7 +78,6 @@ const HotspotEditorProperties = memo(function HotspotEditorProperties({
 
   const kind = getHotspotKind(hotspot);
   const selectedIsPin = isPinHotspot(hotspot);
-  const coordFields = ["x_pct", "y_pct", ...(selectedIsPin ? [] : (["width_pct", "height_pct"] as const))] as const;
 
   return (
     <div className="hotspot-editor-properties">
@@ -150,33 +145,6 @@ const HotspotEditorProperties = memo(function HotspotEditorProperties({
               </Select>
             </FormControl>
           </>
-        ) : null}
-
-        {showNumericFields ? (
-          <div className="hotspot-editor-coords">
-            <Typography variant="caption" fontWeight={600} display="block" sx={{ mb: 0.5 }}>
-              Координаты (%)
-            </Typography>
-            <div className="hotspot-editor-coords-grid">
-              {coordFields.map((field) => (
-                <TextField
-                  key={field}
-                  size="small"
-                  type="number"
-                  label={field.replace("_pct", "")}
-                  value={hotspot[field]}
-                  onChange={(event) => {
-                    const value = Number(event.target.value);
-                    if (Number.isNaN(value)) {
-                      return;
-                    }
-                    onCoordChange({ [field]: value });
-                  }}
-                  inputProps={{ step: 0.1, min: 0, max: 100 }}
-                />
-              ))}
-            </div>
-          </div>
         ) : null}
 
         <div className="hotspot-editor-properties-actions">

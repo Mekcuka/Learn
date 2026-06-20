@@ -699,7 +699,6 @@ export default function AuthorLessonPage() {
                         selectedId={previewHotspotId}
                         onSelectedIdChange={setPreviewHotspotId}
                         viewportResetKey={activeSlide.id}
-                        showNumericFields
                       />
                       <Accordion
                         className="hotspot-student-preview-accordion"

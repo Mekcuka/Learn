@@ -25,12 +25,10 @@ describe("HotspotEditorProperties", () => {
   let root: Root;
   const onUpdate = vi.fn();
   const onRemove = vi.fn();
-  const onCoordChange = vi.fn();
 
   beforeEach(() => {
     onUpdate.mockClear();
     onRemove.mockClear();
-    onCoordChange.mockClear();
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);
@@ -47,12 +45,7 @@ describe("HotspotEditorProperties", () => {
     act(() => {
       root.render(
         <AppTheme>
-          <HotspotEditorProperties
-            hotspot={hotspot}
-            onUpdate={onUpdate}
-            onRemove={onRemove}
-            onCoordChange={onCoordChange}
-          />
+          <HotspotEditorProperties hotspot={hotspot} onUpdate={onUpdate} onRemove={onRemove} />
         </AppTheme>,
       );
     });
@@ -72,7 +65,8 @@ describe("HotspotEditorProperties", () => {
     expect(container.textContent).toContain("Рамка");
     expect(container.textContent).toContain("Пульс");
     expect(container.querySelectorAll(".hotspot-fill-swatch")).toHaveLength(20);
-    expect(container.querySelector(".hotspot-editor-coords-grid")).not.toBeNull();
+    expect(container.textContent).not.toContain("Координаты");
+    expect(container.querySelector(".hotspot-editor-coords-grid")).toBeNull();
   });
 
   it("shows full rich text toolbar for description field", () => {
